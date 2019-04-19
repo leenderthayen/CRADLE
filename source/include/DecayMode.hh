@@ -6,6 +6,7 @@
 #include <string>
 
 class Particle;
+class SpectrumGenerator;
 
 namespace ublas = boost::numeric::ublas;
 
@@ -14,10 +15,13 @@ class DecayMode {
     virtual std::vector<Particle*> Decay(Particle*, double, double) = 0;
     DecayMode();
     virtual ~DecayMode();
-    
+
+    void SetSpectrumGenerator(SpectrumGenerator&);
+
   protected:
     static void ThreeBodyDecay(ublas::vector<double>&, Particle*, Particle*, Particle*, ublas::vector<double>&, double);
     static void TwoBodyDecay(ublas::vector<double>&, Particle*, Particle*, double);
+    SpectrumGenerator* spectrumGen;
 };
 
 class BetaMinus: public DecayMode {

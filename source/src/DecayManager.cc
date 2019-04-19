@@ -4,6 +4,7 @@
 #include "Particle.hh"
 #include "DecayMode.hh"
 #include "OptionContainer.hh"
+#include "SpectrumGenerator.hh"
 #include <boost/progress.hpp>
 #include <fstream>
 #include <sstream>
@@ -13,7 +14,6 @@
 #include <future>
 
 using namespace std;
-
 
 template<typename A, typename B>
 std::pair<B,A> flip_pair(const std::pair<A,B> &p)
@@ -25,7 +25,7 @@ template<typename A, typename B>
 std::multimap<B,A> flip_map(const std::map<A,B> &src)
 {
     std::multimap<B,A> dst;
-    std::transform(src.begin(), src.end(), std::inserter(dst, dst.begin()), 
+    std::transform(src.begin(), src.end(), std::inserter(dst, dst.begin()),
                    flip_pair<A,B>);
     return dst;
 }
@@ -115,6 +115,25 @@ void DecayManager::RegisterBasicDecayModes() {
   RegisterDecayMode("IT", Gamma::GetInstance());
 }
 
+void DecayManager::RegisterSpectrumGenerator(const string decayMode, SpectrumGenerator& sg) {
+  try {
+    DecayMode& dm = GetDecayMode(decayMode);
+    dm.SetSpectrumGenerator(sg);
+  }
+  catch (const invalid_argument &e) {
+    cout << "Cannot register spectrum generator. Decay mode " << decayMode << " not registered." << endl;
+  }
+}
+
+void DecayManager::RegisterBasicSpectrumGenerators() {
+  RegisterSpectrumGenerator("Proton", DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator("Alpha", DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator("Gamma", DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator("IT", DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator("BetaPlus", BSG::GetInstance());
+  RegisterSpectrumGenerator("BetaMinus", BSG::GetInstance());
+}
+
 void DecayManager::ListRegisteredParticles() {
   cout << "--------------------------------------------------------\n";
   cout << " List of registered particles\n";
@@ -129,10 +148,10 @@ void DecayManager::ListRegisteredParticles() {
 }
 
 bool DecayManager::GenerateNucleus(string name, int Z, int A) {
-  ostringstream filename;
+  std::ostringstream filename;
   filename << OptionContainer::GetInstance().GetOption<string>("radiationdata");
   filename << "z" << Z << ".a" << A;
-  ifstream radDataFile((filename.str()).c_str());
+  std::ifstream radDataFile((filename.str()).c_str());
 
   // cout << "Generating nucleus " << name << endl;
 
@@ -249,7 +268,7 @@ std::string DecayManager::GenerateEvent(int eventNr) {
       } catch (const std::invalid_argument& e) {
         // cout << "Decay Mode for particle " << p->GetName() << " not found.
         // Aborting." << endl;
-        return false;
+        return "";
       }
     } else {
       // cout << "Particle " << p->GetName() << " is stable" << endl;

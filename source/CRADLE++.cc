@@ -6,6 +6,8 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "CRADLEConfig.h"
+
 namespace po = boost::program_options;
 
 using std::cout;
@@ -13,16 +15,16 @@ using std::endl;
 using std::cerr;
 
 void ShowIntro() {
-  double version = 0.8;
-
+  std::string author = "L. Hayen (leendert.hayen@kuleuven.be)";
   cout << "------------------------------" << endl;
-  cout << "-  CRADLE++ version " << version << "      -" << endl;
-  cout << "-           May 17th, 2016   -" << endl;
+  cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
+  cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
+  cout << "-  Author: " << author << endl;
   cout << "------------------------------\n" << endl;
 }
 
 int main (int argc, char* argv[]) {
-  ShowIntro(); 
+  ShowIntro();
   po::options_description cmdOptions("Commandline options");
 
   int nrLoops = 1;
@@ -68,6 +70,7 @@ int main (int argc, char* argv[]) {
     DecayManager& dm = DecayManager::GetInstance();
     dm.RegisterBasicParticles();
     dm.RegisterBasicDecayModes();
+    dm.RegisterBasicSpectrumGenerators();
     bool success = dm.Initialise(name, Z, A, excitationEnergy, filename, threads);
     if(success) {
       dm.MainLoop(nrLoops);

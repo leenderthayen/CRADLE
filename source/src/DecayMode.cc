@@ -3,6 +3,7 @@
 #include "Particle.hh"
 #include "Utilities.hh"
 #include "OptionContainer.hh"
+#include "SpectrumGenerator.hh"
 #include <string>
 #include <sstream>
 
@@ -11,7 +12,7 @@ void DecayMode::ThreeBodyDecay(ublas::vector<double>& velocity, Particle* finalS
   ublas::vector<double> momentum1 = finalState1->GetMomentum();
   ublas::vector<double> momentum2 (4);
   ublas::vector<double> momentum3 (4);
-  
+
   ublas::vector<double> p2 (3);
   double p2Norm = 0.;
 
@@ -52,7 +53,7 @@ void DecayMode::ThreeBodyDecay(ublas::vector<double>& velocity, Particle* finalS
   finalState1->SetMomentum(utilities::LorentzBoost(velocity, momentum1));
   finalState2->SetMomentum(utilities::LorentzBoost(velocity, momentum2));
   finalState3->SetMomentum(utilities::LorentzBoost(velocity, momentum3));
-  
+
 }
 
 void DecayMode::TwoBodyDecay(ublas::vector<double>& velocity, Particle* finalState1, Particle* finalState2, double Q) {
@@ -100,13 +101,13 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   Particle* enu = DecayManager::GetInstance().GetNewParticle("enubar");
 
   //std::cout << "Recoil " << recoil->GetCharge() << " " << recoil->GetNeutrons() << " " << recoil << std::endl;
-  
+
   oss.str("");
   oss.clear();
   oss << "BetaMinus:Z" << recoil->GetCharge() << "A" << recoil->GetCharge() + recoil->GetNeutrons() << "Q" << Q;
   //Work in the COM frame
   ublas::vector<double> elFourMomentum (4);
-  
+
   std::vector<std::vector<double> >* dist;
   try {
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
@@ -152,7 +153,7 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   finalStates.push_back(recoil);
   finalStates.push_back(e);
   finalStates.push_back(enu);
-  
+
   return finalStates;
 }
 
@@ -169,7 +170,7 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   recoil->SetExcitationEnergy(daughterExEn);
   Particle* pos = DecayManager::GetInstance().GetNewParticle("e+");
   Particle* enubar = DecayManager::GetInstance().GetNewParticle("enu");
-  
+
   oss.str("");
   oss.clear();
   oss << "BetaPlus:Z" << recoil->GetCharge() << "A" << recoil->GetCharge() + recoil->GetNeutrons() << "Q" << Q;
@@ -188,7 +189,7 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
     DecayManager::GetInstance().RegisterDistribution(oss.str(), utilities::GenerateBetaSpectrum(-recoil->GetCharge(), recoil->GetCharge()+recoil->GetNeutrons(), E0, advancedFermi));
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
   }
-  
+
   double posEnergy = utilities::RandomFromDistribution(*dist) + utilities::EMASSC2;
   double posMomentum = std::sqrt(posEnergy*posEnergy-std::pow(utilities::EMASSC2, 2.));
 
@@ -219,7 +220,7 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   finalStates.push_back(recoil);
   finalStates.push_back(pos);
   finalStates.push_back(enubar);
-  
+
   return finalStates;
 }
 
@@ -265,7 +266,7 @@ std::vector<Particle*> Alpha::Decay(Particle* initState, double Q, double daught
   Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-2, initState->GetCharge()+initState->GetNeutrons()-4);
   Particle* alpha = DecayManager::GetInstance().GetNewParticle("alpha");
   recoil->SetExcitationEnergy(daughterExEn);
-  
+
   ublas::vector<double> velocity = -initState->GetVelocity();
   TwoBodyDecay(velocity, recoil, alpha, Q);
 
@@ -295,6 +296,10 @@ std::vector<Particle*> Gamma::Decay(Particle* initState, double Q, double daught
 DecayMode::DecayMode() { }
 
 DecayMode::~DecayMode() { }
+
+void DecayMode::SetSpectrumGenerator(SpectrumGenerator& sg) {
+  
+}
 
 BetaMinus::BetaMinus() { }
 

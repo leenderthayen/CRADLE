@@ -7,6 +7,7 @@
 
 class Particle;
 class DecayMode;
+class SpectrumGenerator;
 
 class DecayManager {
   public:
@@ -25,6 +26,8 @@ class DecayManager {
     void RegisterDecayMode(const std::string, DecayMode&);
     void RegisterParticle(Particle*);
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
+    void RegisterSpectrumGenerator(const std::string, SpectrumGenerator&);
+    void RegisterBasicSpectrumGenerators();
     void ListRegisteredParticles();
     std::string GenerateEvent(int);
     Particle* GetNewParticle(const std::string, int Z=0, int A=0);
