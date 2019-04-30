@@ -31,6 +31,7 @@ set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
 add_subdirectory(source)
 
 set(CRADLE++_SCRIPTS
+  config/filter.py
   config/config.txt
   config/visualisation.py
 )

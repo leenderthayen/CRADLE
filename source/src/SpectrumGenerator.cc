@@ -1,10 +1,13 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <string>
 
 #include "SpectrumGenerator.hh"
 #include "Particle.hh"
 #include "BSGOptionContainer.h"
 #include "Generator.h"
+
+#include "Utilities.hh"
 
 namespace pt = boost::property_tree;
 
@@ -16,13 +19,21 @@ std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(Part
   return deltaDist;
 }
 
+std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(Particle* initState, Particle* finalState, double Q) {
+  std::vector<std::vector<double> >* spectrum = utilities::GenerateBetaSpectrum(
+  (finalState->GetCharge() - initState->GetCharge())*finalState->GetCharge(),
+  finalState->GetCharge()+finalState->GetNeutrons(), Q, true);
+
+  return spectrum;
+}
+
 std::vector<std::vector<double> >* BSG::GenerateSpectrum(Particle* initState, Particle* finalState, double Q) {
-  char* filename = "test.ini";
+  std::string filename = "test.ini";
 
   WriteINIFile(filename, initState, finalState, Q);
 
   int argc = 5;
-  char * argv[] = {"bsg_exec", "-i", "filename", "-c", "bsgConfig.txt"};
+  char * argv[] = {"bsg_exec", "-i", "test.ini", "-c", "bsgConfig.txt"};
 
   bsg::BSGOptionContainer::GetInstance(argc, argv);
 
@@ -31,13 +42,13 @@ std::vector<std::vector<double> >* BSG::GenerateSpectrum(Particle* initState, Pa
   std::vector<std::vector<double> > spectrum = gen->CalculateSpectrum();
 
   delete gen;
-
+  // TODO
   return &spectrum;
   //std::vector<std::vector<double> >* spectrum = new std::vector<std::vector<double> >();
   //return spectrum;
 }
 
-void BSG::WriteINIFile(const char* filename, Particle* initState, Particle* finalState, double Q) {
+void BSG::WriteINIFile(const std::string filename, Particle* initState, Particle* finalState, double Q) {
   // Create an empty property tree object.
   pt::ptree tree;
 
@@ -63,5 +74,7 @@ SpectrumGenerator::SpectrumGenerator() { }
 SpectrumGenerator::~SpectrumGenerator() { }
 
 DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
+
+SimpleBetaDecay::SimpleBetaDecay() {}
 
 BSG::BSG() { }

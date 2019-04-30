@@ -2,6 +2,7 @@
 #define SPECTRUMGENERATOR
 
 #include <vector>
+#include <string>
 
 class Particle;
 
@@ -26,6 +27,20 @@ class DeltaSpectrumGenerator: public SpectrumGenerator {
     DeltaSpectrumGenerator& operator=(DeltaSpectrumGenerator const& copy);
 };
 
+class SimpleBetaDecay: public SpectrumGenerator {
+  public:
+    static SimpleBetaDecay& GetInstance() {
+      static SimpleBetaDecay instance;
+      return instance;
+    }
+    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+
+  protected:
+    SimpleBetaDecay();
+    SimpleBetaDecay(SimpleBetaDecay const& copy);
+    SimpleBetaDecay& operator=(SimpleBetaDecay const& copy);
+};
+
 class BSG: public SpectrumGenerator {
   public:
     static BSG& GetInstance() {
@@ -38,6 +53,6 @@ class BSG: public SpectrumGenerator {
     BSG();
     BSG(BSG const& copy);
     BSG& operator=(BSG const& copy);
-    void WriteINIFile(const char*, Particle*, Particle*, double);
+    void WriteINIFile(const std::string, Particle*, Particle*, double);
 };
 #endif

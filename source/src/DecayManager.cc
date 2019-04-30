@@ -36,7 +36,7 @@ DecayManager::~DecayManager() {
        it != particleStack.end(); ++it) {
     delete *it;
   }*/
-  for (map<string, Particle*>::iterator it = registeredParticles.begin();
+  for (map<const string, Particle*>::iterator it = registeredParticles.begin();
        it != registeredParticles.end(); ++it) {
     for (vector<DecayChannel*>::iterator it2 =
              (it->second)->GetDecayChannels().begin();
@@ -47,7 +47,7 @@ DecayManager::~DecayManager() {
   }
   registeredParticles.clear();
 
-  for (map<string, vector<vector<double> >*>::iterator it =
+  for (map<const string, vector<vector<double> >*>::iterator it =
            registeredDistributions.begin();
        it != registeredDistributions.end(); ++it) {
     delete it->second;
@@ -118,10 +118,13 @@ void DecayManager::RegisterBasicDecayModes() {
 void DecayManager::RegisterSpectrumGenerator(const string decayMode, SpectrumGenerator& sg) {
   try {
     DecayMode& dm = GetDecayMode(decayMode);
-    dm.SetSpectrumGenerator(sg);
+    dm.SetSpectrumGenerator(&sg);
+    if (OptionContainer::GetInstance().GetOption<int>("General.Verbosity") > 0)
+      cout << "Registered " << decayMode << " Spectrum Generator " << typeid(sg).name() << endl;
   }
   catch (const invalid_argument &e) {
-    cout << "Cannot register spectrum generator. Decay mode " << decayMode << " not registered." << endl;
+    cout << "Cannot register" <<  typeid(sg).name() << "spectrum generator. Decay mode "
+    << decayMode << " not registered." << endl;
   }
 }
 
@@ -130,15 +133,15 @@ void DecayManager::RegisterBasicSpectrumGenerators() {
   RegisterSpectrumGenerator("Alpha", DeltaSpectrumGenerator::GetInstance());
   RegisterSpectrumGenerator("Gamma", DeltaSpectrumGenerator::GetInstance());
   RegisterSpectrumGenerator("IT", DeltaSpectrumGenerator::GetInstance());
-  RegisterSpectrumGenerator("BetaPlus", BSG::GetInstance());
-  RegisterSpectrumGenerator("BetaMinus", BSG::GetInstance());
+  RegisterSpectrumGenerator("BetaPlus", SimpleBetaDecay::GetInstance());
+  RegisterSpectrumGenerator("BetaMinus", SimpleBetaDecay::GetInstance());
 }
 
 void DecayManager::ListRegisteredParticles() {
   cout << "--------------------------------------------------------\n";
   cout << " List of registered particles\n";
   cout << "--------------------------------------------------------\n\n";
-  for (map<string, Particle*>::iterator it = registeredParticles.begin();
+  for (map<const string, Particle*>::iterator it = registeredParticles.begin();
        it != registeredParticles.end(); ++it) {
     cout << it->second->ListInformation();
     cout << "\n";
@@ -153,7 +156,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   filename << "z" << Z << ".a" << A;
   std::ifstream radDataFile((filename.str()).c_str());
 
-  // cout << "Generating nucleus " << name << endl;
+  cout << "Generating nucleus " << name << endl;
 
   string line;
   double excitationEnergy = 0.;
@@ -163,30 +166,40 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
   while (getline(radDataFile, line)) {
     if (!line.compare(0, 1, "#")) {
+      // Comment line
       continue;
     } else if (!line.compare(0, 1, "P")) {
+      // Parent line
       istringstream iss(line);
       string p;
-      iss >> p >> excitationEnergy >> lifetime;
+      string flag;
+      iss >> p >> excitationEnergy >> flag >> lifetime;
       continue;
     }
+    cout << "Lifetime: " << lifetime << endl;
     string mode;
     double daughterExcitationEnergy = 0;
     double intensity = 0;
     double Q = 0;
     string modifier;
+    string flag;
 
     istringstream iss(line);
-    iss >> mode >> daughterExcitationEnergy >> intensity >> Q >> modifier;
+    iss >> mode >> daughterExcitationEnergy >> flag >> intensity >> Q >> modifier;
+    cout << "Mode: " << mode << endl;
+    cout << "Daughter Energy" << daughterExcitationEnergy << endl;
+    cout << "Intensity: " << intensity << endl;
+    cout << "Q: " << Q << endl;
+    cout << "Modifier: " << modifier << endl;
     if (Q > 0.) {
-      // cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
-      // excitationEnergy << " to " << daughterExcitationEnergy << endl;
+      cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
+      excitationEnergy << " to " << daughterExcitationEnergy << endl;
       if (mode.find("shellEC") != string::npos) {
         // TODO
         continue;
       }
       DecayChannel* dc =
-          new DecayChannel(mode, Q, intensity, lifetime, excitationEnergy,
+          new DecayChannel(mode, &GetDecayMode(mode), Q, intensity, lifetime, excitationEnergy,
                            daughterExcitationEnergy);
       p->AddDecayChannel(dc);
     }
@@ -198,7 +211,8 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   ifstream gammaDataFile(gammaFileSS.str().c_str());
   if (gammaDataFile.is_open()) {
     while (getline(gammaDataFile, line)) {
-      double initEnergy, Q;
+      int levelNr;
+      double initEnergy, E;
       double intensity;
       double convIntensity;
       double kCoeff, lCoeff1, lCoeff2, lCoeff3, mCoeff1, mCoeff2, mCoeff3,
@@ -206,16 +220,31 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
       double lifetime;
       string angMom;
       string polarity;
+      string flag;
+
+      int nGammas;
 
       istringstream iss(line);
-      iss >> initEnergy >> Q >> intensity >> polarity >> lifetime >> angMom >>
-          convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
-          mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
-      // cout << "Adding gamma decay level " << initEnergy << " " << Q << endl;
-      DecayChannel* dcGamma =
-          new DecayChannel("Gamma", Q, intensity / (1. + convIntensity),
-                           lifetime, initEnergy, initEnergy - Q);
-      p->AddDecayChannel(dcGamma);
+      iss >> levelNr >> flag >> initEnergy >> lifetime >> angMom >> nGammas;
+      for (int i = 0; i < nGammas; ++i) {
+        getline(gammaDataFile, line);
+        int daughterLevelNr;
+        int multipolarity;
+        double multipolarityMixing;
+        istringstream issLevel(line);
+        issLevel >> daughterLevelNr >> E >> intensity >> multipolarity >> multipolarityMixing
+        >> convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
+        mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
+
+        cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
+        DecayChannel* dcGamma =
+            new DecayChannel("Gamma", &GetDecayMode("Gamma"), E, intensity / (1. + convIntensity),
+                             lifetime, initEnergy, initEnergy - E);
+        p->AddDecayChannel(dcGamma);
+      }
+      // iss >> initEnergy >> Q >> intensity >> polarity >> lifetime >> angMom >>
+      //    convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
+      //    mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
       // TODO Implement conversion electrons
       // p->AddDecayChannel(new DecayChannel("ConversionElectron", Q))
     }
@@ -257,10 +286,11 @@ std::string DecayManager::GenerateEvent(int eventNr) {
   particleStack.push_back(ini);
   while (!particleStack.empty()) {
     Particle* p = particleStack.back();
-    // cout << "Decaying particle " << p->GetName() << endl;
+    cout << "Decaying particle " << p->GetName() << endl;
     vector<Particle*> finalStates;
-    double decayTime = p->IsStable();
-    if (decayTime >= 0.) {
+    double decayTime = p->GetDecayTime();
+
+    if ((time + decayTime) <= OptionContainer::GetInstance().GetOption<double>("Cuts.Lifetime")) {
       try {
         finalStates = p->Decay();
         time += decayTime;

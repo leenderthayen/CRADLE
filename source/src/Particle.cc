@@ -10,7 +10,7 @@ std::default_random_engine Particle::randomGen;
 Particle::Particle(const std::string& _name, double _mass, int _charge, int _neutrons, double _spin, double _excitationEnergy): name(_name), mass(_mass), charge(_charge), neutrons(_neutrons), spin(_spin), currentExcitationEnergy(_excitationEnergy) {
   //std::cout << "Creating new particle " << name << std::endl;
   fourMomentum.resize(4);
-  fourMomentum(0) = mass + currentExcitationEnergy;  
+  fourMomentum(0) = mass + currentExcitationEnergy;
 }
 
 Particle::Particle(const Particle& orig) {
@@ -33,6 +33,7 @@ double Particle::GetLifetime() const {
   double t = 1.e23;
   double energyThreshold = OptionContainer::GetInstance().GetOption<double>("Cuts.Energy");
   for(int i = 0; i < decayChannels.size(); ++i) {
+    // Look for decay channels from current excitation state
     if (std::abs(decayChannels[i]->GetParentExcitationEnergy()-currentExcitationEnergy) < energyThreshold) {
       t = decayChannels[i]->GetLifetime();
        break;
@@ -41,13 +42,12 @@ double Particle::GetLifetime() const {
   return t;
 }
 
-double Particle::IsStable() {
+double Particle::GetDecayTime() {
   double lifetime = GetLifetime();
-  if (lifetime > OptionContainer::GetInstance().GetOption<double>("Cuts.Lifetime")) {
-    return -1.;
-  }
+  // std::cout << name << " Lifetime " << lifetime << std::endl;
   std::exponential_distribution<double> distribution(1./lifetime);
-  return distribution(randomGen);
+  double decayTime = distribution(randomGen);
+  return decayTime;
 }
 
 ublas::vector<double> Particle::GetVelocity() const {
@@ -59,6 +59,7 @@ std::vector<Particle*> Particle::Decay() {
   double totalIntensity = 0.;
   double energyThreshold = OptionContainer::GetInstance().GetOption<double>("Cuts.Energy");
   for(std::vector<DecayChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
+    // Look for decay channels at current excitation level
     if (std::abs(currentExcitationEnergy - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
       totalIntensity+=decayChannels[i]->GetIntensity();
     }
@@ -66,6 +67,7 @@ std::vector<Particle*> Particle::Decay() {
   double r = rand()/(double)RAND_MAX*totalIntensity;
   double intensity = 0.;
   double index = 0.;
+  // Sample randomly from the different decay channels
   for(std::vector<DecayChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
     if (std::abs(currentExcitationEnergy - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
       intensity+=decayChannels[i]->GetIntensity();

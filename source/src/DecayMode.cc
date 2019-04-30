@@ -90,17 +90,17 @@ void DecayMode::TwoBodyDecay(ublas::vector<double>& velocity, Particle* finalSta
 std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double daughterExEn) {
   std::vector<Particle*> finalStates;
 
-  //std::cout << "In BetaMinus Decay " << std::endl;
-  //std::cout << "Address: " << initState << std::endl;
+  // std::cout << "In BetaMinus Decay " << std::endl;
+  // std::cout << "Address: " << initState << std::endl;
   std::ostringstream oss;
   oss << initState->GetCharge()+initState->GetNeutrons() << utilities::atoms[initState->GetCharge()];
-  //std::cout << oss.str() << std::endl;
+  std::cout << oss.str() << std::endl;
   Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()+1, initState->GetCharge()+initState->GetNeutrons());
   recoil->SetExcitationEnergy(daughterExEn);
   Particle* e = DecayManager::GetInstance().GetNewParticle("e-");
   Particle* enu = DecayManager::GetInstance().GetNewParticle("enubar");
 
-  //std::cout << "Recoil " << recoil->GetCharge() << " " << recoil->GetNeutrons() << " " << recoil << std::endl;
+  // std::cout << "Recoil " << recoil->GetCharge() << " " << recoil->GetNeutrons() << " " << recoil << std::endl;
 
   oss.str("");
   oss.clear();
@@ -109,16 +109,21 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   ublas::vector<double> elFourMomentum (4);
 
   std::vector<std::vector<double> >* dist;
+  // std::cout << "Try getting distribution" << std::endl;
   try {
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
   } catch (const std::invalid_argument& e) {
-    bool advancedFermi = false;
-    if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
-      advancedFermi = true;
-    }
-    DecayManager::GetInstance().RegisterDistribution(oss.str(), utilities::GenerateBetaSpectrum(recoil->GetCharge(), recoil->GetCharge()+recoil->GetNeutrons(), Q, advancedFermi));
+    // bool advancedFermi = false;
+    // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
+    //   advancedFermi = true;
+    // }
+    // std::cout << "Distribution not found" << std::endl;
+    // std::cout << oss.str() << " " << spectrumGen << std::endl;
+    DecayManager::GetInstance().RegisterDistribution(oss.str(), spectrumGen->GenerateSpectrum(initState, recoil, Q));
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
   }
+
+  // std::cout << "Found distribution" << std::endl;
 
   double mf = 0.;
   double mgt = 0.;
@@ -129,7 +134,10 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
     mgt = 1.;
   }
 
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(OptionContainer::GetInstance().GetOption<double>("Couplings.CS"), OptionContainer::GetInstance().GetOption<double>("Couplings.CT"), OptionContainer::GetInstance().GetOption<double>("Couplings.CV"), OptionContainer::GetInstance().GetOption<double>("Couplings.CA"), mf, mgt);
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(OptionContainer::GetInstance().GetOption<double>("Couplings.CS"),
+  OptionContainer::GetInstance().GetOption<double>("Couplings.CT"),
+  OptionContainer::GetInstance().GetOption<double>("Couplings.CV"),
+  OptionContainer::GetInstance().GetOption<double>("Couplings.CA"), mf, mgt);
   std::vector<double> p;
 
   double elEnergy = utilities::RandomFromDistribution(*dist)+utilities::EMASSC2;
@@ -182,11 +190,11 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   try {
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
   } catch (const std::invalid_argument& e) {
-    bool advancedFermi = false;
-    if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
-      advancedFermi = true;
-    }
-    DecayManager::GetInstance().RegisterDistribution(oss.str(), utilities::GenerateBetaSpectrum(-recoil->GetCharge(), recoil->GetCharge()+recoil->GetNeutrons(), E0, advancedFermi));
+    // bool advancedFermi = false;
+    // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
+    //   advancedFermi = true;
+    // }
+    DecayManager::GetInstance().RegisterDistribution(oss.str(), spectrumGen->GenerateSpectrum(initState, recoil, E0));
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
   }
 
@@ -201,7 +209,10 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   else {
     mgt = 1.;
   }
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(OptionContainer::GetInstance().GetOption<double>("Couplings.CS"), OptionContainer::GetInstance().GetOption<double>("Couplings.CT"), OptionContainer::GetInstance().GetOption<double>("Couplings.CV"), OptionContainer::GetInstance().GetOption<double>("Couplings.CA"), mf, mgt);
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(OptionContainer::GetInstance().GetOption<double>("Couplings.CS"),
+  OptionContainer::GetInstance().GetOption<double>("Couplings.CT"),
+  OptionContainer::GetInstance().GetOption<double>("Couplings.CV"),
+  OptionContainer::GetInstance().GetOption<double>("Couplings.CA"), mf, mgt);
   std::vector<double> p;
   p.push_back(1.);
   p.push_back(a*posMomentum/posEnergy);
@@ -292,13 +303,12 @@ std::vector<Particle*> Gamma::Decay(Particle* initState, double Q, double daught
   return finalStates;
 }
 
-
 DecayMode::DecayMode() { }
 
 DecayMode::~DecayMode() { }
 
-void DecayMode::SetSpectrumGenerator(SpectrumGenerator& sg) {
-  
+void DecayMode::SetSpectrumGenerator(SpectrumGenerator* sg) {
+  spectrumGen = sg;
 }
 
 BetaMinus::BetaMinus() { }
