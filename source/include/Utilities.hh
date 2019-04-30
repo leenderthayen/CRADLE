@@ -142,7 +142,7 @@ namespace utilities {
 
     return first*third*fourth*fifth;
   }
-  
+
   inline double ApproximateRadius(double A) {
     return (1.15+1.8*std::pow(A, -2./3.)-1.2*std::pow(A, -4./3.))*EMASSC2*1000./HBAR/C*std::pow(A, 1./3.);
   }
@@ -151,7 +151,7 @@ namespace utilities {
     double W = E/EMASSC2+1.;
     double W0 = Q/EMASSC2+1.;
     double R = ApproximateRadius(A);
-    if (advancedFermi) { 
+    if (advancedFermi) {
       return PhaseSpace(W, W0)*FermiFunction(Z, W, R);
     }
     else {
@@ -177,11 +177,11 @@ namespace utilities {
 
   inline vector<double> CrossProduct(vector<double> first, vector<double> second) {
     vector<double> v (3);
-    
+
     v(0) = first(1)*second(2) - first(2)*second(1);
     v(1) = first(2)*second(0) - first(0)*second(2);
     v(2) = first(0)*second(1) - first(1)*second(0);
-    
+
     return v;
   }
 
@@ -233,6 +233,8 @@ namespace utilities {
 
   inline vector<double> GetParticleDirection(std::vector<vector<double> >& dirs, std::vector<std::vector<double> >& A) {
     vector<double> dir (3);
+    //TODO
+    return dir;
   }
 
   inline vector<double> LorentzBoost(vector<double>& velocity, vector<double>& v) {

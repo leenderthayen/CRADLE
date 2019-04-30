@@ -33,6 +33,7 @@ option(USE_BSG "Use the external BSG library for the calculation of beta spectru
 add_subdirectory(source)
 
 set(CRADLE++_SCRIPTS
+  config/filter.py
   config/config.txt
   config/visualisation.py
 )

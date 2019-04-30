@@ -11,14 +11,14 @@ using std::string;
 
 class DecayChannel {
   public:
-    DecayChannel(string, double, double, double, double, double);
+    DecayChannel(string, DecayMode*, double, double, double, double, double);
 
     inline double GetIntensity() { return intensity; };
     inline double GetQValue() { return Q; };
     inline double GetLifetime() { return lifetime; };
     inline double GetDaughterExcitationEnergy() { return daughterExcitationEnergy; };
     inline double GetParentExcitationEnergy() { return parentExcitationEnergy; };
-    inline string GetModeName() { return mode; };
+    inline string GetModeName() { return modeName; };
 
     std::vector<Particle*> Decay(Particle*);
   private:
@@ -27,6 +27,7 @@ class DecayChannel {
     double intensity;
     double Q;
     double lifetime;
-    string mode;
+    string modeName;
+    DecayMode* decayMode;
 };
 #endif

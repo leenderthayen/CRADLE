@@ -18,9 +18,9 @@ class Particle {
     int neutrons;
     double spin;
     double currentExcitationEnergy;
-    
+
     std::string name;
-    
+
     ublas::vector<double> fourMomentum;
     std::vector<DecayChannel*> decayChannels;
 
@@ -29,7 +29,7 @@ class Particle {
     Particle();
     Particle(const std::string&, double, int, int, double, double);
     Particle(const Particle&);
-    Particle& operator=(const Particle& rhs) {};
+    Particle& operator=(const Particle& rhs);
 
     inline std::string ListInformation() const {
       std::ostringstream oss;
@@ -41,12 +41,12 @@ class Particle {
       return oss.str();
     }
     std::vector<Particle*> Decay();
-    double IsStable();
-    inline std::string GetName() const { 
+    double GetDecayTime();
+    inline std::string GetName() const {
       std::string n;
       std::ostringstream oss(n);
       oss << name << " (" << currentExcitationEnergy << " keV) Kin. En.: " << GetKinEnergy();
-      return oss.str(); 
+      return oss.str();
     };
     inline std::string GetRawName() const { return name; };
     inline std::string GetInfoForFile() const {
@@ -67,7 +67,7 @@ class Particle {
     ublas::vector<double> GetVelocity() const;
     inline double GetKinEnergy() const { return fourMomentum(0)-GetMass(); };
     inline void SetKinEnergy(double e) { fourMomentum(0) = GetMass() + e; };
-    inline ublas::vector<double> Get3Momentum() const { 
+    inline ublas::vector<double> Get3Momentum() const {
       ublas::vector<double> v (3);
       v[0] = fourMomentum[1];
       v[1] = fourMomentum[2];

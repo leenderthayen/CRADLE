@@ -1,10 +1,26 @@
 #include "OptionContainer.hh"
 
+po::options_description OptionContainer::cmdOptions("Commandline options");
 po::options_description OptionContainer::configOptions("Configuration options");
 po::options_description OptionContainer::envOptions("Environment variables");
 po::variables_map OptionContainer::vm;
 
-OptionContainer::OptionContainer(std::string configName) {
+using std::cout;
+using std::endl;
+
+OptionContainer::OptionContainer(int argc, char** argv) {
+  std::string configName = "config.txt";
+  cmdOptions.add_options()
+    ("help,h", "Product help message")
+    ("name,n", po::value<std::string>(), "Name of initial particle")
+    ("charge,z", po::value<int>(), "Charge as multiple of proton charge")
+    ("nucleons,a", po::value<int>(), "Number of nucleons")
+    ("energy,e", po::value<double>()->default_value(0.), "Excitation energy of initial state")
+    ("loop,l", po::value<int>()->default_value(1), "Number of events to generate")
+    ("threads,t", po::value<int>()->default_value(8), "Number of threads (2 x #CPU)")
+    ("file,f", po::value<std::string>()->default_value("output.txt"), "Output file")
+    ("config,c", po::value<std::string>(&configName)->default_value("config.txt"), "Config file")
+  ;
   configOptions.add_options()
     ("General.Verbosity", po::value<int>(), "General verbosity")
     ("Couplings.CS", po::value<double>(), "Scalar coupling constant")
@@ -21,12 +37,7 @@ OptionContainer::OptionContainer(std::string configName) {
     ("BetaDecay.PolarisationZ", po::value<double>(), "Set nuclear polarisation in Z of initial state")
   ;
 
-  std::ifstream configStream(configName.c_str());
-  if(!configStream.is_open()) {
-    std::cerr << "ERROR: Config.txt cannot be found. Aborting.\n\n" << std::endl;
-  }
-
-  po::store(po::parse_config_file(configStream, configOptions), vm);
+  po::store(po::parse_command_line(argc, argv, cmdOptions), vm);
   po::notify(vm);
 
   envOptions.add_options()
@@ -36,4 +47,27 @@ OptionContainer::OptionContainer(std::string configName) {
 
   po::store(po::parse_environment(envOptions, "CRADLE_"), vm);
   po::notify(vm);
+
+  if(vm.count("help")) {
+    cout << cmdOptions << endl;
+    cout << configOptions << endl;
+    cout << envOptions << endl;
+  }
+  else if (!(vm.count("name") && vm.count("charge") && vm.count("nucleons"))) {
+    cout << cmdOptions << endl;
+    cout << configOptions << endl;
+    cout << envOptions << endl;
+  } else {
+    /** Parse configuration file
+     * Included: configOptions & spectrumOptions
+     */
+    std::ifstream configStream(configName.c_str());
+    if (!configStream.is_open()) {
+      cout << "WARNING: " << configName << " cannot be found.\n\n"
+                << endl;
+    } else {
+      po::store(po::parse_config_file(configStream, configOptions, true), vm);
+    }
+    po::notify(vm);
+  }
 }

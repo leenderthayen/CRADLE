@@ -16,7 +16,7 @@ class DecayMode {
     DecayMode();
     virtual ~DecayMode();
 
-    void SetSpectrumGenerator(SpectrumGenerator&);
+    void SetSpectrumGenerator(SpectrumGenerator*);
 
   protected:
     static void ThreeBodyDecay(ublas::vector<double>&, Particle*, Particle*, Particle*, ublas::vector<double>&, double);
