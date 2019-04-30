@@ -16,11 +16,11 @@ using std::cerr;
 
 void ShowIntro() {
   std::string author = "L. Hayen (leendert.hayen@kuleuven.be)";
-  cout << "------------------------------" << endl;
+  cout << "-----------------------------------------------" << endl;
   cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
   cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
   cout << "-  Author: " << author << endl;
-  cout << "------------------------------\n" << endl;
+  cout << "-----------------------------------------------\n" << endl;
 }
 
 int main (int argc, char* argv[]) {
@@ -47,6 +47,7 @@ int main (int argc, char* argv[]) {
     ("threads,t", po::value<int>(&threads)->default_value(8), "Number of threads (2 x #CPU)")
     ("file,f", po::value<std::string>(&filename)->default_value("output.txt"), "Output file")
     ("config,c", po::value<std::string>(&configName)->default_value("config.txt"), "Config file")
+    ("bsgconfig,b", po::value<std::string>(), "Config file for the BSG library")
   ;
 
 

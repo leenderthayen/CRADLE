@@ -14,6 +14,12 @@ include_directories(${PROJECT_SOURCE_DIR}/source/include)
 configure_file("${PROJECT_SOURCE_DIR}/cmake/Templates/CRADLEConfig.h.in" "${PROJECT_BINARY_DIR}/CRADLEConfig.h")
 include_directories("${PROJECT_BINARY_DIR}")
 
+if (USE_BSG)
+find_package(BSG REQUIRED)
+include_directories(${BSG_INCLUDE_DIRS})
+set(EXTRA_LIBS ${BSG_LIBRARIES} ${EXTRA_LIBS})
+endif()
+
 #Change to local install directory of BSG
 set(BSG_INSTALL_DIR "~/BSG")
 
@@ -31,7 +37,7 @@ set(BSG_LIBRARIES "${BSG_INSTALL_DIR}/lib/nme/libnme.so;${BSG_INSTALL_DIR}/lib/b
 
 target_link_libraries(CRADLE++ ${Boost_LIBRARIES})
 target_link_libraries(CRADLE++ ${GSL_LIBRARIES})
-target_link_libraries(CRADLE++ ${BSG_LIBRARIES})
+target_link_libraries(CRADLE++ ${EXTRA_LIBS})
 
 add_custom_command(TARGET CRADLE++
                    POST_BUILD

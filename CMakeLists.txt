@@ -28,6 +28,8 @@ set(INSTALL_BIN_DIR ${PROJECT_BINARY_DIR}/bin CACHE PATH "Installation directory
 set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
   "Installation directory for header files")
 
+option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" ON)
+
 add_subdirectory(source)
 
 set(CRADLE++_SCRIPTS
