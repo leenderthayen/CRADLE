@@ -57,7 +57,7 @@ DecayManager::~DecayManager() {
 
 void DecayManager::RegisterDecayMode(const string name, DecayMode& dm) {
   registeredDecayModes.insert(pair<string, DecayMode&>(name, dm));
-  if (OptionContainer::GetInstance().GetOption<int>("General.Verbosity") > 0)
+  if (GetOpt(int, "General.Verbosity") > 0)
     cout << "Registered DecayMode " << name << endl;
 }
 
@@ -119,7 +119,7 @@ void DecayManager::RegisterSpectrumGenerator(const string decayMode, SpectrumGen
   try {
     DecayMode& dm = GetDecayMode(decayMode);
     dm.SetSpectrumGenerator(&sg);
-    if (OptionContainer::GetInstance().GetOption<int>("General.Verbosity") > 0)
+    if (GetOpt(int, "General.Verbosity") > 0)
       cout << "Registered " << decayMode << " Spectrum Generator " << typeid(sg).name() << endl;
   }
   catch (const invalid_argument &e) {
@@ -152,11 +152,11 @@ void DecayManager::ListRegisteredParticles() {
 
 bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   std::ostringstream filename;
-  filename << OptionContainer::GetInstance().GetOption<string>("radiationdata");
+  filename << GetOpt(std::string, "radiationdata");
   filename << "z" << Z << ".a" << A;
   std::ifstream radDataFile((filename.str()).c_str());
 
-  cout << "Generating nucleus " << name << endl;
+  //cout << "Generating nucleus " << name << endl;
 
   string line;
   double excitationEnergy = 0.;
@@ -176,7 +176,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
       iss >> p >> excitationEnergy >> flag >> lifetime;
       continue;
     }
-    cout << "Lifetime: " << lifetime << endl;
+    //cout << "Lifetime: " << lifetime << endl;
     string mode;
     double daughterExcitationEnergy = 0;
     double intensity = 0;
@@ -186,14 +186,14 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
     istringstream iss(line);
     iss >> mode >> daughterExcitationEnergy >> flag >> intensity >> Q >> modifier;
-    cout << "Mode: " << mode << endl;
+    /*cout << "Mode: " << mode << endl;
     cout << "Daughter Energy" << daughterExcitationEnergy << endl;
     cout << "Intensity: " << intensity << endl;
     cout << "Q: " << Q << endl;
-    cout << "Modifier: " << modifier << endl;
+    cout << "Modifier: " << modifier << endl;*/
     if (Q > 0.) {
-      cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
-      excitationEnergy << " to " << daughterExcitationEnergy << endl;
+      /*cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
+      excitationEnergy << " to " << daughterExcitationEnergy << endl;*/
       if (mode.find("shellEC") != string::npos) {
         // TODO
         continue;
@@ -206,7 +206,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   }
 
   ostringstream gammaFileSS;
-  gammaFileSS << OptionContainer::GetInstance().GetOption<string>("gammadata");
+  gammaFileSS << GetOpt(std::string, "gammadata");
   gammaFileSS << "z" << Z << ".a" << A;
   ifstream gammaDataFile(gammaFileSS.str().c_str());
   if (gammaDataFile.is_open()) {
@@ -236,7 +236,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
         >> convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
         mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
 
-        cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
+        //cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
         DecayChannel* dcGamma =
             new DecayChannel("Gamma", &GetDecayMode("Gamma"), E, intensity / (1. + convIntensity),
                              lifetime, initEnergy, initEnergy - E);
@@ -263,10 +263,10 @@ bool DecayManager::Initialise(string name, int Z, int A,
   struct stat infoRD;
   struct stat infoG;
   int i = stat(
-      OptionContainer::GetInstance().GetOption<string>("radiationdata").c_str(),
+      GetOpt(std::string, "radiationdata").c_str(),
       &infoRD);
   int j = stat(
-      OptionContainer::GetInstance().GetOption<string>("radiationdata").c_str(),
+      GetOpt(std::string, "radiationdata").c_str(),
       &infoG);
   if (i == 0 && j == 0 && S_ISDIR(infoRD.st_mode) && S_ISDIR(infoG.st_mode)) {
     return GenerateNucleus(name, Z, A);
@@ -286,11 +286,11 @@ std::string DecayManager::GenerateEvent(int eventNr) {
   particleStack.push_back(ini);
   while (!particleStack.empty()) {
     Particle* p = particleStack.back();
-    cout << "Decaying particle " << p->GetName() << endl;
+    //cout << "Decaying particle " << p->GetName() << endl;
     vector<Particle*> finalStates;
     double decayTime = p->GetDecayTime();
 
-    if ((time + decayTime) <= OptionContainer::GetInstance().GetOption<double>("Cuts.Lifetime")) {
+    if ((time + decayTime) <= GetOpt(double, "Cuts.Lifetime")) {
       try {
         finalStates = p->Decay();
         time += decayTime;
@@ -322,7 +322,8 @@ bool DecayManager::MainLoop(int nrParticles) {
   std::ios::sync_with_stdio(false);
   boost::progress_display show_progress(nrParticles);
   boost::progress_timer t;
-  for (int i = 0; i < nrParticles; i+=NRTHREADS) {
+  fileStream << GenerateEvent(0);
+  for (int i = 1; i < nrParticles; i+=NRTHREADS) {
     // cout << "LOOP NR " << i+1 << endl;
     int threads = std::min(NRTHREADS, nrParticles-i);
     std::future<std::string> f[threads];

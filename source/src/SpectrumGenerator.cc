@@ -4,10 +4,17 @@
 
 #include "SpectrumGenerator.hh"
 #include "Particle.hh"
-#include "BSGOptionContainer.h"
-#include "Generator.h"
-
 #include "Utilities.hh"
+#include "CRADLEConfig.h"
+#include "OptionContainer.hh"
+
+#include "spdlog/spdlog.h"
+
+#ifdef USE_BSG
+#include "BSGOptionContainer.h"
+#include "NMEOptionContainer.h"
+#include "Generator.h"
+#endif
 
 namespace pt = boost::property_tree;
 
@@ -27,25 +34,51 @@ std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(Particle* i
   return spectrum;
 }
 
+SpectrumGenerator::SpectrumGenerator() { }
+
+SpectrumGenerator::~SpectrumGenerator() { }
+
+DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
+
+SimpleBetaDecay::SimpleBetaDecay() {}
+
+#ifdef USE_BSG
 std::vector<std::vector<double> >* BSG::GenerateSpectrum(Particle* initState, Particle* finalState, double Q) {
+
+  spdlog::warn("In GenerateSpectrum");
+  bsg::BSGOptionContainer::GetInstance();
+  nme::NMEOptionContainer::GetInstance();
+  bsg::BSGOptionContainer::ClearVariablesMap();
+  nme::NMEOptionContainer::GetInstance().ClearVariablesMap();
+  spdlog::warn("Cleared VMs");
+  bsg::BSGOptionContainer::ParseCmdLineOptions(0, NULL);
+  nme::NMEOptionContainer::GetInstance().ParseCmdLineOptions(0, NULL);
+
+  spdlog::warn("Parsed Cmd Options");
+  spdlog::warn("Test NME: {}", GetNMEOpt(std::string, output));
+
   std::string filename = "test.ini";
+  std::string bsgConfig = GetOpt(std::string, "bsgconfig");
 
   WriteINIFile(filename, initState, finalState, Q);
 
-  int argc = 5;
-  char * argv[] = {"bsg_exec", "-i", "test.ini", "-c", "bsgConfig.txt"};
+  spdlog::warn("Parsing config");
+  //nme::NMEOptionContainer::GetInstance().ParseConfigOptions(bsgConfig);
+  bsg::BSGOptionContainer::ParseConfigOptions(bsgConfig);
 
-  bsg::BSGOptionContainer::GetInstance(argc, argv);
+  spdlog::warn("Parsing input");
+  bsg::BSGOptionContainer::ParseInputOptions(filename);
+  //nme::NMEOptionContainer::GetInstance().ParseInputOptions(filename);
+
+  spdlog::warn("Constructing gen");
 
   bsg::Generator* gen = new bsg::Generator();
 
-  std::vector<std::vector<double> > spectrum = gen->CalculateSpectrum();
+  std::vector<std::vector<double> >* spectrum = gen->CalculateSpectrum();
 
   delete gen;
-  // TODO
-  return &spectrum;
-  //std::vector<std::vector<double> >* spectrum = new std::vector<std::vector<double> >();
-  //return spectrum;
+
+  return spectrum;
 }
 
 void BSG::WriteINIFile(const std::string filename, Particle* initState, Particle* finalState, double Q) {
@@ -54,6 +87,7 @@ void BSG::WriteINIFile(const std::string filename, Particle* initState, Particle
 
   //TODO Change Fermi/GT
   //Mae the most basic transition config file
+  tree.put("Transition.Process", (initState->GetCharge() < finalState->GetCharge()) ? "B-" : "B+");
   tree.put("Transition.Type", "Gamow-Teller");
   tree.put("Transition.QValue", Q);
 
@@ -69,12 +103,6 @@ void BSG::WriteINIFile(const std::string filename, Particle* initState, Particle
   pt::write_ini(filename, tree);
 }
 
-SpectrumGenerator::SpectrumGenerator() { }
-
-SpectrumGenerator::~SpectrumGenerator() { }
-
-DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
-
-SimpleBetaDecay::SimpleBetaDecay() {}
-
 BSG::BSG() { }
+
+#endif

@@ -94,7 +94,7 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   // std::cout << "Address: " << initState << std::endl;
   std::ostringstream oss;
   oss << initState->GetCharge()+initState->GetNeutrons() << utilities::atoms[initState->GetCharge()];
-  std::cout << oss.str() << std::endl;
+  //std::cout << oss.str() << std::endl;
   Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()+1, initState->GetCharge()+initState->GetNeutrons());
   recoil->SetExcitationEnergy(daughterExEn);
   Particle* e = DecayManager::GetInstance().GetNewParticle("e-");
@@ -127,17 +127,16 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
 
   double mf = 0.;
   double mgt = 0.;
-  if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.Default") == "Fermi") {
+  if (GetOpt(std::string, "BetaDecay.Default") == "Fermi") {
     mf = 1.;
   }
   else {
     mgt = 1.;
   }
 
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(OptionContainer::GetInstance().GetOption<double>("Couplings.CS"),
-  OptionContainer::GetInstance().GetOption<double>("Couplings.CT"),
-  OptionContainer::GetInstance().GetOption<double>("Couplings.CV"),
-  OptionContainer::GetInstance().GetOption<double>("Couplings.CA"), mf, mgt);
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(GetOpt(double, "Couplings.CS"),
+  GetOpt(double, "Couplings.CT"), GetOpt(double, "Couplings.CV"),
+  GetOpt(double, "Couplings.CA"), mf, mgt);
   std::vector<double> p;
 
   double elEnergy = utilities::RandomFromDistribution(*dist)+utilities::EMASSC2;
@@ -203,16 +202,16 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
 
   double mf = 0.;
   double mgt = 0.;
-  if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.Default") == "Fermi") {
+  if (GetOpt(std::string, "BetaDecay.Default") == "Fermi") {
     mf = 1.;
   }
   else {
     mgt = 1.;
   }
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(OptionContainer::GetInstance().GetOption<double>("Couplings.CS"),
-  OptionContainer::GetInstance().GetOption<double>("Couplings.CT"),
-  OptionContainer::GetInstance().GetOption<double>("Couplings.CV"),
-  OptionContainer::GetInstance().GetOption<double>("Couplings.CA"), mf, mgt);
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(GetOpt(double, "Couplings.CS"),
+  GetOpt(double, "Couplings.CT"),
+  GetOpt(double, "Couplings.CV"),
+  GetOpt(double, "Couplings.CA"), mf, mgt);
   std::vector<double> p;
   p.push_back(1.);
   p.push_back(a*posMomentum/posEnergy);

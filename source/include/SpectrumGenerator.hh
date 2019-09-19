@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "CRADLEConfig.h"
+
 class Particle;
 
 class SpectrumGenerator {
@@ -41,6 +43,7 @@ class SimpleBetaDecay: public SpectrumGenerator {
     SimpleBetaDecay& operator=(SimpleBetaDecay const& copy);
 };
 
+#ifdef USE_BSG
 class BSG: public SpectrumGenerator {
   public:
     static BSG& GetInstance() {
@@ -55,4 +58,6 @@ class BSG: public SpectrumGenerator {
     BSG& operator=(BSG const& copy);
     void WriteINIFile(const std::string, Particle*, Particle*, double);
 };
-#endif
+#endif // End of USE_BSG if
+
+#endif // End of SPECTRUMGENERATOR if

@@ -1,4 +1,5 @@
 #include "OptionContainer.hh"
+#include "CRADLEConfig.h"
 
 po::options_description OptionContainer::cmdOptions("Commandline options");
 po::options_description OptionContainer::configOptions("Configuration options");
@@ -20,9 +21,13 @@ OptionContainer::OptionContainer(int argc, char** argv) {
     ("threads,t", po::value<int>()->default_value(8), "Number of threads (2 x #CPU)")
     ("file,f", po::value<std::string>()->default_value("output.txt"), "Output file")
     ("config,c", po::value<std::string>(&configName)->default_value("config.txt"), "Config file")
+#ifdef USE_BSG
+    ("usebsg,u", po::value<bool>(), "Choose whether or not to use BSG")
+    ("bsgconfig,b", po::value<std::string>()->default_value("bsgConfig.txt"), "BSG config file")
+#endif
   ;
   configOptions.add_options()
-    ("General.Verbosity", po::value<int>(), "General verbosity")
+    ("General.Verbosity", po::value<int>()->default_value(0), "General verbosity")
     ("Couplings.CS", po::value<double>(), "Scalar coupling constant")
     ("Couplings.CV", po::value<double>(), "Vector coupling constant")
     ("Couplings.CT", po::value<double>(), "Tensor coupling constant")
@@ -37,7 +42,13 @@ OptionContainer::OptionContainer(int argc, char** argv) {
     ("BetaDecay.PolarisationZ", po::value<double>(), "Set nuclear polarisation in Z of initial state")
   ;
 
-  po::store(po::parse_command_line(argc, argv, cmdOptions), vm);
+  cmdOptions.add(configOptions);
+  po::store(po::command_line_parser(argc, argv)
+                .options(cmdOptions)
+                .allow_unregistered()
+                .run(),
+            vm);
+  //po::store(po::parse_command_line(argc, argv, cmdOptions), vm);
   po::notify(vm);
 
   envOptions.add_options()
@@ -49,11 +60,6 @@ OptionContainer::OptionContainer(int argc, char** argv) {
   po::notify(vm);
 
   if(vm.count("help")) {
-    cout << cmdOptions << endl;
-    cout << configOptions << endl;
-    cout << envOptions << endl;
-  }
-  else if (!(vm.count("name") && vm.count("charge") && vm.count("nucleons"))) {
     cout << cmdOptions << endl;
     cout << configOptions << endl;
     cout << envOptions << endl;

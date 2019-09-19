@@ -31,7 +31,7 @@ Particle::Particle(const Particle& orig) {
 
 double Particle::GetLifetime() const {
   double t = 1.e23;
-  double energyThreshold = OptionContainer::GetInstance().GetOption<double>("Cuts.Energy");
+  double energyThreshold = GetOpt(double, "Cuts.Energy");
   for(int i = 0; i < decayChannels.size(); ++i) {
     // Look for decay channels from current excitation state
     if (std::abs(decayChannels[i]->GetParentExcitationEnergy()-currentExcitationEnergy) < energyThreshold) {
@@ -57,7 +57,7 @@ ublas::vector<double> Particle::GetVelocity() const {
 
 std::vector<Particle*> Particle::Decay() {
   double totalIntensity = 0.;
-  double energyThreshold = OptionContainer::GetInstance().GetOption<double>("Cuts.Energy");
+  double energyThreshold = GetOpt(double, "Cuts.Energy");
   for(std::vector<DecayChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
     // Look for decay channels at current excitation level
     if (std::abs(currentExcitationEnergy - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {

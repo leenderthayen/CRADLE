@@ -9,6 +9,9 @@ include_directories(${Boost_INCLUDE_DIRS})
 FIND_PACKAGE(GSL REQUIRED)
 include_directories(${GSL_INCLUDE_DIRS})
 
+find_package(spdlog REQUIRED)
+include_directories(${spdlog_INCLUDE_DIRS})
+
 include_directories(${PROJECT_SOURCE_DIR}/source/include)
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/Templates/CRADLEConfig.h.in" "${PROJECT_BINARY_DIR}/CRADLEConfig.h")
@@ -17,29 +20,19 @@ include_directories("${PROJECT_BINARY_DIR}")
 if (USE_BSG)
 find_package(BSG REQUIRED)
 include_directories(${BSG_INCLUDE_DIRS})
-set(EXTRA_LIBS ${BSG_LIBRARIES} ${EXTRA_LIBS})
+set(EXTRA_LIBS ${EXTRA_LIBS} bsg nme)
 endif()
-
-#Change to local install directory of BSG
-set(BSG_INSTALL_DIR "/Users/leenderthayen/BSG")
-
-include_directories("${BSG_INSTALL_DIR}/include")
 
 file(GLOB sources ${PROJECT_SOURCE_DIR}/source/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/source/include/*.hh)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread -L/usr/local/Cellar/gsl/2.5/lib")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread")
 
 add_executable(CRADLE++ CRADLE++.cc ${sources} ${headers})
-
-set(BSG_LIBRARIES "${BSG_INSTALL_DIR}/lib/nme/libnme.dylib;${BSG_INSTALL_DIR}/lib/bsg/libbsg.dylib")
-message("${BSG_LIBRARIES}")
 
 target_link_libraries(CRADLE++ ${Boost_LIBRARIES})
 target_link_libraries(CRADLE++ ${GSL_LIBRARIES})
 target_link_libraries(CRADLE++ ${EXTRA_LIBS})
-
-message("${GSL_LIBRARY}")
 
 add_custom_command(TARGET CRADLE++
                    POST_BUILD

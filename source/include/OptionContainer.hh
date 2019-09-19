@@ -16,13 +16,13 @@ namespace po = boost::program_options;
  * @param a variable type
  * @param b variable name
  */
-#define GetOpt(a, b) OptionContainer::GetInstance().GetOption<a>(#b)
+#define GetOpt(a, b) OptionContainer::GetInstance().GetOption<a>(b)
 /**
  * Macro to check whether a certain option was present
  *
  * @param a variable name
  */
-#define OptExists(a) OptionContainer::GetInstance().Exists(#a)
+#define OptExists(a) OptionContainer::GetInstance().Exists(a)
 
 class OptionContainer {
   public:
