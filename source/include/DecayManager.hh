@@ -7,7 +7,7 @@
 
 class Particle;
 class DecayMode;
-class SpectrumGenerator;
+class SpectrumGenerator; 
 
 class DecayManager {
   public:
@@ -41,7 +41,6 @@ class DecayManager {
     std::map<const std::string, DecayMode&> registeredDecayModes;
     std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
     //std::vector<Particle*> particleStack;
-    std::map<const std::string, Particle*> registeredParticles;
     std::string filename;
     std::string initStateName;
     double initExcitationEn;

@@ -1,24 +1,24 @@
-#include "DecayMode.hh"
+#include "ReactionMode.hh"
 #include "DecayManager.hh"
-#include "Particle.hh"
+#include "PDS/core/DynamicParticle.hh"
 #include "Utilities.hh"
 #include "OptionContainer.hh"
 #include "SpectrumGenerator.hh"
 #include <string>
 #include <sstream>
 
-void DecayMode::ThreeBodyDecay(ublas::vector<double>& velocity, Particle* finalState1, Particle* finalState2, Particle* finalState3, ublas::vector<double>& dir2, double Q) {
+void ReactionMode::ThreeBodyDecay(ublas::vector<double>& velocity, PDS::core::DynamicParticle* finalState1, PDS::core::DynamicParticle* finalState2, PDS::core::DynamicParticle* finalState3, ublas::vector<double>& dir2, double Q) {
   //Perform decay in CoM frame
-  ublas::vector<double> momentum1 = finalState1->GetMomentum();
+  ublas::vector<double> momentum1 = finalState1->GetFourMomentum();
   ublas::vector<double> momentum2 (4);
   ublas::vector<double> momentum3 (4);
 
   ublas::vector<double> p2 (3);
   double p2Norm = 0.;
 
-  double mass1 = finalState1->GetMass();
-  double mass2 = finalState2->GetMass();
-  double mass3 = finalState3->GetMass();
+  double mass1 = finalState1->GetRestMass();
+  double mass2 = finalState2->GetRestMass();
+  double mass3 = finalState3->GetRestMass();
   ublas::vector<double> p1 = finalState1->Get3Momentum();
 
   double a = mass2*mass2;
@@ -50,20 +50,20 @@ void DecayMode::ThreeBodyDecay(ublas::vector<double>& velocity, Particle* finalS
   //std::cout << "\t" << inner_prod(p1, p2)/p2Norm/c << std::endl;
 
   // Perform Lorentz boost back to lab frame
-  finalState1->SetMomentum(utilities::LorentzBoost(velocity, momentum1));
-  finalState2->SetMomentum(utilities::LorentzBoost(velocity, momentum2));
-  finalState3->SetMomentum(utilities::LorentzBoost(velocity, momentum3));
+  finalState1->SetFourMomentum(utilities::LorentzBoost(velocity, momentum1));
+  finalState2->SetFourMomentum(utilities::LorentzBoost(velocity, momentum2));
+  finalState3->SetFourMomentum(utilities::LorentzBoost(velocity, momentum3));
 
 }
 
-void DecayMode::TwoBodyDecay(ublas::vector<double>& velocity, Particle* finalState1, Particle* finalState2, double Q) {
+void ReactionMode::TwoBodyDecay(ublas::vector<double>& velocity, PDS::core::DynamicParticle* finalState1, PDS::core::DynamicParticle* finalState2, double Q) {
   ublas::vector<double> momentum1 (4);
   ublas::vector<double> momentum2 (4);
 
   ublas::vector<double> dir = utilities::RandomDirection();
 
-  double mass1 = finalState1->GetMass();
-  double mass2 = finalState2->GetMass();
+  double mass1 = finalState1->GetRestMass();
+  double mass2 = finalState2->GetRestMass();
 
   double M = Q + mass1 + mass2;
 
@@ -83,22 +83,22 @@ void DecayMode::TwoBodyDecay(ublas::vector<double>& velocity, Particle* finalSta
   momentum2(3) = p*dir[2];
 
   // Perform Lorentz boost back to lab frame
-  finalState1->SetMomentum(utilities::LorentzBoost(velocity, momentum1));
-  finalState2->SetMomentum(utilities::LorentzBoost(velocity, momentum2));
+  finalState1->SetFourMomentum(utilities::LorentzBoost(velocity, momentum1));
+  finalState2->SetFourMomentum(utilities::LorentzBoost(velocity, momentum2));
 }
 
-std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double daughterExEn) {
-  std::vector<Particle*> finalStates;
+static std::vector<PDS::core::DynamicParticle*> BetaMinus::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+  std::vector<PDS::core::DynamicParticle*> finalStates;
 
   // std::cout << "In BetaMinus Decay " << std::endl;
   // std::cout << "Address: " << initState << std::endl;
   std::ostringstream oss;
   oss << initState->GetCharge()+initState->GetNeutrons() << utilities::atoms[initState->GetCharge()];
   //std::cout << oss.str() << std::endl;
-  Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()+1, initState->GetCharge()+initState->GetNeutrons());
+  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()+1, initState->GetCharge()+initState->GetNeutrons());
   recoil->SetExcitationEnergy(daughterExEn);
-  Particle* e = DecayManager::GetInstance().GetNewParticle("e-");
-  Particle* enu = DecayManager::GetInstance().GetNewParticle("enubar");
+  PDS::core::DynamicParticle* e = DecayManager::GetInstance().GetNewParticle("e-");
+  PDS::core::DynamicParticle* enu = DecayManager::GetInstance().GetParticle("enubar");
 
   // std::cout << "Recoil " << recoil->GetCharge() << " " << recoil->GetNeutrons() << " " << recoil << std::endl;
 
@@ -164,8 +164,8 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   return finalStates;
 }
 
-std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double daughterExEn) {
-  std::vector<Particle*> finalStates;
+static std::vector<PDS::core::DynamicParticle*> BetaPlus::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+  std::vector<PDS::core::DynamicParticle*> finalStates;
 
   double E0 = Q-2*utilities::EMASSC2;
 
@@ -173,10 +173,10 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   //std::cout << "Address: " << initState << std::endl;
   std::ostringstream oss;
   oss << initState->GetCharge()+initState->GetNeutrons() << utilities::atoms[initState->GetCharge()-2];
-  Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-1, initState->GetCharge()+initState->GetNeutrons());
+  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-1, initState->GetCharge()+initState->GetNeutrons());
   recoil->SetExcitationEnergy(daughterExEn);
-  Particle* pos = DecayManager::GetInstance().GetNewParticle("e+");
-  Particle* enubar = DecayManager::GetInstance().GetNewParticle("enu");
+  PDS::core::DynamicParticle* pos = DecayManager::GetInstance().GetNewParticle("e+");
+  PDS::core::DynamicParticle* enubar = DecayManager::GetInstance().GetNewParticle("enu");
 
   oss.str("");
   oss.clear();
@@ -234,12 +234,12 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   return finalStates;
 }
 
-std::vector<Particle*> ConversionElectron::Decay(Particle* initState, double Q, double daughterExEn) {
-  std::vector<Particle*> finalStates;
+static std::vector<PDS::core::DynamicParticle*> ConversionElectron::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+  std::vector<PDS::core::DynamicParticle*> finalStates;
 
   ublas::vector<double> velocity = -initState->GetVelocity();
-  Particle* recoil = DecayManager::GetInstance().GetNewParticle(initState->GetRawName());
-  Particle* e = DecayManager::GetInstance().GetNewParticle("e+");
+  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(initState->GetRawName());
+  PDS::core::DynamicParticle* e = DecayManager::GetInstance().GetNewParticle("e+");
   recoil->SetExcitationEnergy(daughterExEn);
 
   TwoBodyDecay(velocity, recoil, e, Q);
@@ -250,13 +250,13 @@ std::vector<Particle*> ConversionElectron::Decay(Particle* initState, double Q, 
   return finalStates;
 }
 
-std::vector<Particle*> Proton::Decay(Particle* initState, double Q, double daughterExEn) {
-  std::vector<Particle*> finalStates;
+static std::vector<PDS::core::DynamicParticle*> Proton::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+  std::vector<PDS::core::DynamicParticle*> finalStates;
 
   std::ostringstream oss;
   oss << initState->GetCharge()+initState->GetNeutrons() - 1 << utilities::atoms[initState->GetCharge()-2];
-  Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-1, initState->GetCharge()+initState->GetNeutrons()-1);
-  Particle* p = DecayManager::GetInstance().GetNewParticle("p");
+  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-1, initState->GetCharge()+initState->GetNeutrons()-1);
+  PDS::core::DynamicParticle* p = DecayManager::GetInstance().GetNewParticle("p");
   recoil->SetExcitationEnergy(daughterExEn);
 
   ublas::vector<double> velocity = -initState->GetVelocity();
@@ -268,13 +268,13 @@ std::vector<Particle*> Proton::Decay(Particle* initState, double Q, double daugh
   return finalStates;
 }
 
-std::vector<Particle*> Alpha::Decay(Particle* initState, double Q, double daughterExEn) {
-  std::vector<Particle*> finalStates;
+static std::vector<PDS::core::DynamicParticle*> Alpha::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+  std::vector<PDS::core::DynamicParticle*> finalStates;
 
   std::ostringstream oss;
   oss << initState->GetCharge()+initState->GetNeutrons() - 4 << utilities::atoms[initState->GetCharge()-3];
-  Particle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-2, initState->GetCharge()+initState->GetNeutrons()-4);
-  Particle* alpha = DecayManager::GetInstance().GetNewParticle("alpha");
+  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()-2, initState->GetCharge()+initState->GetNeutrons()-4);
+  PDS::core::DynamicParticle* alpha = DecayManager::GetInstance().GetNewParticle("alpha");
   recoil->SetExcitationEnergy(daughterExEn);
 
   ublas::vector<double> velocity = -initState->GetVelocity();
@@ -286,12 +286,12 @@ std::vector<Particle*> Alpha::Decay(Particle* initState, double Q, double daught
   return finalStates;
 }
 
-std::vector<Particle*> Gamma::Decay(Particle* initState, double Q, double daughterExEn) {
-  std::vector<Particle*> finalStates;
+static std::vector<PDS::core::DynamicParticle*> Gamma::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+  std::vector<PDS::core::DynamicParticle*> finalStates;
 
   ublas::vector<double> velocity = -initState->GetVelocity();
-  Particle* recoil = DecayManager::GetInstance().GetNewParticle(initState->GetRawName());
-  Particle* gamma = DecayManager::GetInstance().GetNewParticle("gamma");
+  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(initState->GetRawName());
+  PDS::core::DynamicParticle* gamma = DecayManager::GetInstance().GetNewParticle("gamma");
   recoil->SetExcitationEnergy(daughterExEn);
 
   TwoBodyDecay(velocity, recoil, gamma, Q);
@@ -302,11 +302,11 @@ std::vector<Particle*> Gamma::Decay(Particle* initState, double Q, double daught
   return finalStates;
 }
 
-DecayMode::DecayMode() { }
+ReactionMode::ReactionMode() { }
 
-DecayMode::~DecayMode() { }
+ReactionMode::~ReactionMode() { }
 
-void DecayMode::SetSpectrumGenerator(SpectrumGenerator* sg) {
+void ReactionMode::SetSpectrumGenerator(SpectrumGenerator* sg) {
   spectrumGen = sg;
 }
 

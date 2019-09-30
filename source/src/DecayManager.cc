@@ -95,14 +95,7 @@ vector<vector<double> >* DecayManager::GetDistribution(const string name) {
 }
 
 void DecayManager::RegisterBasicParticles() {
-  RegisterParticle(new Particle("e-", utilities::EMASSC2, -1, 0, 0.5, 0.));
-  RegisterParticle(new Particle("e+", utilities::EMASSC2, 1, 0, 0.5, 0.));
-  RegisterParticle(new Particle("p", utilities::PMASSC2, 1, 0, 0.5, 0.));
-  RegisterParticle(new Particle("n", utilities::NMASSC2, 0, 1, 0.5, 0.));
-  RegisterParticle(new Particle("alpha", utilities::ALPHAMASSC2, 2, 2, 0., 0.));
-  RegisterParticle(new Particle("enu", 0., 0, 0, 0.5, 0.));
-  RegisterParticle(new Particle("enubar", 0., 0, 0, 0.5, 0.));
-  RegisterParticle(new Particle("gamma", 0., 0, 0, 0., 0.));
+  PDS::ParticleFactory::RegisterBasicParticles();
 }
 
 void DecayManager::RegisterBasicDecayModes() {

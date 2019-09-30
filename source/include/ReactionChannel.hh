@@ -1,5 +1,5 @@
-#ifndef DECAYCHANNEL
-#define DECAYCHANNEL
+#ifndef REACTIONCHANNEL
+#define REACTIONCHANNEL
 
 class Particle;
 class DecayMode;
@@ -9,9 +9,9 @@ class DecayMode;
 
 using std::string;
 
-class DecayChannel {
+class ReactionChannel {
   public:
-    DecayChannel(string, DecayMode*, double, double, double, double, double);
+    ReactionChannel(string, double, double, double, double, double);
 
     inline double GetIntensity() { return intensity; };
     inline double GetQValue() { return Q; };
@@ -20,7 +20,6 @@ class DecayChannel {
     inline double GetParentExcitationEnergy() { return parentExcitationEnergy; };
     inline string GetModeName() { return modeName; };
 
-    std::vector<Particle*> Decay(Particle*);
   private:
     double daughterExcitationEnergy;
     double parentExcitationEnergy;
@@ -28,6 +27,10 @@ class DecayChannel {
     double Q;
     double lifetime;
     string modeName;
-    DecayMode* decayMode;
 };
+
+inline ReactionChannel::ReactionChannel(string md, double q, double i, double t, double pExEn, double dExEn):
+modeName(md), decayMode(dm), Q(q), intensity(i), lifetime(t), parentExcitationEnergy(pExEn), daughterExcitationEnergy(dExEn) {
+}
+
 #endif
