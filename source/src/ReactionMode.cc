@@ -93,18 +93,19 @@ static std::vector<PDS::core::DynamicParticle*> BetaMinus::Decay(PDS::core::Dyna
   // std::cout << "In BetaMinus Decay " << std::endl;
   // std::cout << "Address: " << initState << std::endl;
   std::ostringstream oss;
-  oss << initState->GetCharge()+initState->GetNeutrons() << utilities::atoms[initState->GetCharge()];
+  oss << initState->GetParticleDefinition()->GetA() << PDS::util::GetAtomName(initState->GetParticleDefinition()->GetZ());
   //std::cout << oss.str() << std::endl;
-  PDS::core::DynamicParticle* recoil = DecayManager::GetInstance().GetNewParticle(oss.str(), initState->GetCharge()+1, initState->GetCharge()+initState->GetNeutrons());
+  //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
+  PDS::core::DynamicParticle* recoil = PDS::ParticleFactory::CreateNewDynamicParticle(PDS::util::GetAtomName(initState->GetParticleDefinition()->GetZ()+1));
   recoil->SetExcitationEnergy(daughterExEn);
-  PDS::core::DynamicParticle* e = DecayManager::GetInstance().GetNewParticle("e-");
-  PDS::core::DynamicParticle* enu = DecayManager::GetInstance().GetParticle("enubar");
+  PDS::core::DynamicParticle* e = PDS::ParticleFactory::CreateNewDynamicParticle("e-");
+  PDS::core::DynamicParticle* enu = PDS::ParticleFactory::CreateNewDynamicParticle("enubar");
 
   // std::cout << "Recoil " << recoil->GetCharge() << " " << recoil->GetNeutrons() << " " << recoil << std::endl;
 
   oss.str("");
   oss.clear();
-  oss << "BetaMinus:Z" << recoil->GetCharge() << "A" << recoil->GetCharge() + recoil->GetNeutrons() << "Q" << Q;
+  oss << "BetaMinus:Z" << recoil->GetParticleDefinition()->GetZ() << "A" << recoil->GetParticleDefinition()->GetA() << "Q" << Q;
   //Work in the COM frame
   ublas::vector<double> elFourMomentum (4);
 

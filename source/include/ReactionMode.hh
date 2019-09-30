@@ -8,7 +8,12 @@
 
 class Particle;
 class SpectrumGenerator;
-class DynamicParticle;
+
+namespace PDS {
+  namespace core {
+    class DynamicParticle;
+  }
+}
 
 namespace ublas = boost::numeric::ublas;
 
