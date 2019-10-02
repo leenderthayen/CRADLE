@@ -14,8 +14,6 @@ class SpectrumGenerator;
 
 namespace ublas = boost::numeric::ublas;
 
-enum class ReactionModeNames {BetaMinus, BetaPlus, InternalConversion, Proton, Alpha, Gamma};
-
 class ReactionMode{
   public:
     virtual static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double, SpectrumGenerator*) = 0;

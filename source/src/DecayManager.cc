@@ -4,7 +4,6 @@
 #include "Particle.hh"
 #include "DecayMode.hh"
 #include "SpectrumGenerator.hh"
-#include <boost/progress.hpp>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -16,23 +15,21 @@ using namespace std;
 
 DecayManager::~DecayManager() { }
 
-void DecayManager::Initialise(ConfigOptions _configOptions) {
-  configOptions = _configOptions;
+void DecayManager::Initialise(ConfigOptions configOptions) {
   cout << "Initialising..." << endl;
-  filename = configOptions.cmdOptions.Output;
-  initStateName = configOptions.cmdOptions.Name;
-  initExcitationEn = configOptions.cmdOptions.Energy;
-  NRTHREADS = configOptions.cmdOptions.Threads;
+  initStateName = configOptions.nuclearOptions.Name;
+  initExcitationEn = configOptions.nuclearOptions.Energy;
+  filename = configOptions.General.Output;
 
   PDS::ParticleFactory::RegisterBasicParticles();
-  PDS::factory::GenerateNucleus(initStateName, configOptions.cmdOptions.Z, configOptions.cmdOptions.A);
+  PDS::factory::GenerateNucleus(initStateName, configOptions.nuclearOptions.Z, configOptions.nuclearOptions.A);
 }
 
 void DecayManager::SetReactionEngine(ReactionEngine* _reactionEngine){
   reactionEngine = _reactionEngine;
 }
 
-bool DecayManager::MainLoop(int nrParticles) {
+bool DecayManager::MainLoop(int nrParticles, int nThreads) {
   cout << "Starting Main Loop " << endl;
   ofstream fileStream;
   fileStream.open(filename.c_str());
@@ -41,19 +38,20 @@ bool DecayManager::MainLoop(int nrParticles) {
   boost::progress_display show_progress(nrParticles);
   boost::progress_timer t;
   fileStream << GenerateEvent(0);
-  for (int i = 1; i < nrParticles; i+=NRTHREADS) {
-    // cout << "LOOP NR " << i+1 << endl;
-    int threads = std::min(NRTHREADS, nrParticles-i);
-    std::future<std::string> f[threads];
-    for (int t = 0; t < threads; t++) {
-      f[t] = std::async(std::launch::async, &DecayManager::GenerateEvent, this, i+t);
-    }
+  int Q = nrParticles/nThreads;
+	int R = nrParticles%nThreads;
 
-    for (int t = 0; t < threads; t++) {
-      fileStream << f[t].get();
-      ++show_progress;
-    }
+  std::future<std::string> f[nThreads];
+  for (int t = 0; t < nThreads; t++) {
+    if(t==nThreads-1) Q+=R;
+    f[t] = std::async(std::launch::async, &DecayManager::GenerateEvent, this, i+t);
   }
+
+  for (int t = 0; t < threads; t++) {
+    fileStream << f[t].get();
+    ++show_progress;
+  }
+
   std::cout << "Done! Time taken: ";
   fileStream.flush();
   fileStream.close();

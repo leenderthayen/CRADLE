@@ -17,21 +17,21 @@ void parse(CLI::App& app, int argc, const char** argv) {
 
 void SetCmdOptions (CLI::App& app, CmdOptions& cmdOptions) {
 
-  CLI::App* cmd = app.add_subcommand("CmdOptions","This is the command-line options command.")->ignore_case();
-  cmd.add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
-  cmd.add_option("-z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
-  cmd.add_option("-n,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
-  cmd.add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
-  cmd.add_option("-l,--loop", cmdOptions.Loop, "Number of events to generate.");
-  cmd.add_option("-t,--threads", cmdOptions.Threads, "Number of threads (2 x #CPU).");
-  cmd.add_option("-o,--output", cmdOptions.Output, "Name of the output file.");
-  cmd.add_option("-u,--usebsg", cmdOptions.Usebsg, "Choose whether or not to use BSG.");
+  CLI::App* cmd = app.add_subcommand("NuclearOptions","This is the nuclear options command.")->ignore_case();
+  cmd->add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
+  cmd->add_option("-z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
+  cmd->add_option("-n,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
+  cmd->add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
 
 }
 
 void SetGeneralOptions (CLI::App& app, General& general) {
   CLI::App* comp = app.add_subcommand("General", "This is the general subcommand")->ignore_case();
-  comp->add_option("--Verbosity", general.Verbosity, "Verbosity settings");
+  comp->add_option("-v,--Verbosity", general.Verbosity, "Verbosity settings");
+  comp->add_option("-l,--loop", cmdOptions.Loop, "Number of events to generate.");
+  comp->add_option("-t,--threads", cmdOptions.Threads, "Number of threads (2 x #CPU).");
+  comp->add_option("-o,--output", cmdOptions.Output, "Name of the output file.");
+  comp->add_option("-u,--usebsg", cmdOptions.Usebsg, "Choose whether or not to use BSG.");
 
 }
 

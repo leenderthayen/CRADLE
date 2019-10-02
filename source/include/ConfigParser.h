@@ -6,19 +6,19 @@
 
 #include <string>
 
-struct CmdOptions {
+struct NuclearOptions {
   std::string Name = "";
   int Charge = 1;
   int Nucleons = 1;
   double Energy = 0.0;
-  int Loop = 1;
-  int Threads = 1;
-  std::string Output = "output.txt";
-  bool Usebsg = true;
 };
 
 struct General {
   int Verbosity = 0;
+  int Loop = 1;
+  int Threads = 1;
+  std::string Output = "output.txt";
+  bool Usebsg = true;
 };
 
 struct CouplingConstants {
@@ -48,7 +48,7 @@ struct EnvOptions {
 };
 
 struct ConfigOptions{
-  CmdOptions cmdOptions;
+  NuclearOptions nuclearOptions;
   CouplingConstants couplingConstants;
   Cuts cuts;
   BetaDecay betaDecay;

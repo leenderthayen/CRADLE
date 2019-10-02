@@ -39,8 +39,6 @@ class DecayManager {
     std::string filename;
     std::string initStateName;
     double initExcitationEn;
-    int NRTHREADS;
     ReactionEngine* reactionEngine;
-    ConfigOptions configOptions;
 };
 #endif

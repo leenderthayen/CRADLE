@@ -115,7 +115,7 @@ std::vector<PDS::core::DynamicParticle *> ReactionEngine::Decay(PDS::core::Dynam
     index++;
   }
 
-  auto it = registeredReactionModeMap.find( decayChannels[index]->GetReactionModeName());
+  auto it = registeredReactionModeMap.find(decayChannels[index]->GetReactionModeName());
   if (it != registeredReactionModeMap.end()){
     auto it2 = registeredSpectrumGeneratorMap.find(decayChannels[index]->GetReactionModeName());
     if(it2 != registeredSpectrumGeneratorMap.end()){

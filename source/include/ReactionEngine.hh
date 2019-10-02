@@ -7,10 +7,10 @@
 namespace PDS {
   namespace core {
     class DynamicParticle;
+    enum class ReactionModeNames;
   }
 }
 struct Cuts;
-enum class ReactionModeNames;
 
 typedef std::vector<PDS::core::DynamicParticle*> (*activator)(PDS::core::DynamicParticle*, double, double, SpectrumGenerator*);
 typedef std::map<ReactionModeNames, activator> reaction_mode_map;
