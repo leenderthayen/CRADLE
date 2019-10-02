@@ -6,13 +6,22 @@
 
 #include "CRADLEConfig.h"
 
-class Particle;
+namespace PDS{
+  namespace core{
+    class DynamicParticle;
+  }
+}
 
 class SpectrumGenerator {
   public:
-    virtual std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double) = 0;
+    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double) = 0;
     SpectrumGenerator();
     virtual ~SpectrumGenerator();
+    void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
+    std::vector<std::vector<double> >* GetDistribution(const std::string);
+
+  private:
+    std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
 };
 
 class DeltaSpectrumGenerator: public SpectrumGenerator {
@@ -21,7 +30,7 @@ class DeltaSpectrumGenerator: public SpectrumGenerator {
       static DeltaSpectrumGenerator instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
 
   protected:
     DeltaSpectrumGenerator();
@@ -35,7 +44,7 @@ class SimpleBetaDecay: public SpectrumGenerator {
       static SimpleBetaDecay instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
 
   protected:
     SimpleBetaDecay();
@@ -50,13 +59,12 @@ class BSG: public SpectrumGenerator {
       static BSG instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
 
   protected:
     BSG();
     BSG(BSG const& copy);
     BSG& operator=(BSG const& copy);
-    void WriteINIFile(const std::string, Particle*, Particle*, double);
 };
 #endif // End of USE_BSG if
 

@@ -2,12 +2,7 @@
 #define REACTIONMODE
 
 #include <vector>
-#include <boost/numeric/ublas/vector.hpp>
 #include <string>
-
-
-class Particle;
-class SpectrumGenerator;
 
 namespace PDS {
   namespace core {
@@ -15,25 +10,25 @@ namespace PDS {
   }
 }
 
+class SpectrumGenerator;
+
 namespace ublas = boost::numeric::ublas;
+
+enum class ReactionModeNames {BetaMinus, BetaPlus, InternalConversion, Proton, Alpha, Gamma};
 
 class ReactionMode{
   public:
-    virtual static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double) = 0;
+    virtual static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double, SpectrumGenerator*) = 0;
     ReactionMode();
     virtual ~ReactionMode();
 
-    void SetSpectrumGenerator(SpectrumGenerator*);
 
   protected:
-    static void ThreeBodyDecay(ublas::vector<double>&, Particle*, Particle*, Particle*, ublas::vector<double>&, double);
-    static void TwoBodyDecay(ublas::vector<double>&, Particle*, Particle*, double);
-    SpectrumGenerator* spectrumGen;
 };
 
 class BetaMinus: public ReactionMode {
   public:
-    static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
 
   protected:
     BetaMinus();
@@ -42,7 +37,7 @@ class BetaMinus: public ReactionMode {
 
 class BetaPlus: public ReactionMode {
   public:
-    static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
 
   protected:
     BetaPlus();
@@ -50,7 +45,7 @@ class BetaPlus: public ReactionMode {
 
 class ConversionElectron: public ReactionMode {
     public:
-    static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
 
   protected:
     ConversionElectron();
@@ -58,7 +53,7 @@ class ConversionElectron: public ReactionMode {
 
 class Proton: public ReactionMode {
     public:
-    static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
 
   protected:
     Proton();
@@ -66,7 +61,7 @@ class Proton: public ReactionMode {
 
 class Alpha: public ReactionMode {
     public:
-    static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
 
   protected:
     Alpha();
@@ -74,7 +69,7 @@ class Alpha: public ReactionMode {
 
 class Gamma: public ReactionMode {
     public:
-    static std::vector<DynamicParticle*> activate(DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
 
   protected:
     Gamma();

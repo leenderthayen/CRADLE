@@ -2,92 +2,11 @@
 #include "DecayManager.hh"
 #include "PDS/core/DynamicParticle.hh"
 #include "Utilities.hh"
-#include "OptionContainer.hh"
 #include "SpectrumGenerator.hh"
 #include <string>
 #include <sstream>
 
-void ReactionMode::ThreeBodyDecay(ublas::vector<double>& velocity, PDS::core::DynamicParticle* finalState1, PDS::core::DynamicParticle* finalState2, PDS::core::DynamicParticle* finalState3, ublas::vector<double>& dir2, double Q) {
-  //Perform decay in CoM frame
-  ublas::vector<double> momentum1 = finalState1->GetFourMomentum();
-  ublas::vector<double> momentum2 (4);
-  ublas::vector<double> momentum3 (4);
-
-  ublas::vector<double> p2 (3);
-  double p2Norm = 0.;
-
-  double mass1 = finalState1->GetRestMass();
-  double mass2 = finalState2->GetRestMass();
-  double mass3 = finalState3->GetRestMass();
-  ublas::vector<double> p1 = finalState1->Get3Momentum();
-
-  double a = mass2*mass2;
-  double b = mass3*mass3;
-  double c = utilities::GetNorm(p1);
-  double d = Q + mass1 + mass2 + mass3 - momentum1(0);
-  double e = inner_prod(p1, dir2)/c;
-
-  double first = 1./2./(c*c*e*e-d*d);
-  double second = a*a*d*d-2*a*b*d*d+4.*a*c*c*d*d*e*e-2.*a*c*c*d*d-2.*a*d*d*d*d+b*b*d*d+2*b*c*c*d*d-2.*b*d*d*d*d+c*c*c*c*d*d-2.*c*c*d*d*d*d+d*d*d*d*d*d;
-  double third = a*c*e-b*c*e-c*c*c*e+c*d*d*e;
-
-  p2Norm = first*(-std::sqrt(second)+third);
-  p2 = p2Norm*dir2;
-
-  ublas::vector<double> p3 = -(p1+p2);
-  double p3Norm = utilities::GetNorm(p3);
-
-  momentum2(0) = std::sqrt(a+p2Norm*p2Norm);
-  momentum2(1) = p2(0);
-  momentum2(2) = p2(1);
-  momentum2(3) = p2(2);
-
-  momentum3(0) = std::sqrt(b+p3Norm*p3Norm);
-  momentum3(1) = p3(0);
-  momentum3(2) = p3(1);
-  momentum3(3) = p3(2);
-
-  //std::cout << "\t" << inner_prod(p1, p2)/p2Norm/c << std::endl;
-
-  // Perform Lorentz boost back to lab frame
-  finalState1->SetFourMomentum(utilities::LorentzBoost(velocity, momentum1));
-  finalState2->SetFourMomentum(utilities::LorentzBoost(velocity, momentum2));
-  finalState3->SetFourMomentum(utilities::LorentzBoost(velocity, momentum3));
-
-}
-
-void ReactionMode::TwoBodyDecay(ublas::vector<double>& velocity, PDS::core::DynamicParticle* finalState1, PDS::core::DynamicParticle* finalState2, double Q) {
-  ublas::vector<double> momentum1 (4);
-  ublas::vector<double> momentum2 (4);
-
-  ublas::vector<double> dir = utilities::RandomDirection();
-
-  double mass1 = finalState1->GetRestMass();
-  double mass2 = finalState2->GetRestMass();
-
-  double M = Q + mass1 + mass2;
-
-  double p = 1./(2.*M)*std::sqrt((M*M-std::pow(mass1-mass2, 2.))*(M*M-std::pow(mass1+mass2, 2.)));
-
-  double energy1 = std::sqrt(mass1*mass1+p*p);
-  double energy2 = std::sqrt(mass2*mass2+p*p);
-
-  momentum1(0) = energy1;
-  momentum1(1) = -p*dir[0];
-  momentum1(2) = -p*dir[1];
-  momentum1(3) = -p*dir[2];
-
-  momentum2(0) = energy2;
-  momentum2(1) = p*dir[0];
-  momentum2(2) = p*dir[1];
-  momentum2(3) = p*dir[2];
-
-  // Perform Lorentz boost back to lab frame
-  finalState1->SetFourMomentum(utilities::LorentzBoost(velocity, momentum1));
-  finalState2->SetFourMomentum(utilities::LorentzBoost(velocity, momentum2));
-}
-
-static std::vector<PDS::core::DynamicParticle*> BetaMinus::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+static std::vector<PDS::core::DynamicParticle*> BetaMinus::activate(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
   std::vector<PDS::core::DynamicParticle*> finalStates;
 
   // std::cout << "In BetaMinus Decay " << std::endl;
@@ -165,7 +84,7 @@ static std::vector<PDS::core::DynamicParticle*> BetaMinus::Decay(PDS::core::Dyna
   return finalStates;
 }
 
-static std::vector<PDS::core::DynamicParticle*> BetaPlus::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+static std::vector<PDS::core::DynamicParticle*> BetaPlus::activate(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
   std::vector<PDS::core::DynamicParticle*> finalStates;
 
   double E0 = Q-2*utilities::EMASSC2;
@@ -235,7 +154,7 @@ static std::vector<PDS::core::DynamicParticle*> BetaPlus::Decay(PDS::core::Dynam
   return finalStates;
 }
 
-static std::vector<PDS::core::DynamicParticle*> ConversionElectron::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+static std::vector<PDS::core::DynamicParticle*> ConversionElectron::activate(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
   std::vector<PDS::core::DynamicParticle*> finalStates;
 
   ublas::vector<double> velocity = -initState->GetVelocity();
@@ -251,7 +170,7 @@ static std::vector<PDS::core::DynamicParticle*> ConversionElectron::Decay(PDS::c
   return finalStates;
 }
 
-static std::vector<PDS::core::DynamicParticle*> Proton::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+static std::vector<PDS::core::DynamicParticle*> Proton::activate(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
   std::vector<PDS::core::DynamicParticle*> finalStates;
 
   std::ostringstream oss;
@@ -269,7 +188,7 @@ static std::vector<PDS::core::DynamicParticle*> Proton::Decay(PDS::core::Dynamic
   return finalStates;
 }
 
-static std::vector<PDS::core::DynamicParticle*> Alpha::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+static std::vector<PDS::core::DynamicParticle*> Alpha::activate(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
   std::vector<PDS::core::DynamicParticle*> finalStates;
 
   std::ostringstream oss;
@@ -287,7 +206,7 @@ static std::vector<PDS::core::DynamicParticle*> Alpha::Decay(PDS::core::DynamicP
   return finalStates;
 }
 
-static std::vector<PDS::core::DynamicParticle*> Gamma::Decay(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
+static std::vector<PDS::core::DynamicParticle*> Gamma::activate(PDS::core::DynamicParticle* initState, double Q, double daughterExEn) {
   std::vector<PDS::core::DynamicParticle*> finalStates;
 
   ublas::vector<double> velocity = -initState->GetVelocity();
@@ -306,10 +225,6 @@ static std::vector<PDS::core::DynamicParticle*> Gamma::Decay(PDS::core::DynamicP
 ReactionMode::ReactionMode() { }
 
 ReactionMode::~ReactionMode() { }
-
-void ReactionMode::SetSpectrumGenerator(SpectrumGenerator* sg) {
-  spectrumGen = sg;
-}
 
 BetaMinus::BetaMinus() { }
 
