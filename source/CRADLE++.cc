@@ -1,15 +1,10 @@
 #include "DecayManager.hh"
-#include "OptionContainer.hh"
 #include "SpectrumGenerator.hh"
 #include <iostream>
 #include <string>
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
 
 #include "CRADLEConfig.h"
 
-namespace po = boost::program_options;
 
 using std::cout;
 using std::endl;
@@ -27,7 +22,6 @@ void ShowInfo() {
 int main (int argc, char* argv[]) {
   ShowInfo();
 
-  OptionContainer::GetInstance(argc, argv);
 
   if (!(OptExists("config") && OptExists("name") && OptExists("charge") && OptExists("nucleons"))) {
     cout << "Specify configuration file, isotope name, charge and number of nucleons. Use the --help option for more documentation." << endl;

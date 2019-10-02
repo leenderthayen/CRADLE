@@ -14,6 +14,7 @@ namespace PDS {
 class ReactionMode;
 class SpectrumGenerator;
 class ReactionEngine;
+struct ConfigOptions;
 
 class DecayManager {
   public:
@@ -24,18 +25,15 @@ class DecayManager {
 
     ~DecayManager();
 
-    bool Initialise(std::string, int, int, double, std::string, int);
+    void Initialise(ConfigOptions);
     bool MainLoop(int);
 
-  protected:
-    virtual void SetReactionEngine(ReactionEngine* );
+    void SetReactionEngine(ReactionEngine* );
 
   private:
     DecayManager() {};
     DecayManager(DecayManager const&);
     void operator=(DecayManager const&);
-
-    bool InitializeOptionsFromConfigFile(std::string);
 
     //std::vector<Particle*> particleStack;
     std::string filename;

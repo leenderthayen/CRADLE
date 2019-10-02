@@ -3,7 +3,6 @@
 #include "DecayChannel.hh"
 #include "Particle.hh"
 #include "DecayMode.hh"
-#include "OptionContainer.hh"
 #include "SpectrumGenerator.hh"
 #include <boost/progress.hpp>
 #include <fstream>
@@ -17,30 +16,20 @@ using namespace std;
 
 DecayManager::~DecayManager() { }
 
-
-void DecayManager::RegisterBasicParticles() {
-  PDS::ParticleFactory::RegisterBasicParticles();
-}
-
-
-bool DecayManager::Initialise(string name, int Z, int A,
-                              double excitationEnergy, string _filename, int threads) {
+void DecayManager::Initialise(ConfigOptions _configOptions) {
+  configOptions = _configOptions;
   cout << "Initialising..." << endl;
-  filename = _filename;
-  initStateName = name;
-  initExcitationEn = excitationEnergy;
-  NRTHREADS = threads;
+  filename = configOptions.cmdOptions.Output;
+  initStateName = configOptions.cmdOptions.Name;
+  initExcitationEn = configOptions.cmdOptions.Energy;
+  NRTHREADS = configOptions.cmdOptions.Threads;
 
-  return PDS::factory::GenerateNucleus(name, Z, A);
-  PDS::core::DynamicParticle
+  PDS::ParticleFactory::RegisterBasicParticles();
+  PDS::factory::GenerateNucleus(initStateName, configOptions.cmdOptions.Z, configOptions.cmdOptions.A);
 }
 
-bool DecayManager::InitializeOptionsFromConfigFile(std::string filename){
-  configOptions = ParseConfigFile(filename);
-}
-
-void DecayManager::SetReactionEngine(){
-  reactionEngine = new ReactionEngine();
+void DecayManager::SetReactionEngine(ReactionEngine* _reactionEngine){
+  reactionEngine = _reactionEngine;
 }
 
 bool DecayManager::MainLoop(int nrParticles) {

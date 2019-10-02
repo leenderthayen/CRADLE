@@ -2,11 +2,12 @@
 
 #include "CLI11.hpp"
 
-namespace NME {
-  void parse(CLI::App& app) {
-    int argc = 1;
-    char* argv[argc] = {"coupling"};
-
+void parse(CLI::App& app, int argc, const char** argv) {
+    if (argc == 0) {
+      argc = 1;
+      const char* _argv[1] = {"coupling"};
+      argv = _argv;
+    }
     try {
       app.parse(argc, argv);
     } catch (const CLI::ParseError &e) {
@@ -14,111 +15,73 @@ namespace NME {
     }
   }
 
-  CmdOptions ParseCmdOptions (std::string filename) {
-    CmdOptions cmdOptions;
+void SetCmdOptions (CLI::App& app, CmdOptions& cmdOptions) {
 
-    CLI::App app{"Command-line Options"};
-    app.add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
-    app.add_option("-z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
-    app.add_option("-n,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
-    app.add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
-    app.add_option("-l,--loop", cmdOptions.Loop, "Number of events to generate.");
-    app.add_option("-t,--threads", cmdOptions.Threads, "Number of threads (2 x #CPU).");
-    app.add_option("-o,--output", cmdOptions.Output, "Name of the output file.");
-    app.add_option("-u,--usebsg", cmdOptions.Usebsg, "Choose whether or not to use BSG.");
+  CLI::App* cmd = app.add_subcommand("CmdOptions","This is the command-line options command.")->ignore_case();
+  cmd.add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
+  cmd.add_option("-z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
+  cmd.add_option("-n,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
+  cmd.add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
+  cmd.add_option("-l,--loop", cmdOptions.Loop, "Number of events to generate.");
+  cmd.add_option("-t,--threads", cmdOptions.Threads, "Number of threads (2 x #CPU).");
+  cmd.add_option("-o,--output", cmdOptions.Output, "Name of the output file.");
+  cmd.add_option("-u,--usebsg", cmdOptions.Usebsg, "Choose whether or not to use BSG.");
 
-    parse(app);
+}
 
-    return cmdOptions;
-  }
+void SetGeneralOptions (CLI::App& app, General& general) {
+  CLI::App* comp = app.add_subcommand("General", "This is the general subcommand")->ignore_case();
+  comp->add_option("--Verbosity", general.Verbosity, "Verbosity settings");
 
-  General ParseGeneralOptions (std::string filename) {
-    General general;
+}
 
-    CLI::App app{"General options"};
-    app.allow_config_extras(true);
-    app.set_config("-c", filename);
-    CLI::App* comp = app.add_subcommand("General", "This is the general subcommand");
-    comp->add_option("--Verbosity", general.Verbosity, "Verbosity settings");
+void SetCouplingConstants (CLI::App& app, CouplingConstants& couplingConstants) {
+  CLI::App* coupling = app.add_subcommand("Coupling", "This is the coupling subcommand")->ignore_case();
+  coupling->add_option("--CV", couplingConstants.CV, "Vector coupling constant.");
+  coupling->add_option("--CT", couplingConstants.CT, "Tensor coupling constant.");
+  coupling->add_option("--CS", couplingConstants.CS, "Scalar coupling constant.");
+  coupling->add_option("--CA", couplingConstants.CA, "Axial coupling constant.");
 
-    parse(app);
+}
 
-    return general;
-  }
+void SetCuts (CLI::App& app, Cuts& cuts) {
+  CLI::App* comp = app.add_subcommand("Cuts", "This is the cuts subcommand")->ignore_case();
+  comp->add_option("--Distance", cuts.Distance, "");
+  comp->add_option("--Lifetime", cuts.Lifetime, "");
+  comp->add_option("--Energy", cuts.Energy, "");
 
-  CouplingConstants ParseCouplingConstants (std::string filename) {
-    CouplingConstants couplingConstants;
+}
 
-    CLI::App app{"Coupling constants"};
-    app.allow_config_extras(true);
-    app.set_config("-c", filename);
-    CLI::App* coupling = app.add_subcommand("Coupling", "This is the coupling subcommand");
-    coupling->add_option("--CV", couplingConstants.CV, "Vector coupling constant.");
-    coupling->add_option("--CT", couplingConstants.CT, "Tensor coupling constant.");
-    coupling->add_option("--CS", couplingConstants.CS, "Scalar coupling constant.");
-    coupling->add_option("--CA", couplingConstants.CA, "Axial coupling constant.");
+void SetBetaDecayOptions (CLI::App& app, BetaDecay& betaDecay) {
+  CLI::App* comp = app.add_subcommand("BetaDecay", "This is the beta decay subcommand")->ignore_case();
+  comp->add_option("--Default", betaDecay.Default, "");
+  comp->add_option("--FermiFunction", betaDecay.FermiFunction, "");
+  comp->add_option("--PolarisationX", betaDecay.PolarisationX, "");
+  comp->add_option("--PolarisationY", betaDecay.PolarisationY, "");
+  comp->add_option("--PolarisationZ", betaDecay.PolarisationZ, "");
 
-    parse(app);
+}
 
-    return couplingConstants;
-  }
+void SetEnvironmentOptions (CLI::App& app, EnvOptions& envOptions) {
+  app.add_option("--Gammadata", envOptions.Gammadata, "")->envname("Gammadata");
+  app.add_option("--Radiationdata", envOptions.Radiationdata, "")->envname("Radiationdata");
 
-  Cuts ParseCuts (std::string filename) {
-    Cuts cuts;
+}
 
-    CLI::App app{"Cuts"};
-    app.allow_config_extras(true);
-    app.set_config("-c", filename);
-    CLI::App* comp = app.add_subcommand("Cuts", "This is the cuts subcommand");
-    comp->add_option("--Distance", cuts.Distance, "");
-    comp->add_option("--Lifetime", cuts.Lifetime, "");
-    comp->add_option("--Energy", cuts.Energy, "");
+ConfigOptions ParseOptions(std::string filename, int argc, const char** argv) {
+  ConfigOptions configOptions;
 
-    parse(app);
+  CLI::App app{"CRADLE++ App"};
+  app.allow_extras(true);
+  app.allow_config_extras(true);
+  app.set_config("-c", filename);
 
-    return cuts;
-  }
+  SetCmdOptions(app,configOptions.cmdOptions);
+  SetGeneralOptions(app,configOptions.general);
+  SetCouplingConstants(app,configOptions.couplingConstants);
+  SetCuts(app,configOptions.cuts);
+  SetBetaDecayOptions(app,configOptions.betaDecay);
+  SetEnvironmentOptions(app,configOptions.envOptions ;
 
-  BetaDecay ParseBetaDecayOptions (std::string filename) {
-    BetaDecay betaDecay;
-
-    CLI::App app{"BetaDecay"};
-    app.allow_config_extras(true);
-    app.set_config("-c", filename);
-    CLI::App* comp = app.add_subcommand("BetaDecay", "This is the beta decay subcommand");
-    comp->add_option("--Default", betaDecay.Default, "");
-    comp->add_option("--FermiFunction", betaDecay.FermiFunction, "");
-    comp->add_option("--PolarisationX", betaDecay.PolarisationX, "");
-    comp->add_option("--PolarisationY", betaDecay.PolarisationY, "");
-    comp->add_option("--PolarisationZ", betaDecay.PolarisationZ, "");
-
-    parse(app);
-
-    return betaDecay;
-  }
-
-  EnvOptions ParseEnvironmentOptions (std::string filename) {
-    EnvOptions envOptions;
-
-    CLI::App app{"EnvOptions"};
-
-    app.add_option("--Gammadata", envOptions.Gammadata, "")->envname("Gammadata");
-    app.add_option("--Radiationdata", envOptions.Radiationdata, "")->envname("Radiationdata");
-    parse(app);
-
-    return envOptions;
-  }
-
-  ConfigOptions ParseConfigFile(std::string filename) {
-    ConfigOptions configOptions;
-
-    configOptions.cmdOptions = ParseCmdOptions(filename);
-    configOptions.general = ParseGeneralOptions(filename);
-    configOptions.couplingConstants = ParseCouplingConstants(filename);
-    configOptions.cuts = ParseCuts(filename);
-    configOptions.betaDecay = ParseBetaDecayOptions(filename);
-    configOptions.envOptions = ParseEnvironmentOptions(filename);
-
-    return configOptions;
-  }
-}//end of NME namespace
+  return configOptions;
+}

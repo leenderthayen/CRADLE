@@ -1,9 +1,19 @@
 #include "ReactionEngine.hh"
 #include "PDS/core/DynamicParticle.h"
+#include "PDS/core/ReactionChannel.h"
 #include "ReactionMode.hh"
 #include "SpectrumGenerator.hh"
 
-ReactionEngine::ReactionEngine(std::vector<DynamicParticle *> _dynamicParticles) : dynamicParticles(_dynamicParticles){}
+#include <stdlib.h>
+#include <stdexcept>
+#include <cmath>
+
+std::default_random_engine ReactionEngine::randomGen;
+
+ReactionEngine::ReactionEngine(Cuts _cuts) : cuts(_cuts){
+  RegisterBasicSpectrumGenerators();
+  RegisterBasicReactionModes();
+}
 
 ReactionEngine::~ReactionEngine(){}
 
@@ -16,7 +26,7 @@ void ReactionEngine::RegisterSpectrumGenerator(ReactionModeNames modeName, Spect
   }
 }
 
-void ReactionEngine::RegisterSpectrumGenerators() {
+void ReactionEngine::RegisterBasicSpectrumGenerators() {
   RegisterSpectrumGenerator(ReactionModeNames::Proton, DeltaSpectrumGenerator::GetInstance());
   RegisterSpectrumGenerator(ReactionModeNames::Alpha, DeltaSpectrumGenerator::GetInstance());
   RegisterSpectrumGenerator(ReactionModeNames::Gamma, DeltaSpectrumGenerator::GetInstance());
@@ -34,7 +44,7 @@ void ReactionEngine::RegisterReactionMode(ReactionModeNames modeName, activator 
   }
 }
 
-void ReactionEngine::RegisterReactionModes(){
+void ReactionEngine::RegisterBasicReactionModes(){
   RegisterReactionMode(ReactionModeNames::Proton, &Proton::activate);
   RegisterReactionMode(ReactionModeNames::Alpha, &Alpha::activate);
   RegisterReactionMode(ReactionModeNames::Gamma, &Gamma::activate);
@@ -43,22 +53,22 @@ void ReactionEngine::RegisterReactionModes(){
   RegisterReactionMode(ReactionModeNames::BetaMinus, &BetaMinus::activate);
 }
 
-std::string ReactionEngine::GenerateEvent(int eventNr, double initExcitationEn) {
+std::string ReactionEngine::GenerateEvent(int eventNr, std::string initStateName, double initExcitationEn) {
   double time = 0.;
   ostringstream eventDataSS;
   std::vector<PDS::core::DynamicParticle*> particleStack;
   PDS::core::DynamicParticle* ini = PDS::ParticleFactory::CreateNewDynamicParticle(initStateName,initExcitationEn);
   particleStack.push_back(ini);
   while (!particleStack.empty()) {
-    PDS::core::DynamicParticle* p = particleStack.back();
+    PDS::core::DynamicParticle* dp = particleStack.back();
     //cout << "Decaying particle " << p->GetName() << endl;
     vector<PDS::core::DynamicParticle*> finalStates;
     //TODO: add similar method in PDS
-    double decayTime = p->GetDecayTime();
+    double decayTime = GetDecayTime(dp->getParticle()->GetCurrentState()->GetLifetime());
 
-    if ((time + decayTime) <= GetOpt(double, "Cuts.Lifetime")) {
+    if ((time + decayTime) <= cuts.Lifetime) {
       try {
-        finalStates = Decay();
+        finalStates = Decay(dp);
         time += decayTime;
         // cout << "Decay finished" << endl;
       } catch (const std::invalid_argument& e) {
@@ -82,10 +92,10 @@ std::string ReactionEngine::GenerateEvent(int eventNr, double initExcitationEn) 
 
 std::vector<PDS::core::DynamicParticle *> ReactionEngine::Decay(PDS::core::DynamicParticle* dp){
   double totalIntensity = 0.;
-  double energyThreshold = GetOpt(double, "Cuts.Energy");
-  decayChannel = dp->GetParticle()->GetReactionChannel()->Get;
+  double energyThreshold = cuts.Energy;
+  std::vector<PDS::core::ReactionChannel *> decayChannels = dp->GetParticleDefinition()->GetReactionChannels();
   double currentExcitationEnergy = dp->getParticle().GetExcitationEnergy();
-  for(std::vector<DecayChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
+  for(std::vector<PDS::core::ReactionChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
     // Look for decay channels at current excitation level
     if (std::abs(currentExcitationEnergy - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
       totalIntensity+=decayChannels[i]->GetIntensity();
@@ -96,7 +106,7 @@ std::vector<PDS::core::DynamicParticle *> ReactionEngine::Decay(PDS::core::Dynam
   double index = 0.;
   // Sample randomly from the different decay channels
   for(std::vector<DecayChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
-    if (std::abs(currentExcitationEnergy - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
+    if (std::abs(dp->GetParticle()->GetExcitationEnergy() - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
       intensity+=decayChannels[i]->GetIntensity();
       if (r <= intensity) {
         break;
@@ -104,13 +114,25 @@ std::vector<PDS::core::DynamicParticle *> ReactionEngine::Decay(PDS::core::Dynam
     }
     index++;
   }
-  try {
-    return decayChannels[index]->Decay(this);
-  }
-  catch (const std::invalid_argument& e) {
-    std::cout << "DecayMode " << decayChannels[index]->GetModeName() << " not found." << std::endl;
-    std::cout << GetName() << std::endl;
 
-    throw e;
+  auto it = registeredReactionModeMap.find( decayChannels[index]->GetReactionModeName());
+  if (it != registeredReactionModeMap.end()){
+    auto it2 = registeredSpectrumGeneratorMap.find(decayChannels[index]->GetReactionModeName());
+    if(it2 != registeredSpectrumGeneratorMap.end()){
+      return (*(it->second))(dp,currentExcitationEnergy,decayChannels[index]->GetQValue(),it2->second());
+    }
+    else{
+      return (*(it->second))(dp,currentExcitationEnergy,decayChannels[index]->GetQValue(),nullptr);
+    }
   }
+  else{
+    throw "No such decay mode was registered!!";
+  }
+
+}
+
+double ReactionEngine::GetDecayTime(double lifetime) {
+  std::exponential_distribution<double> distribution(1./lifetime);
+  double decayTime = distribution(randomGen);
+  return decayTime;
 }
