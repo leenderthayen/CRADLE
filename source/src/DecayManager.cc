@@ -43,11 +43,12 @@ bool DecayManager::MainLoop(int nrParticles, int nThreads) {
 
   std::future<std::string> f[nThreads];
   for (int t = 0; t < nThreads; t++) {
-    if(t==nThreads-1) Q+=R;
-    f[t] = std::async(std::launch::async, &DecayManager::GenerateEvent, this, i+t);
+    if(t<R) f[t] = std::async(std::launch::async, &DecayManager::GenerateEvent, this, Q+1);
+    else f[t] = std::async(std::launch::async, &DecayManager::GenerateEvent, this, Q);
+
   }
 
-  for (int t = 0; t < threads; t++) {
+  for (int t = 0; t < nThreads; t++) {
     fileStream << f[t].get();
     ++show_progress;
   }

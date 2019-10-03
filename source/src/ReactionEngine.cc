@@ -19,7 +19,11 @@ ReactionEngine::~ReactionEngine(){}
 
 void ReactionEngine::RegisterSpectrumGenerator(ReactionModeNames modeName, SpectrumGenerator& sg) {
   try {
-    registeredSpectrumGeneratorMap.insert(modeName,sg);
+    auto it = registeredSpectrumGeneratorMap.find(modeName);
+    if (it != registeredSpectrumGeneratorMap.end())
+      registeredSpectrumGeneratorMap[modeName]  = sg;
+    else
+      registeredSpectrumGeneratorMap.insert(modeName,sg);
   }
   catch (const invalid_argument &e) {
     cout << "Cannot register" <<  typeid(sg).name() << "spectrum generator. Invalid mode name." << endl;
@@ -37,7 +41,11 @@ void ReactionEngine::RegisterBasicSpectrumGenerators() {
 
 void ReactionEngine::RegisterReactionMode(ReactionModeNames modeName, activator act){
   try {
-    registeredReactionModeMap.insert(modeName,act);
+    auto it = registeredReactionModeMap.find(modeName);
+    if (it != registeredReactionModeMap.end())
+      registeredReactionModeMap[modeName]  = act;
+    else
+      registeredReactionModeMap.insert(modeName,act);
   }
   catch (const invalid_argument &e) {
     cout << "Cannot register" <<  typeid(sg).name() << "activator method. Invalid mode name." << endl;
