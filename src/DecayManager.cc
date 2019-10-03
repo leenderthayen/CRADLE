@@ -1,10 +1,10 @@
-#include "DecayManager.hh"
-#include "Utilities.hh"
-#include "DecayChannel.hh"
-#include "Particle.hh"
-#include "DecayMode.hh"
-#include "OptionContainer.hh"
-#include "SpectrumGenerator.hh"
+#include "CRADLE/DecayManager.h"
+#include "CRADLE/Utilities.h"
+#include "CRADLE/DecayChannel.h"
+#include "CRADLE/Particle.h"
+#include "CRADLE/DecayMode.h"
+#include "CRADLE/SpectrumGenerator.h"
+
 #include <boost/progress.hpp>
 #include <fstream>
 #include <sstream>

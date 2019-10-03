@@ -1,6 +1,6 @@
-#include "DecayChannel.hh"
-#include "DecayMode.hh"
-#include "Particle.hh"
+#include "CRADLE/DecayChannel.h"
+#include "CRADLE/DecayMode.h"
+#include "CRADLE/Particle.h"
 #include <iostream>
 #include <stdexcept>
 
