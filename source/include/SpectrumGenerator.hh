@@ -52,20 +52,20 @@ class SimpleBetaDecay: public SpectrumGenerator {
     SimpleBetaDecay& operator=(SimpleBetaDecay const& copy);
 };
 
-#ifdef USE_BSG
-class BSG: public SpectrumGenerator {
-  public:
-    static BSG& GetInstance() {
-      static BSG instance;
-      return instance;
-    }
-    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
-
-  protected:
-    BSG();
-    BSG(BSG const& copy);
-    BSG& operator=(BSG const& copy);
-};
+// #ifdef USE_BSG
+// class BSG: public SpectrumGenerator {
+//   public:
+//     static BSG& GetInstance() {
+//       static BSG instance;
+//       return instance;
+//     }
+//     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
+//
+//   protected:
+//     BSG();
+//     BSG(BSG const& copy);
+//     BSG& operator=(BSG const& copy);
+// };
 #endif // End of USE_BSG if
 
 #endif // End of SPECTRUMGENERATOR if

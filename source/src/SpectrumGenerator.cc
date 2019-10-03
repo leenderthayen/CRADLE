@@ -53,16 +53,16 @@ DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
 
 SimpleBetaDecay::SimpleBetaDecay() {}
 
-#ifdef USE_BSG
-std::vector<std::vector<double> >* BSG::GenerateSpectrum(PDS::core::DynamicParticle* initState, PDS::core::DynamicParticle* finalState, double Q) {
-
-  bsg::Generator* gen = new bsg::Generator();
-
-  std::vector<std::vector<double> >* spectrum = gen->CalculateSpectrum();
-
-  return spectrum;
-}
-
-BSG::BSG() { }
+// #ifdef USE_BSG
+// std::vector<std::vector<double> >* BSG::GenerateSpectrum(PDS::core::DynamicParticle* initState, PDS::core::DynamicParticle* finalState, double Q) {
+//
+//   bsg::Generator* gen = new bsg::Generator();
+//
+//   std::vector<std::vector<double> >* spectrum = gen->CalculateSpectrum();
+//
+//   return spectrum;
+// }
+//
+// BSG::BSG() { }
 
 #endif
