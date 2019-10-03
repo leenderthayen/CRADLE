@@ -1,15 +1,10 @@
-#include "DecayManager.hh"
-#include "OptionContainer.hh"
-#include "SpectrumGenerator.hh"
+#include "CRADLE/DecayManager.h"
+#include "CRADLE/SpectrumGenerator.h"
+
 #include <iostream>
 #include <string>
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
 
-#include "CRADLEConfig.h"
-
-namespace po = boost::program_options;
+//#include "CRADLEConfig.h"
 
 using std::cout;
 using std::endl;
@@ -18,8 +13,8 @@ using std::cerr;
 void ShowInfo() {
   std::string author = "L. Hayen (leendert.hayen@kuleuven.be)";
   cout << "-----------------------------------------------" << endl;
-  cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
-  cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
+  //cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
+  //cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
   cout << "-  Author: " << author << endl;
   cout << "-----------------------------------------------\n" << endl;
 }
@@ -27,7 +22,7 @@ void ShowInfo() {
 int main (int argc, char* argv[]) {
   ShowInfo();
 
-  OptionContainer::GetInstance(argc, argv);
+  /*OptionContainer::GetInstance(argc, argv);
 
   if (!(OptExists("config") && OptExists("name") && OptExists("charge") && OptExists("nucleons"))) {
     cout << "Specify configuration file, isotope name, charge and number of nucleons. Use the --help option for more documentation." << endl;
@@ -50,7 +45,7 @@ int main (int argc, char* argv[]) {
       if (GetOpt(int, "General.Verbosity") > 0)
         dm.ListRegisteredParticles();
     }
-  }
+  }*/
   cout << "Exiting..." << endl;
   return 0;
 }

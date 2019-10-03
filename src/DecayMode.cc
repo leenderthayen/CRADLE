@@ -1,9 +1,9 @@
-#include "DecayMode.hh"
-#include "DecayManager.hh"
-#include "Particle.hh"
-#include "Utilities.hh"
-#include "OptionContainer.hh"
-#include "SpectrumGenerator.hh"
+#include "CRADLE/DecayMode.h"
+#include "CRADLE/DecayManager.h"
+#include "CRADLE/Particle.h"
+#include "CRADLE/Utilities.h"
+#include "CRADLE/SpectrumGenerator.h"
+
 #include <string>
 #include <sstream>
 
