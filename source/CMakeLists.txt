@@ -12,13 +12,13 @@ include_directories(${GSL_INCLUDE_DIRS})
 find_package(spdlog REQUIRED)
 include_directories(${spdlog_INCLUDE_DIRS})
 
-set(NHL_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/NHL/include")
-set(PDS_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/ParticleDataStructure/include")
+set(NHL_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/NHL/include")
+set(PDS_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/ParticleDataStructure/include")
 
 
-#include_directories(${PROJECT_SOURCE_DIR}/source/include)
-include_directories(NHL_INCLUDE_DIRS)
-include_directories(PDS_INCLUDE_DIRS)
+include_directories(${PROJECT_SOURCE_DIR}/source/include)
+include_directories(${NHL_INCLUDE_DIRS})
+include_directories(${PDS_INCLUDE_DIRS})
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/Templates/CRADLEConfig.h.in" "${PROJECT_BINARY_DIR}/CRADLEConfig.h")
 include_directories("${PROJECT_BINARY_DIR}")

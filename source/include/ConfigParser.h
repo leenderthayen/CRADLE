@@ -49,6 +49,7 @@ struct EnvOptions {
 
 struct ConfigOptions{
   NuclearOptions nuclearOptions;
+  General general;
   CouplingConstants couplingConstants;
   Cuts cuts;
   BetaDecay betaDecay;
@@ -57,7 +58,7 @@ struct ConfigOptions{
 
 ConfigOptions ParseOptions(std::string, int argc = 0, const char** argv = nullptr);
 
-void SetCmdOptions(CLI::App&, CmdOptions&);
+void SetCmdOptions(CLI::App&, NuclearOptions&);
 void SetGeneralOptions(CLI::App&, General&);
 void SetCouplingConstants(CLI::App&, CouplingConstants&);
 void SetCuts(CLI::App&, Cuts&);

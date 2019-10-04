@@ -14,9 +14,11 @@ namespace PDS{
 
 class SpectrumGenerator {
   public:
-    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double) = 0;
+    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double) = 0;
     SpectrumGenerator();
     virtual ~SpectrumGenerator();
+    SpectrumGenerator(const SpectrumGenerator & copy);
+    SpectrumGenerator& operator=(const SpectrumGenerator & copy);
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
 
@@ -30,12 +32,13 @@ class DeltaSpectrumGenerator: public SpectrumGenerator {
       static DeltaSpectrumGenerator instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double);
+    
+    DeltaSpectrumGenerator(const DeltaSpectrumGenerator & copy);
+    DeltaSpectrumGenerator& operator=(const DeltaSpectrumGenerator & copy);
 
   protected:
     DeltaSpectrumGenerator();
-    DeltaSpectrumGenerator(DeltaSpectrumGenerator const& copy);
-    DeltaSpectrumGenerator& operator=(DeltaSpectrumGenerator const& copy);
 };
 
 class SimpleBetaDecay: public SpectrumGenerator {
@@ -44,12 +47,13 @@ class SimpleBetaDecay: public SpectrumGenerator {
       static SimpleBetaDecay instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle*, PDS::core::DynamicParticle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double);
+    
+    SimpleBetaDecay(const SimpleBetaDecay & copy);
+    SimpleBetaDecay& operator=(const SimpleBetaDecay & copy);
 
   protected:
     SimpleBetaDecay();
-    SimpleBetaDecay(SimpleBetaDecay const& copy);
-    SimpleBetaDecay& operator=(SimpleBetaDecay const& copy);
 };
 
 // #ifdef USE_BSG
@@ -66,6 +70,6 @@ class SimpleBetaDecay: public SpectrumGenerator {
 //     BSG(BSG const& copy);
 //     BSG& operator=(BSG const& copy);
 // };
-#endif // End of USE_BSG if
+// #endif // End of USE_BSG if
 
 #endif // End of SPECTRUMGENERATOR if

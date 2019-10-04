@@ -10,15 +10,15 @@ namespace PDS {
   }
 }
 
+struct CouplingConstants;
+struct BetaDecay;
 class SpectrumGenerator;
-
-namespace ublas = boost::numeric::ublas;
 
 class ReactionMode{
   public:
-    virtual static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double, SpectrumGenerator*) = 0;
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
     ReactionMode();
-    virtual ~ReactionMode();
+    virtual ~ReactionMode() = 0;
 
 
   protected:
@@ -26,7 +26,7 @@ class ReactionMode{
 
 class BetaMinus: public ReactionMode {
   public:
-    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
 
   protected:
     BetaMinus();
@@ -35,7 +35,7 @@ class BetaMinus: public ReactionMode {
 
 class BetaPlus: public ReactionMode {
   public:
-    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
 
   protected:
     BetaPlus();
@@ -43,7 +43,7 @@ class BetaPlus: public ReactionMode {
 
 class ConversionElectron: public ReactionMode {
     public:
-    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
 
   protected:
     ConversionElectron();
@@ -51,7 +51,7 @@ class ConversionElectron: public ReactionMode {
 
 class Proton: public ReactionMode {
     public:
-    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
 
   protected:
     Proton();
@@ -59,7 +59,7 @@ class Proton: public ReactionMode {
 
 class Alpha: public ReactionMode {
     public:
-    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
 
   protected:
     Alpha();
@@ -67,7 +67,7 @@ class Alpha: public ReactionMode {
 
 class Gamma: public ReactionMode {
     public:
-    static std::vector<PDS::core::DynamicParticle*> activate(PDS::core::DynamicParticle*, double, double);
+    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
 
   protected:
     Gamma();

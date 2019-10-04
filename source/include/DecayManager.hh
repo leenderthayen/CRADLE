@@ -26,7 +26,7 @@ class DecayManager {
     ~DecayManager();
 
     void Initialise(ConfigOptions);
-    bool MainLoop(int);
+    bool MainLoop(int,int);
 
     void SetReactionEngine(ReactionEngine* );
 
@@ -35,10 +35,12 @@ class DecayManager {
     DecayManager(DecayManager const&);
     void operator=(DecayManager const&);
 
-    //std::vector<Particle*> particleStack;
+    std::string GenerateEvents(int);
+    
     std::string filename;
     std::string initStateName;
     double initExcitationEn;
     ReactionEngine* reactionEngine;
+    ConfigOptions* configOptions;
 };
 #endif

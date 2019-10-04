@@ -1,4 +1,4 @@
-#include "CRADLE/ConfigParser.h"
+#include "ConfigParser.h"
 
 #include "CLI11.hpp"
 
@@ -15,7 +15,7 @@ void parse(CLI::App& app, int argc, const char** argv) {
     }
   }
 
-void SetCmdOptions (CLI::App& app, CmdOptions& cmdOptions) {
+void SetCmdOptions (CLI::App& app, NuclearOptions& cmdOptions) {
 
   CLI::App* cmd = app.add_subcommand("NuclearOptions","This is the nuclear options command.")->ignore_case();
   cmd->add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
@@ -28,10 +28,10 @@ void SetCmdOptions (CLI::App& app, CmdOptions& cmdOptions) {
 void SetGeneralOptions (CLI::App& app, General& general) {
   CLI::App* comp = app.add_subcommand("General", "This is the general subcommand")->ignore_case();
   comp->add_option("-v,--Verbosity", general.Verbosity, "Verbosity settings");
-  comp->add_option("-l,--loop", cmdOptions.Loop, "Number of events to generate.");
-  comp->add_option("-t,--threads", cmdOptions.Threads, "Number of threads (2 x #CPU).");
-  comp->add_option("-o,--output", cmdOptions.Output, "Name of the output file.");
-  comp->add_option("-u,--usebsg", cmdOptions.Usebsg, "Choose whether or not to use BSG.");
+  comp->add_option("-l,--loop", general.Loop, "Number of events to generate.");
+  comp->add_option("-t,--threads", general.Threads, "Number of threads (2 x #CPU).");
+  comp->add_option("-o,--output", general.Output, "Name of the output file.");
+  comp->add_option("-u,--usebsg", general.Usebsg, "Choose whether or not to use BSG.");
 
 }
 
@@ -76,12 +76,12 @@ ConfigOptions ParseOptions(std::string filename, int argc, const char** argv) {
   app.allow_config_extras(true);
   app.set_config("-c", filename);
 
-  SetCmdOptions(app,configOptions.cmdOptions);
+  SetCmdOptions(app,configOptions.nuclearOptions);
   SetGeneralOptions(app,configOptions.general);
   SetCouplingConstants(app,configOptions.couplingConstants);
   SetCuts(app,configOptions.cuts);
   SetBetaDecayOptions(app,configOptions.betaDecay);
-  SetEnvironmentOptions(app,configOptions.envOptions ;
+  SetEnvironmentOptions(app,configOptions.envOptions) ;
 
   return configOptions;
 }

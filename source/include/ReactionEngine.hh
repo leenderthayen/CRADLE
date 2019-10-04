@@ -1,8 +1,9 @@
 #ifndef REACTIONENGINE
 #define REACTIONENGINE
 
-#include <vector>
 #include <map>
+#include <vector>
+#include <random>
 
 namespace PDS {
   namespace core {
@@ -10,28 +11,38 @@ namespace PDS {
     enum class ReactionModeNames;
   }
 }
-struct Cuts;
 
-typedef std::vector<PDS::core::DynamicParticle*> (*activator)(PDS::core::DynamicParticle*, double, double, SpectrumGenerator*);
-typedef std::map<ReactionModeNames, activator> reaction_mode_map;
+class SpectrumGenerator;
+struct ConfigOptions;
+struct CouplingConstants;
+struct BetaDecay;
+
+
+typedef std::vector<PDS::core::DynamicParticle> (*activator)(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&,CouplingConstants,BetaDecay);
+typedef std::map<PDS::core::ReactionModeNames, activator> reaction_mode_map;
+typedef std::map<PDS::core::ReactionModeNames, SpectrumGenerator&> spectrum_generator_map;
 
 class ReactionEngine {
   public:
-    ReactionEngine(Cuts);
+    ReactionEngine();
     ReactionEngine(const ReactionEngine &);
     ~ReactionEngine();
 
     void RegisterBasicSpectrumGenerators();
     void RegisterBasicReactionModes();
-    void RegisterSpectrumGenerator();
-    void RegisterReactionMode();
-
-    std::string GenerateEvent(int);
+    void RegisterSpectrumGenerator(PDS::core::ReactionModeNames,SpectrumGenerator&);
+    void RegisterReactionMode(PDS::core::ReactionModeNames,activator);
+    std::string GenerateEvent(int,std::string,double,ConfigOptions);
 
   private:
+    static std::default_random_engine randomGen;
     reaction_mode_map registeredReactionModeMap;
-    std::map<ReactionModeNames, SpectrumGenerator&> registeredSpectrumGeneratorMap;
-    Cuts cuts;
+    spectrum_generator_map registeredSpectrumGeneratorMap;
+
+    std::vector<PDS::core::DynamicParticle > Decay(PDS::core::DynamicParticle, ConfigOptions);
+    inline std::string GetInfoForFile(PDS::core::DynamicParticle) const;
+    inline double GetDecayTime(double) const;
+    
 
 };
 #endif
