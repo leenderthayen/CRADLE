@@ -1,8 +1,8 @@
-#include "DecayManager.hh"
-#include "Utilities.hh"
-#include "ReactionEngine.hh"
-#include "ConfigParser.h"
-#include "PDS/Factory/ParticleFactory.h"
+#include "CRADLE/DecayManager.h"
+#include "CRADLE/Utilities.h"
+#include "CRADLE/SpectrumGenerator.h"
+
+#include <boost/progress.hpp>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -48,7 +48,7 @@ bool DecayManager::MainLoop(int nrParticles, int nThreads) {
 
   for (int t = 0; t < nThreads; t++) {
     fileStream << f[t].get();
-    
+
   }
 
   std::cout << "Done! Time taken: ";
@@ -61,9 +61,9 @@ std::string DecayManager::GenerateEvents(int nrEvents){
   std::ios::sync_with_stdio(false);
   boost::progress_display show_progress(nrEvents);
   boost::progress_timer t;
-  
+
   ReactionEngine* re = reactionEngine;
-  
+
   std::ostringstream threadDataSS;
   for(int i=0; i < nrEvents ; i++){
     threadDataSS << re->GenerateEvent(i, initStateName, initExcitationEn, *configOptions);

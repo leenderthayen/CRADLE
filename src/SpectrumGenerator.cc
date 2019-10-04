@@ -2,16 +2,15 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <string>
 
-#include "SpectrumGenerator.hh"
-#include "PDS/Core/DynamicParticle.h"
-#include "Utilities.hh"
-#include "PDS/Core/Nucleus.h"
+#include "CRADLE/SpectrumGenerator.h"
+#include "CRADLE/Particle.h"
+#include "CRADLE/Utilities.h"
+//#include "CRADLEConfig.h"
 
 #include "spdlog/spdlog.h"
 
 #ifdef USE_BSG
-
-#include "Generator.h"
+#include "BSG/Generator.h"
 #endif
 
 namespace pt = boost::property_tree;
