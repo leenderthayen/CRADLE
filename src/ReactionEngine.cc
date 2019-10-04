@@ -1,14 +1,15 @@
-#include "ReactionEngine.hh"
+#include "CRADLE/ReactionEngine.h"
+#include "CRADLE/ReactionMode.h"
+#include "CRADLE/SpectrumGenerator.h"
+#include "CRADLE/ConfigParser.h"
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Core/ReactionChannel.h"
 #include "PDS/Core/ParticleDefinition.h"
 #include "PDS/Factory/ParticleFactory.h"
-#include "ReactionMode.hh"
-#include "SpectrumGenerator.hh"
+
 #include <stdlib.h>
 #include <stdexcept>
 #include <cmath>
-#include "ConfigParser.h"
 #include <map>
 
 std::default_random_engine ReactionEngine::randomGen;

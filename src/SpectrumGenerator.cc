@@ -3,7 +3,6 @@
 #include <string>
 
 #include "CRADLE/SpectrumGenerator.h"
-#include "CRADLE/Particle.h"
 #include "CRADLE/Utilities.h"
 //#include "CRADLEConfig.h"
 

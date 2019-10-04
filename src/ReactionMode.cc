@@ -1,11 +1,12 @@
-#include "ReactionMode.hh"
-#include "DecayManager.hh"
-#include "ConfigParser.h"
+#include "CRADLE/ReactionMode.h"
+#include "CRADLE/DecayManager.h"
+#include "CRADLE/ConfigParser.h"
+#include "CRADLE/SpectrumGenerator.h"
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Factory/ParticleFactory.h"
 #include "PDS/Util/Atoms.h"
 #include "Utilities.hh"
-#include "SpectrumGenerator.hh"
+
 #include <string>
 #include <sstream>
 
@@ -32,7 +33,7 @@ std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicPa
   oss << "BetaMinus:Z" << recoilNucleusDef->GetZ() << "A" << recoilNucleusDef->GetA() << "Q" << Q;
   //Work in the COM frame
   ublas::vector<double> elFourMomentum (4);
-  
+
   std::vector<std::vector<double> >* dist;
   // std::cout << "Try getting distribution" << std::endl;
   try {
@@ -105,7 +106,7 @@ std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicPar
   PDS::core::Nucleus* recoilNucleusDef = static_cast<PDS::core::Nucleus*>(recoil.GetParticle().GetParticleDefinition());
   oss << "BetaMinus:Z" << recoilNucleusDef->GetZ() << "A" << recoilNucleusDef->GetA() << "Q" << Q;
   //Work in the COM frame
-  
+
   std::vector<std::vector<double> >* dist;
   // std::cout << "Try getting distribution" << std::endl;
   try {
@@ -129,9 +130,9 @@ std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicPar
   else {
     mgt = 1.;
   }
-  
+
   double a = utilities::CalculateBetaNeutrinoAsymmetry(couplingConstants.CS, couplingConstants.CT, couplingConstants.CV, couplingConstants.CA, mf, mgt);
-  
+
   double posEnergy = utilities::RandomFromDistribution(*dist) + utilities::EMASSC2;
   double posMomentum = std::sqrt(posEnergy*posEnergy-std::pow(utilities::EMASSC2, 2.));
   ublas::vector<double> enuDir = utilities::RandomDirection();
@@ -140,7 +141,7 @@ std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicPar
   p.push_back(1.);
   p.push_back(a*posMomentum/posEnergy);
   ublas::vector<double> posDir = utilities::GetParticleDirection(enuDir, p);
-  
+
   ublas::vector<double> posFourMomentum (4);
   posFourMomentum(0) = posEnergy;
   posFourMomentum(1) = posMomentum*posDir[0];
@@ -150,7 +151,7 @@ std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicPar
   pos.SetFourMomentum(posFourMomentum);
 
   ublas::vector<double> velocity = -initState.GetVelocity();
-  
+
   double E0 = Q-2*utilities::EMASSC2;
   utilities::ThreeBodyDecay(velocity, pos, enu, recoil, enuDir, E0);
 
