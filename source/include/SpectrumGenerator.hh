@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "CRADLEConfig.h"
 
@@ -33,7 +34,7 @@ class DeltaSpectrumGenerator: public SpectrumGenerator {
       return instance;
     }
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double);
-    
+
     DeltaSpectrumGenerator(const DeltaSpectrumGenerator & copy);
     DeltaSpectrumGenerator& operator=(const DeltaSpectrumGenerator & copy);
 
@@ -48,7 +49,7 @@ class SimpleBetaDecay: public SpectrumGenerator {
       return instance;
     }
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double);
-    
+
     SimpleBetaDecay(const SimpleBetaDecay & copy);
     SimpleBetaDecay& operator=(const SimpleBetaDecay & copy);
 

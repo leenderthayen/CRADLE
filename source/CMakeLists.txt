@@ -3,7 +3,7 @@ set(CRADLE_VERSION_MAJOR "1")
 set(CRADLE_VERSION_MINOR "0")
 set(CRADLE_LAST_UPDATE "April 29, 2019")
 
-FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
+FIND_PACKAGE(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 
 FIND_PACKAGE(GSL REQUIRED)
@@ -12,8 +12,8 @@ include_directories(${GSL_INCLUDE_DIRS})
 find_package(spdlog REQUIRED)
 include_directories(${spdlog_INCLUDE_DIRS})
 
-set(NHL_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/NHL/include")
-set(PDS_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/ParticleDataStructure/include")
+set(NHL_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/NHL/include")
+set(PDS_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/ParticleDataStructure/include")
 
 
 include_directories(${PROJECT_SOURCE_DIR}/source/include)
