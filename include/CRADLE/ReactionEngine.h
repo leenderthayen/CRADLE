@@ -8,7 +8,7 @@
 namespace PDS {
   namespace core {
     class DynamicParticle;
-    enum class ReactionModeNames;
+    enum class ReactionModeName;
   }
 }
 
@@ -19,8 +19,8 @@ struct BetaDecay;
 
 
 typedef std::vector<PDS::core::DynamicParticle> (*activator)(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&,CouplingConstants,BetaDecay);
-typedef std::map<PDS::core::ReactionModeNames, activator> reaction_mode_map;
-typedef std::map<PDS::core::ReactionModeNames, SpectrumGenerator&> spectrum_generator_map;
+typedef std::map<PDS::core::ReactionModeName, activator> reaction_mode_map;
+typedef std::map<PDS::core::ReactionModeName, SpectrumGenerator&> spectrum_generator_map;
 
 class ReactionEngine {
   public:
@@ -29,8 +29,8 @@ class ReactionEngine {
 
     void RegisterBasicSpectrumGenerators();
     void RegisterBasicReactionModes();
-    void RegisterSpectrumGenerator(PDS::core::ReactionModeNames,SpectrumGenerator&);
-    void RegisterReactionMode(PDS::core::ReactionModeNames,activator);
+    void RegisterSpectrumGenerator(PDS::core::ReactionModeName,SpectrumGenerator&);
+    void RegisterReactionMode(PDS::core::ReactionModeName,activator);
     std::string GenerateEvent(int,std::string,double,ConfigOptions);
 
   private:

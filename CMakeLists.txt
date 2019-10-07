@@ -22,15 +22,52 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
 include(CMakeUninstallTarget)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    add_compile_options("-Wall")
+    add_compile_options("-Wextra")
+    add_compile_options("-Wconversion")
+    add_compile_options("-pedantic")
+    add_compile_options("-Wfatal-errors")
+    add_compile_options("-pthread")
+endif()
+
 # Offer the user the choice of overriding the installation directories
-set(INSTALL_LIB_DIR ${PROJECT_BINARY_DIR}/lib CACHE PATH "Installation directory for libraries")
-set(INSTALL_BIN_DIR ${PROJECT_BINARY_DIR}/bin CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
-  "Installation directory for header files")
+# set(INSTALL_LIB_DIR ${PROJECT_BINARY_DIR}/lib CACHE PATH "Installation directory for libraries")
+# set(INSTALL_BIN_DIR ${PROJECT_BINARY_DIR}/bin CACHE PATH "Installation directory for executables")
+# set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
+#   "Installation directory for header files")
 
-option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" ON)
+set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+add_executable(CRADLE++ src/CRADLE++.cc src/ConfigParser.cc src/DecayManager.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc)
 
-add_subdirectory(source)
+find_package(Boost)
+target_include_directories(CRADLE++ PUBLIC ${Boost_INCLUDE_DIRS})
+
+find_package(GSL REQUIRED)
+target_include_directories(CRADLE++ PUBLIC ${GSL_INCLUDE_DIRS})
+
+find_package(spdlog REQUIRED)
+target_include_directories(CRADLE++ PUBLIC ${spdlog_INCLUDE_DIRS})
+
+find_package(Threads)
+
+set(NHL_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/NHL/include")
+set(PDS_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/ParticleDataStructure/include")
+
+target_include_directories(CRADLE++ PUBLIC ${NHL_INCLUDE_DIRS})
+target_include_directories(CRADLE++ PUBLIC ${PDS_INCLUDE_DIRS})
+target_include_directories(CRADLE++ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" OFF)
+if (USE_BSG)
+find_package(BSG REQUIRED)
+include_directories(${BSG_INCLUDE_DIRS})
+set(EXTRA_LIBS ${EXTRA_LIBS} bsg nme)
+endif()
 
 set(CRADLE++_SCRIPTS
   config/filter.py
@@ -45,3 +82,14 @@ foreach (_script ${CRADLE++_SCRIPTS})
     COPYONLY
     )
 endforeach()
+
+target_link_libraries(CRADLE++ ${Boost_LIBRARIES})
+target_link_libraries(CRADLE++ ${GSL_LIBRARIES})
+target_link_libraries(CRADLE++ ${EXTRA_LIBS})
+target_link_libraries(CRADLE++ ${CMAKE_THREAD_LIBS_INIT})
+
+add_custom_command(TARGET CRADLE++
+                   POST_BUILD
+		   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:CRADLE++> ${PROJECT_BINARY_DIR}/bin/$<TARGET_FILE_NAME:CRADLE++>)
+
+install(TARGETS CRADLE++ DESTINATION bin)

@@ -22,7 +22,7 @@ ReactionEngine::ReactionEngine(){
 
 ReactionEngine::~ReactionEngine(){}
 
-void ReactionEngine::RegisterSpectrumGenerator(PDS::core::ReactionModeNames modeName, SpectrumGenerator& sg) {
+void ReactionEngine::RegisterSpectrumGenerator(PDS::core::ReactionModeName modeName, SpectrumGenerator& sg) {
   try {
     auto it = registeredSpectrumGeneratorMap.find(modeName);
     if (it != registeredSpectrumGeneratorMap.end())
@@ -35,15 +35,15 @@ void ReactionEngine::RegisterSpectrumGenerator(PDS::core::ReactionModeNames mode
 }
 
 void ReactionEngine::RegisterBasicSpectrumGenerators() {
-  RegisterSpectrumGenerator(PDS::core::ReactionModeNames::Proton, DeltaSpectrumGenerator::GetInstance());
-  RegisterSpectrumGenerator(PDS::core::ReactionModeNames::Alpha, DeltaSpectrumGenerator::GetInstance());
-  RegisterSpectrumGenerator(PDS::core::ReactionModeNames::Gamma, DeltaSpectrumGenerator::GetInstance());
-  RegisterSpectrumGenerator(PDS::core::ReactionModeNames::InternalConversion, DeltaSpectrumGenerator::GetInstance());
-  RegisterSpectrumGenerator(PDS::core::ReactionModeNames::BetaPlus, SimpleBetaDecay::GetInstance());
-  RegisterSpectrumGenerator(PDS::core::ReactionModeNames::BetaMinus, SimpleBetaDecay::GetInstance());
+  RegisterSpectrumGenerator(PDS::core::ReactionModeName::Proton, DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator(PDS::core::ReactionModeName::Alpha, DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator(PDS::core::ReactionModeName::Gamma, DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator(PDS::core::ReactionModeName::InternalConversion, DeltaSpectrumGenerator::GetInstance());
+  RegisterSpectrumGenerator(PDS::core::ReactionModeName::BetaPlus, SimpleBetaDecay::GetInstance());
+  RegisterSpectrumGenerator(PDS::core::ReactionModeName::BetaMinus, SimpleBetaDecay::GetInstance());
 }
 
-void ReactionEngine::RegisterReactionMode(PDS::core::ReactionModeNames modeName, activator act){
+void ReactionEngine::RegisterReactionMode(PDS::core::ReactionModeName modeName, activator act){
   try {
     auto it = registeredReactionModeMap.find(modeName);
     if (it != registeredReactionModeMap.end())
@@ -57,12 +57,12 @@ void ReactionEngine::RegisterReactionMode(PDS::core::ReactionModeNames modeName,
 }
 
 void ReactionEngine::RegisterBasicReactionModes(){
-  RegisterReactionMode(PDS::core::ReactionModeNames::Proton, &Proton::activate);
-  RegisterReactionMode(PDS::core::ReactionModeNames::Alpha, &Alpha::activate);
-  RegisterReactionMode(PDS::core::ReactionModeNames::Gamma, &Gamma::activate);
-  RegisterReactionMode(PDS::core::ReactionModeNames::InternalConversion, &ConversionElectron::activate);
-  RegisterReactionMode(PDS::core::ReactionModeNames::BetaPlus, &BetaPlus::activate);
-  RegisterReactionMode(PDS::core::ReactionModeNames::BetaMinus, &BetaMinus::activate);
+  RegisterReactionMode(PDS::core::ReactionModeName::Proton, &Proton::activate);
+  RegisterReactionMode(PDS::core::ReactionModeName::Alpha, &Alpha::activate);
+  RegisterReactionMode(PDS::core::ReactionModeName::Gamma, &Gamma::activate);
+  RegisterReactionMode(PDS::core::ReactionModeName::InternalConversion, &ConversionElectron::activate);
+  RegisterReactionMode(PDS::core::ReactionModeName::BetaPlus, &BetaPlus::activate);
+  RegisterReactionMode(PDS::core::ReactionModeName::BetaMinus, &BetaMinus::activate);
 }
 
 std::string ReactionEngine::GenerateEvent(int eventNr, std::string initStateName, double initExcitationEn, ConfigOptions configOptions) {
@@ -105,21 +105,21 @@ std::string ReactionEngine::GenerateEvent(int eventNr, std::string initStateName
 std::vector<PDS::core::DynamicParticle > ReactionEngine::Decay(PDS::core::DynamicParticle dp, ConfigOptions configOptions){
   double totalIntensity = 0.;
   double energyThreshold = configOptions.cuts.Energy;
-  std::vector<PDS::core::ReactionChannel *> decayChannels = dp.GetParticle().GetParticleDefinition()->GetReactionChannels();
+  std::vector<PDS::core::ReactionChannel> decayChannels = dp.GetParticle().GetParticleDefinition()->GetReactionChannels();
   double currentExcitationEnergy = dp.GetParticle().GetExcitationEnergy();
-  for(std::vector<PDS::core::ReactionChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
+  for(std::vector<PDS::core::ReactionChannel>::size_type i = 0; i != decayChannels.size(); i++) {
     // Look for decay channels at current excitation level
-    if (std::abs(currentExcitationEnergy - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
-      totalIntensity+=decayChannels[i]->GetIntensity();
+    if (std::abs(currentExcitationEnergy - decayChannels[i].GetInitialExcitationEnergy()) < energyThreshold) {
+      totalIntensity+=decayChannels[i].GetIntensity();
     }
   }
   double r = rand()/(double)RAND_MAX*totalIntensity;
   double intensity = 0.;
   double index = 0.;
   // Sample randomly from the different decay channels
-  for(std::vector<PDS::core::ReactionChannel*>::size_type i = 0; i != decayChannels.size(); i++) {
-    if (std::abs(dp.GetParticle().GetExcitationEnergy() - decayChannels[i]->GetParentExcitationEnergy()) < energyThreshold) {
-      intensity+=decayChannels[i]->GetIntensity();
+  for(std::vector<PDS::core::ReactionChannel>::size_type i = 0; i != decayChannels.size(); i++) {
+    if (std::abs(dp.GetParticle().GetExcitationEnergy() - decayChannels[i].GetInitialExcitationEnergy()) < energyThreshold) {
+      intensity+=decayChannels[i].GetIntensity();
       if (r <= intensity) {
         break;
       }
@@ -127,15 +127,15 @@ std::vector<PDS::core::DynamicParticle > ReactionEngine::Decay(PDS::core::Dynami
     index++;
   }
 
-  auto it = registeredReactionModeMap.find(decayChannels[index]->GetReactionModeName());
+  auto it = registeredReactionModeMap.find(decayChannels[index].GetReactionModeName());
   if (it != registeredReactionModeMap.end()){
-    auto it2 = registeredSpectrumGeneratorMap.find(decayChannels[index]->GetReactionModeName());
+    auto it2 = registeredSpectrumGeneratorMap.find(decayChannels[index].GetReactionModeName());
     if(it2 != registeredSpectrumGeneratorMap.end()){
-      return (*(it->second))(dp,currentExcitationEnergy,decayChannels[index]->GetQValue(),it2->second,configOptions.couplingConstants,configOptions.betaDecay);
+      return (*(it->second))(dp,currentExcitationEnergy,decayChannels[index].GetQValue(),it2->second,configOptions.couplingConstants,configOptions.betaDecay);
     }
     else{
       SpectrumGenerator* sg = nullptr;
-      return (*(it->second))(dp,currentExcitationEnergy,decayChannels[index]->GetQValue(),*sg,configOptions.couplingConstants,configOptions.betaDecay);
+      return (*(it->second))(dp,currentExcitationEnergy,decayChannels[index].GetQValue(),*sg,configOptions.couplingConstants,configOptions.betaDecay);
     }
   }
   else{

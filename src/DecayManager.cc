@@ -1,15 +1,16 @@
 #include "CRADLE/DecayManager.h"
 #include "CRADLE/Utilities.h"
 #include "CRADLE/SpectrumGenerator.h"
+#include "CRADLE/ConfigParser.h"
+#include "PDS/Factory/ParticleFactory.h"
+#include "CRADLE/ReactionEngine.h"
 
-#include <boost/progress.hpp>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <future>
-#include <boost/progress.hpp>
 
 using namespace std;
 

@@ -5,8 +5,6 @@
 #include <string>
 #include <map>
 
-#include "CRADLEConfig.h"
-
 namespace PDS{
   namespace core{
     class DynamicParticle;

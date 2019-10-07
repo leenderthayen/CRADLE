@@ -1,18 +1,13 @@
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <string>
-
 #include "CRADLE/SpectrumGenerator.h"
 #include "CRADLE/Utilities.h"
 //#include "CRADLEConfig.h"
-
+#include "PDS/Core/Nucleus.h"
 #include "spdlog/spdlog.h"
+#include <string>
 
 #ifdef USE_BSG
 #include "BSG/Generator.h"
 #endif
-
-namespace pt = boost::property_tree;
 
 void SpectrumGenerator::RegisterDistribution(const std::string name,
                                              std::vector<std::vector<double> >* dist) {

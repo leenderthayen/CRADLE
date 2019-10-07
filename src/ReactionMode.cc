@@ -5,7 +5,7 @@
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Factory/ParticleFactory.h"
 #include "PDS/Util/Atoms.h"
-#include "Utilities.hh"
+#include "CRADLE/Utilities.h"
 
 #include <string>
 #include <sstream>
@@ -21,7 +21,7 @@ std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicPa
   oss << initNucleusDef->GetName();
   //std::cout << oss.str() << std::endl;
   //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
-  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::CreateNewDynamicParticle(PDS::util::GetIsotopeName(initNucleusDef->GetZ()+1,initNucleusDef->GetA()),daughterExEn);
+  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()+1,initNucleusDef->GetA(),daughterExEn);
   PDS::core::DynamicParticle e = PDS::ParticleFactory::CreateNewDynamicParticle("e-",0);
   PDS::core::DynamicParticle enubar = PDS::ParticleFactory::CreateNewDynamicParticle("enubar",0);
 
@@ -97,7 +97,7 @@ std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicPar
   oss << initNucleusDef->GetName();
   //std::cout << oss.str() << std::endl;
   //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
-  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::CreateNewDynamicParticle(PDS::util::GetIsotopeName(initNucleusDef->GetZ()-1,initNucleusDef->GetA()),daughterExEn);
+  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
   PDS::core::DynamicParticle pos = PDS::ParticleFactory::CreateNewDynamicParticle("e+",0);
   PDS::core::DynamicParticle enu = PDS::ParticleFactory::CreateNewDynamicParticle("enu",0);
 
@@ -181,7 +181,7 @@ std::vector<PDS::core::DynamicParticle> Proton::activate(PDS::core::DynamicParti
   PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
   std::ostringstream oss;
   oss << initState.GetParticle().GetParticleDefinition()->GetName();
-  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::CreateNewDynamicParticle(PDS::util::GetIsotopeName(initNucleusDef->GetZ()-1,initNucleusDef->GetA()),daughterExEn);
+  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
   PDS::core::DynamicParticle p = PDS::ParticleFactory::CreateNewDynamicParticle("p",0);
 
   ublas::vector<double> velocity = -initState.GetVelocity();
@@ -198,7 +198,7 @@ std::vector<PDS::core::DynamicParticle> Alpha::activate(PDS::core::DynamicPartic
   PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
   std::ostringstream oss;
   oss << initState.GetParticle().GetParticleDefinition()->GetName();
-  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::CreateNewDynamicParticle(PDS::util::GetIsotopeName(initNucleusDef->GetZ()-2,initNucleusDef->GetA()-4),daughterExEn);
+  PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-2,initNucleusDef->GetA()-4,daughterExEn);
   PDS::core::DynamicParticle alpha = PDS::ParticleFactory::CreateNewDynamicParticle("alpha",0);
 
   ublas::vector<double> velocity = -initState.GetVelocity();
