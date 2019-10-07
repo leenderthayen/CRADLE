@@ -59,15 +59,13 @@ bool DecayManager::MainLoop(int nrParticles, int nThreads) {
 
 std::string DecayManager::GenerateEvents(int nrEvents){
   std::ios::sync_with_stdio(false);
-  boost::progress_display show_progress(nrEvents);
-  boost::progress_timer t;
-
-  ReactionEngine* re = reactionEngine;
+  // boost::progress_display show_progress(nrEvents);
+  // boost::progress_timer t;
 
   std::ostringstream threadDataSS;
   for(int i=0; i < nrEvents ; i++){
-    threadDataSS << re->GenerateEvent(i, initStateName, initExcitationEn, *configOptions);
-    ++show_progress;
+    threadDataSS << reactionEngine->GenerateEvent(i, initStateName, initExcitationEn, *configOptions);
+    // ++show_progress;
   }
   return threadDataSS.str();
 }

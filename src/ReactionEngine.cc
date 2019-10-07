@@ -20,11 +20,6 @@ ReactionEngine::ReactionEngine(){
   RegisterBasicReactionModes();
 }
 
-ReactionEngine::ReactionEngine(const ReactionEngine &rhs){
-  registeredSpectrumGeneratorMap = rhs.registeredSpectrumGeneratorMap;
-  registeredReactionModeMap = rhs.registeredReactionModeMap;
-}
-
 ReactionEngine::~ReactionEngine(){}
 
 void ReactionEngine::RegisterSpectrumGenerator(PDS::core::ReactionModeNames modeName, SpectrumGenerator& sg) {

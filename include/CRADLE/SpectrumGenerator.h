@@ -18,8 +18,7 @@ class SpectrumGenerator {
     virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double) = 0;
     SpectrumGenerator();
     virtual ~SpectrumGenerator();
-    SpectrumGenerator(const SpectrumGenerator & copy);
-    SpectrumGenerator& operator=(const SpectrumGenerator & copy);
+
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
 
@@ -35,9 +34,6 @@ class DeltaSpectrumGenerator: public SpectrumGenerator {
     }
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double);
 
-    DeltaSpectrumGenerator(const DeltaSpectrumGenerator & copy);
-    DeltaSpectrumGenerator& operator=(const DeltaSpectrumGenerator & copy);
-
   protected:
     DeltaSpectrumGenerator();
 };
@@ -49,9 +45,6 @@ class SimpleBetaDecay: public SpectrumGenerator {
       return instance;
     }
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::DynamicParticle&, PDS::core::DynamicParticle&, double);
-
-    SimpleBetaDecay(const SimpleBetaDecay & copy);
-    SimpleBetaDecay& operator=(const SimpleBetaDecay & copy);
 
   protected:
     SimpleBetaDecay();

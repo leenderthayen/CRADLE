@@ -47,30 +47,6 @@ std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(PDS::core::
 
 SpectrumGenerator::SpectrumGenerator() { }
 
-SpectrumGenerator::SpectrumGenerator(const SpectrumGenerator & copy){
-  for (auto it = copy.registeredDistributions.begin(); it !=copy.registeredDistributions.end();++it){
-    registeredDistributions.insert({it->first,it->second});
-  }
-}
-
-DeltaSpectrumGenerator::DeltaSpectrumGenerator(const DeltaSpectrumGenerator & copy) :
-SpectrumGenerator(copy){}
-
-SimpleBetaDecay::SimpleBetaDecay(const SimpleBetaDecay & copy) :
-SpectrumGenerator(copy){}
-
-SpectrumGenerator& SpectrumGenerator::operator=(const SpectrumGenerator &copy){
-  return *this;
-}
-
-DeltaSpectrumGenerator& DeltaSpectrumGenerator::operator=(const DeltaSpectrumGenerator &copy){
-    return *this;
-}
-
-SimpleBetaDecay& SimpleBetaDecay::operator=(const SimpleBetaDecay &copy){
-  return *this;
-}
-
 SpectrumGenerator::~SpectrumGenerator() { }
 
 DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }

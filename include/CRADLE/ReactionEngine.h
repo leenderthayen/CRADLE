@@ -25,7 +25,6 @@ typedef std::map<PDS::core::ReactionModeNames, SpectrumGenerator&> spectrum_gene
 class ReactionEngine {
   public:
     ReactionEngine();
-    ReactionEngine(const ReactionEngine &);
     ~ReactionEngine();
 
     void RegisterBasicSpectrumGenerators();
@@ -42,7 +41,7 @@ class ReactionEngine {
     std::vector<PDS::core::DynamicParticle > Decay(PDS::core::DynamicParticle, ConfigOptions);
     inline std::string GetInfoForFile(PDS::core::DynamicParticle) const;
     inline double GetDecayTime(double) const;
-    
+
 
 };
 #endif
