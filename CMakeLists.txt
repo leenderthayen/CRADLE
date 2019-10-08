@@ -55,8 +55,8 @@ target_include_directories(CRADLE++ PUBLIC ${spdlog_INCLUDE_DIRS})
 
 find_package(Threads)
 
-set(NHL_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/NHL/include")
-set(PDS_INCLUDE_DIRS "/mnt/ksf9/H2/user/u0111340/linux/Code/LeendertProject/ParticleDataStructure/include")
+set(NHL_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/NHL/include")
+set(PDS_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/ParticleDataStructure/include")
 
 target_include_directories(CRADLE++ PUBLIC ${NHL_INCLUDE_DIRS})
 target_include_directories(CRADLE++ PUBLIC ${PDS_INCLUDE_DIRS})
