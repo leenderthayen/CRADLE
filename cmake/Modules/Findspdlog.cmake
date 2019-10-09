@@ -7,7 +7,8 @@
 find_path(spdlog_INCLUDE_DIRS spdlog/spdlog.h
     ~/spdlog/include
     /usr/local/include
-    /usr/include)
+    /usr/include
+    /Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/spdlog/include)
 if(${spdlog_INCLUDE_DIRS})
 	set(spdlog_FOUND "YES")
 endif()
