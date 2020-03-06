@@ -1,10 +1,11 @@
 #ifndef CRADLE_CONFIG_CONTAINER_H
 #define CRADLE_CONFIG_CONTAINER_H
 
-#include "PDS/Units/GlobalSystemOfUnits.h"
 #include "CLI11.hpp"
 
 #include <string>
+
+namespace CRADLE {
 
 struct NuclearOptions {
   std::string Name = "";
@@ -64,5 +65,7 @@ void SetCouplingConstants(CLI::App&, CouplingConstants&);
 void SetCuts(CLI::App&, Cuts&);
 void SetBetaDecayOptions(CLI::App&, BetaDecay&);
 void SetEnvironmentOptions(CLI::App&, EnvOptions&);
+
+}
 
 #endif

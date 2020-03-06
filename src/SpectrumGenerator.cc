@@ -9,6 +9,8 @@
 #include "BSG/Generator.h"
 #endif
 
+namespace CRADLE {
+
 void SpectrumGenerator::RegisterDistribution(const std::string name,
                                              std::vector<std::vector<double> >* dist) {
   registeredDistributions.insert(
@@ -59,5 +61,7 @@ SimpleBetaDecay::SimpleBetaDecay() {}
 // }
 //
 // BSG::BSG() { }
+
+}//end of CRADLE namespace 
 
 // #endif

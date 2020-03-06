@@ -1,15 +1,13 @@
-#ifndef SPECTRUMGENERATOR
-#define SPECTRUMGENERATOR
+#ifndef CRADLE_SPECTRUM_GENERATOR_H
+#define CRADLE_SPECTRUM_GENERATOR_H
+
+#include "PDS/Core/DynamicParticle.h"
 
 #include <vector>
 #include <string>
 #include <map>
 
-namespace PDS{
-  namespace core{
-    class DynamicParticle;
-  }
-}
+namespace CRADLE {
 
 class SpectrumGenerator {
   public:
@@ -63,5 +61,7 @@ class SimpleBetaDecay: public SpectrumGenerator {
 //     BSG& operator=(BSG const& copy);
 // };
 // #endif // End of USE_BSG if
+
+}//end of CRADLE namespace
 
 #endif // End of SPECTRUMGENERATOR if

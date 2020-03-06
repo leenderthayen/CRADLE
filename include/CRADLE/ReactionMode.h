@@ -10,6 +10,8 @@ namespace PDS {
   }
 }
 
+namespace CRADLE {
+
 struct CouplingConstants;
 struct BetaDecay;
 class SpectrumGenerator;
@@ -72,4 +74,6 @@ class Gamma: public ReactionMode {
   protected:
     Gamma();
 };
+
+}//end of CRADLE namespace
 #endif

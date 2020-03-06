@@ -1,5 +1,5 @@
 #include "CRADLE/ReactionMode.h"
-#include "CRADLE/DecayManager.h"
+#include "CRADLE/Cradle.h"
 #include "CRADLE/ConfigParser.h"
 #include "CRADLE/SpectrumGenerator.h"
 #include "PDS/Core/DynamicParticle.h"
@@ -11,6 +11,8 @@
 #include <sstream>
 
 namespace ublas = boost::numeric::ublas;
+
+namespace CRADLE {
 
 std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator& sg, CouplingConstants couplingConstants, BetaDecay betaDecay) {
 
@@ -241,3 +243,5 @@ Proton::Proton () { }
 Alpha::Alpha () { }
 
 Gamma::Gamma () { }
+
+}//end of CRADLE namespace

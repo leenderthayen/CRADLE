@@ -21,6 +21,7 @@
 #include "gsl/gsl_complex_math.h"
 #include "PDS/Core/DynamicParticle.h"
 
+namespace CRADLE {
 namespace utilities {
   using namespace boost::numeric::ublas;
 
@@ -373,5 +374,6 @@ namespace utilities {
     finalState2.SetFourMomentum(LorentzBoost(velocity, momentum2));
   }
 
-}
+}//end of utilities namespace
+}//end of CRADLE namespace
 #endif

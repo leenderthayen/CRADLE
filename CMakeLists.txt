@@ -2,7 +2,7 @@
 # - Enforce an out-of-source builds before anything else
 #
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-    message(STATUS "BSG requires an out-of-source build.")
+    message(STATUS "CRADLE++ requires an out-of-source build.")
     message(STATUS "Please remove these files from ${CMAKE_BINARY_DIR} first:")
     message(STATUS "CMakeFiles")
     message(STATUS "Once these files are removed, create a separate directory")
@@ -45,58 +45,54 @@ endif()
 # set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
 #   "Installation directory for header files")
 
-add_executable(CRADLE++ src/CRADLE++.cc src/ConfigParser.cc src/DecayManager.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc)
+add_library(Cradle src/ConfigParser.cc src/Cradle.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc)
+add_executable(CRADLE++ src/CRADLE++.cc)
 
 find_package(Boost)
 find_package(GSL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Threads)
 
-set(NHL_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/NHL/include")
-set(PDS_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/ParticleDataStructure/include")
+option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" OFF)
+option(CRADLE_BUILD_TESTS "Build tests" ON)
 
-target_include_directories(CRADLE++ PUBLIC ${NHL_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${PDS_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${Boost_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${GSL_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${spdlog_INCLUDE_DIRS})
+set(NHL_INCLUDE_DIRS "/Users/leenderthayen/git/NHL/include")
+set(PDS_INCLUDE_DIRS "/Users/leenderthayen/git/PDS/include")
+
+target_include_directories(Cradle PUBLIC ${NHL_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${PDS_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${Boost_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${GSL_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${spdlog_INCLUDE_DIRS})
 
 target_include_directories(
-    CRADLE++
+    Cradle
     PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:include>"
 )
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" OFF)
 if (USE_BSG)
 find_package(BSG REQUIRED)
 target_include_directories(CRADLE++ PUBLIC ${BSG_INCLUDE_DIRS})
 set(EXTRA_LIBS ${EXTRA_LIBS} bsg nme)
 endif()
 
-set(CRADLE++_SCRIPTS
-  config/filter.py
-  config/config.txt
-  config/visualisation.py
-)
+if(CRADLE_BUILD_TESTS)
+    include(CTest)
+    add_subdirectory(tests)
+endif()
 
-foreach (_script ${CRADLE++_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-    )
-endforeach()
+target_link_libraries(Cradle PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(Cradle PUBLIC ${GSL_LIBRARIES})
+target_link_libraries(Cradle PUBLIC ${EXTRA_LIBS})
+target_link_libraries(Cradle PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-target_link_libraries(CRADLE++ PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(CRADLE++ PUBLIC ${GSL_LIBRARIES})
-target_link_libraries(CRADLE++ PUBLIC ${EXTRA_LIBS})
-target_link_libraries(CRADLE++ PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(CRADLE++ PRIVATE Cradle)
 
-add_custom_command(TARGET CRADLE++
-                   POST_BUILD
-		   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:CRADLE++> ${PROJECT_BINARY_DIR}/bin/$<TARGET_FILE_NAME:CRADLE++>)
-
-install(TARGETS CRADLE++ DESTINATION bin)
+# add_custom_command(TARGET CRADLE++
+#                    POST_BUILD
+# 		   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:CRADLE++> ${PROJECT_BINARY_DIR}/bin/$<TARGET_FILE_NAME:CRADLE++>)
+#
+# install(TARGETS CRADLE++ DESTINATION bin)
