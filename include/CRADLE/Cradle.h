@@ -21,9 +21,12 @@ class Cradle {
 
     void Initialise(std::string, int argc = 0, const char** argv = nullptr);
     void Initialise(ConfigOptions);
+    bool Next();
     bool MainLoop(int,int);
 
     void SetReactionEngine(ReactionEngine* );
+
+    inline ReactionEngine* GetReactionEngine() { return reactionEngine; }
 
   private:
     std::string GenerateEvents(int);

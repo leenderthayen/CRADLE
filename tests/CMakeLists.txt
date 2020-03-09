@@ -3,6 +3,7 @@ project(CRADLE-utests CXX)
 set(CRADLE_MAIN main.cc)
 
 set(CRADLE_UTESTS_SOURCES
+  test_external_bsg.cc
   test_config_parser.cc)
 
 enable_testing()

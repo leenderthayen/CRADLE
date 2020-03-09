@@ -16,12 +16,9 @@ namespace CRADLE {
 
 std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator& sg, CouplingConstants couplingConstants, BetaDecay betaDecay) {
 
-  // std::cout << "In BetaMinus Decay " << std::endl;
-  // std::cout << "Address: " << initState << std::endl;
   PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
   std::ostringstream oss;
   oss << initNucleusDef->GetName();
-  //std::cout << oss.str() << std::endl;
   //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
   PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()+1,initNucleusDef->GetA(),daughterExEn);
   PDS::core::DynamicParticle e = PDS::ParticleFactory::CreateNewDynamicParticle("e-",0);
@@ -47,7 +44,7 @@ std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicPa
     // }
     // std::cout << "Distribution not found" << std::endl;
     // std::cout << oss.str() << " " << spectrumGen << std::endl;
-    sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState, recoil, Q));
+    sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState.GetParticle(), recoil.GetParticle(), Q));
     dist = sg.GetDistribution(oss.str());
   }
 
@@ -120,7 +117,7 @@ std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicPar
     // }
     // std::cout << "Distribution not found" << std::endl;
     // std::cout << oss.str() << " " << spectrumGen << std::endl;
-    sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState, recoil, Q));
+    sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState.GetParticle(), recoil.GetParticle(), Q));
     dist = sg.GetDistribution(oss.str());
   }
 

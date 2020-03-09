@@ -1,6 +1,4 @@
 #include "CRADLE/Cradle.h"
-#include "CRADLE/Utilities.h"
-#include "CRADLE/SpectrumGenerator.h"
 #include "CRADLE/ConfigParser.h"
 #include "PDS/Factory/ParticleFactory.h"
 #include "CRADLE/ReactionEngine.h"
@@ -21,12 +19,13 @@ namespace CRADLE {
     InitialiseLoggers();
   }
 
-  Cradle::~Cradle() { }
+  Cradle::~Cradle() { delete reactionEngine; }
 
   void Cradle::Initialise(std::string configFilename, int argc, const char** argv) {
     ConfigOptions configOptions = ParseOptions(configFilename, argc, argv);
     Initialise(configOptions);
     PDS::ParticleFactory::RegisterBasicParticles();
+    reactionEngine = new ReactionEngine();
   }
 
   void Cradle::Initialise(ConfigOptions _configOptions) {
@@ -66,7 +65,7 @@ namespace CRADLE {
 
     }
 
-    std::cout << "Done! Time taken: ";
+    //std::cout << "Done! Time taken: ";
     fileStream.flush();
     fileStream.close();
     return true;
