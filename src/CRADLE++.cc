@@ -1,26 +1,38 @@
-#include "CRADLE/DecayManager.h"
-#include "CRADLE/SpectrumGenerator.h"
+#include "CRADLE/Cradle.h"
 
-#include <iostream>
 #include <string>
-
-//#include "CRADLEConfig.h"
-
-using std::cout;
-using std::endl;
-using std::cerr;
+#include <iostream>
 
 void ShowInfo() {
-  std::string author = "L. Hayen (leendert.hayen@kuleuven.be)";
-  cout << "-----------------------------------------------" << endl;
+  std::string author = "L. Hayen (lmhayen@ncsu.edu)";
+  std::cout << "-----------------------------------------------" << std::endl;
   //cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
   //cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
-  cout << "-  Author: " << author << endl;
-  cout << "-----------------------------------------------\n" << endl;
+  std::cout << "-  Author: " << author << std::endl;
+  std::cout << "-----------------------------------------------\n" << std::endl;
 }
 
-int main (int argc, char* argv[]) {
+int main (int argc, const char* argv[]) {
   ShowInfo();
+
+  std::string iniFilename;
+  std::string configFilename;
+  std::string outputName = "output";
+
+  CLI::App app{"CRADLE++ standalone"};
+  app.add_option("-i,--input", iniFilename, "INI input file for transition information")->required();
+  app.add_option("-c,--config", configFilename, "INI config file for calculation information");
+  app.add_option("-o,--output", outputName, "Name for file output. No extensions.");
+
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError &e) {
+    app.exit(e);
+  }
+
+  CRADLE::Cradle* cradle = new CRADLE::Cradle(outputName);
+
+  cradle->Initialise(configFilename, argc, argv);
 
   /*OptionContainer::GetInstance(argc, argv);
 
@@ -46,6 +58,5 @@ int main (int argc, char* argv[]) {
         dm.ListRegisteredParticles();
     }
   }*/
-  cout << "Exiting..." << endl;
   return 0;
 }

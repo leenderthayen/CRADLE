@@ -1,14 +1,12 @@
-#ifndef REACTIONMODE
-#define REACTIONMODE
+#ifndef CRADLE_REACTION_MODE_H
+#define CRADLE_REACTION_MODE_H
+
+#include "PDS/Core/DynamicParticle.h"
 
 #include <vector>
 #include <string>
 
-namespace PDS {
-  namespace core {
-    class DynamicParticle;
-  }
-}
+namespace CRADLE {
 
 struct CouplingConstants;
 struct BetaDecay;
@@ -19,7 +17,6 @@ class ReactionMode{
     static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double, SpectrumGenerator&, CouplingConstants, BetaDecay);
     ReactionMode();
     virtual ~ReactionMode() = 0;
-
 
   protected:
 };
@@ -72,4 +69,6 @@ class Gamma: public ReactionMode {
   protected:
     Gamma();
 };
+
+}//end of CRADLE namespace
 #endif

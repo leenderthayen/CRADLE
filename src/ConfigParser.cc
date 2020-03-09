@@ -2,6 +2,8 @@
 
 #include "CLI11.hpp"
 
+namespace CRADLE {
+
 void parse(CLI::App& app, int argc, const char** argv) {
     if (argc == 0) {
       argc = 1;
@@ -13,14 +15,14 @@ void parse(CLI::App& app, int argc, const char** argv) {
     } catch (const CLI::ParseError &e) {
       app.exit(e);
     }
-  }
+}
 
 void SetCmdOptions (CLI::App& app, NuclearOptions& cmdOptions) {
 
   CLI::App* cmd = app.add_subcommand("NuclearOptions","This is the nuclear options command.")->ignore_case();
   cmd->add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
-  cmd->add_option("-z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
-  cmd->add_option("-n,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
+  cmd->add_option("-Z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
+  cmd->add_option("-N,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
   cmd->add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
 
 }
@@ -81,7 +83,11 @@ ConfigOptions ParseOptions(std::string filename, int argc, const char** argv) {
   SetCouplingConstants(app,configOptions.couplingConstants);
   SetCuts(app,configOptions.cuts);
   SetBetaDecayOptions(app,configOptions.betaDecay);
-  SetEnvironmentOptions(app,configOptions.envOptions) ;
+  SetEnvironmentOptions(app,configOptions.envOptions);
+
+  parse(app, argc, argv);
 
   return configOptions;
 }
+
+}//end of namespace CRADLE

@@ -5,59 +5,75 @@
 #include "spdlog/spdlog.h"
 #include <string>
 
-#ifdef USE_BSG
+//#ifdef USE_BSG
 #include "BSG/Generator.h"
-#endif
+//#endif
 
-void SpectrumGenerator::RegisterDistribution(const std::string name,
-                                             std::vector<std::vector<double> >* dist) {
-  registeredDistributions.insert(
-                                 std::pair<std::string, std::vector<std::vector<double> >*>(name, dist));
-  // cout << "Registered distribution " << name << endl;
-}
+namespace CRADLE {
 
-std::vector<std::vector<double> >* SpectrumGenerator::GetDistribution(const std::string name) {
-  if (registeredDistributions.count(name) == 0) {
-      throw std::invalid_argument("Distribution not registered.");
-  }
-  return registeredDistributions.at(name);
-}
+  void SpectrumGenerator::RegisterDistribution(const std::string name, std::vector<std::vector<double> >* dist) {
+    registeredDistributions.insert(
+      std::pair<std::string, std::vector<std::vector<double> >*>(name, dist));
+      // cout << "Registered distribution " << name << endl;
+    }
 
-std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(PDS::core::DynamicParticle& initState, PDS::core::DynamicParticle& finalState, double Q) {
-  std::vector<std::vector<double> >* deltaDist = new std::vector<std::vector<double> >();
-  std::vector<double> pair = {Q, 1.0};
-  deltaDist->push_back(pair);
+    std::vector<std::vector<double> >* SpectrumGenerator::GetDistribution(const std::string name) {
+      if (registeredDistributions.count(name) == 0) {
+        throw std::invalid_argument("Distribution not registered.");
+      }
+      return registeredDistributions.at(name);
+    }
 
-  return deltaDist;
-}
+    std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+      std::vector<std::vector<double> >* deltaDist = new std::vector<std::vector<double> >();
+      std::vector<double> pair = {Q, 1.0};
+      deltaDist->push_back(pair);
 
-std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(PDS::core::DynamicParticle& initState, PDS::core::DynamicParticle& finalState, double Q) {
-  PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
-  PDS::core::Nucleus* finalNucleusDef = static_cast<PDS::core::Nucleus*>(finalState.GetParticle().GetParticleDefinition());
-  std::vector<std::vector<double> >* spectrum = utilities::GenerateBetaSpectrum(
-  (finalNucleusDef->GetZ() - initNucleusDef->GetZ())*finalNucleusDef->GetZ(), finalNucleusDef->GetZ()+finalNucleusDef->GetA(), Q, true);
+      return deltaDist;
+    }
 
-  return spectrum;
-}
+    std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+      PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticleDefinition());
+      PDS::core::Nucleus* finalNucleusDef = static_cast<PDS::core::Nucleus*>(finalState.GetParticleDefinition());
+      std::vector<std::vector<double> >* spectrum = utilities::GenerateBetaSpectrum(
+        (finalNucleusDef->GetZ() - initNucleusDef->GetZ())*finalNucleusDef->GetZ(), finalNucleusDef->GetZ()+finalNucleusDef->GetA(), Q, true);
 
-SpectrumGenerator::SpectrumGenerator() { }
+        return spectrum;
+      }
 
-SpectrumGenerator::~SpectrumGenerator() { }
+      SpectrumGenerator::SpectrumGenerator() { }
 
-DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
+      SpectrumGenerator::~SpectrumGenerator() { }
 
-SimpleBetaDecay::SimpleBetaDecay() {}
+      DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
 
-// #ifdef USE_BSG
-// std::vector<std::vector<double> >* BSG::GenerateSpectrum(PDS::core::DynamicParticle* initState, PDS::core::DynamicParticle* finalState, double Q) {
-//
-//   bsg::Generator* gen = new bsg::Generator();
-//
-//   std::vector<std::vector<double> >* spectrum = gen->CalculateSpectrum();
-//
-//   return spectrum;
-// }
-//
-// BSG::BSG() { }
+      SimpleBetaDecay::SimpleBetaDecay() {}
 
-// #endif
+      //#ifdef USE_BSG
+
+      ExternalBSG::ExternalBSG(std::string configFilename) {
+        generator = new BSG::Generator();
+
+        generator->InitialiseOptionsFromConfigFile(configFilename);
+      }
+
+      const BSG::Generator* ExternalBSG::GetGenerator() const {
+        return generator;
+      }
+
+      std::vector<std::vector<double> >* ExternalBSG::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+        generator->SetInitialState(initState);
+        generator->SetFinalState(finalState);
+        generator->SetQValue(Q);
+
+        std::vector<std::vector<double> >* spectrum = generator->CalculateSpectrum();
+
+        return spectrum;
+      }
+      //#endif
+      //
+      // BSG::BSG() { }
+
+    }//end of CRADLE namespace
+
+    // #endif

@@ -2,7 +2,7 @@
 # - Enforce an out-of-source builds before anything else
 #
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-    message(STATUS "BSG requires an out-of-source build.")
+    message(STATUS "CRADLE++ requires an out-of-source build.")
     message(STATUS "Please remove these files from ${CMAKE_BINARY_DIR} first:")
     message(STATUS "CMakeFiles")
     message(STATUS "Once these files are removed, create a separate directory")
@@ -13,6 +13,25 @@ endif()
 cmake_minimum_required(VERSION 3.1)
 
 project(CRADLE++ VERSION 1.0 LANGUAGES CXX)
+
+# use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif("${isSystemDir}" STREQUAL "-1")
 
 # - Prepend our own CMake Modules to the search path
 # NB: if our custom modules include others that we don't supply, those in
@@ -26,14 +45,14 @@ include(CMakeUninstallTarget)
 #---------------------------------------------------------------------------------------
 # compiler config
 #---------------------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     add_compile_options("-Wall")
     add_compile_options("-Wextra")
-    add_compile_options("-Wconversion")
+    #add_compile_options("-Wconversion")
     add_compile_options("-pedantic")
     add_compile_options("-Wfatal-errors")
     add_compile_options("-pthread")
@@ -45,58 +64,62 @@ endif()
 # set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
 #   "Installation directory for header files")
 
-add_executable(CRADLE++ src/CRADLE++.cc src/ConfigParser.cc src/DecayManager.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc)
+add_library(Cradle src/ConfigParser.cc src/Cradle.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc)
+add_executable(CRADLE++ src/CRADLE++.cc)
 
 find_package(Boost)
 find_package(GSL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Threads)
 
-set(NHL_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/NHL/include")
-set(PDS_INCLUDE_DIRS "/Users/lennertdekeukeleere/Documents/Work/Code/LeendertProject/ParticleDataStructure/include")
+option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" ON)
+option(CRADLE_BUILD_TESTS "Build tests" ON)
 
-target_include_directories(CRADLE++ PUBLIC ${NHL_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${PDS_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${Boost_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${GSL_INCLUDE_DIRS})
-target_include_directories(CRADLE++ PUBLIC ${spdlog_INCLUDE_DIRS})
+set(NHL_INCLUDE_DIRS "/Users/leenderthayen/git/NHL/include")
+set(PDS_INCLUDE_DIRS "/Users/leenderthayen/git/PDS/include")
+set(BSG_INCLUDE_DIRS "/Users/leenderthayen/git/BSG/include")
+
+target_include_directories(Cradle PUBLIC ${NHL_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${PDS_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${Boost_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${GSL_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${spdlog_INCLUDE_DIRS})
+
 
 target_include_directories(
-    CRADLE++
+    Cradle
     PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:include>"
 )
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-option(USE_BSG "Use the external BSG library for the calculation of beta spectrum shapes" OFF)
-if (USE_BSG)
-find_package(BSG REQUIRED)
-target_include_directories(CRADLE++ PUBLIC ${BSG_INCLUDE_DIRS})
-set(EXTRA_LIBS ${EXTRA_LIBS} bsg nme)
+message(${GSL_LIBRARIES})
+
+set(BSG_LIBRARIES "-L/Users/leenderthayen/git/BSG/build2 -lBSG")
+
+#if (USE_BSG)
+  message("Using BSG")
+# find_package(BSG REQUIRED)
+target_include_directories(Cradle PUBLIC ${BSG_INCLUDE_DIRS})
+set(EXTRA_LIBS ${EXTRA_LIBS} ${BSG_LIBRARIES})
+#endif()
+
+if(CRADLE_BUILD_TESTS)
+    include(CTest)
+    add_subdirectory(tests)
 endif()
 
-set(CRADLE++_SCRIPTS
-  config/filter.py
-  config/config.txt
-  config/visualisation.py
-)
+target_link_libraries(Cradle PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(Cradle PUBLIC ${GSL_LIBRARIES})
+target_link_libraries(Cradle PUBLIC ${EXTRA_LIBS})
+target_link_libraries(Cradle PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-foreach (_script ${CRADLE++_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-    )
-endforeach()
+target_link_libraries(CRADLE++ PRIVATE Cradle)
 
-target_link_libraries(CRADLE++ PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(CRADLE++ PUBLIC ${GSL_LIBRARIES})
-target_link_libraries(CRADLE++ PUBLIC ${EXTRA_LIBS})
-target_link_libraries(CRADLE++ PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-add_custom_command(TARGET CRADLE++
-                   POST_BUILD
-		   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:CRADLE++> ${PROJECT_BINARY_DIR}/bin/$<TARGET_FILE_NAME:CRADLE++>)
-
-install(TARGETS CRADLE++ DESTINATION bin)
+# add_custom_command(TARGET CRADLE++
+#                    POST_BUILD
+# 		   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:CRADLE++> ${PROJECT_BINARY_DIR}/bin/$<TARGET_FILE_NAME:CRADLE++>)
+#
+# install(TARGETS CRADLE++ DESTINATION bin)

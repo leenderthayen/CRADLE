@@ -2,6 +2,7 @@
 #include "CRADLE/ReactionMode.h"
 #include "CRADLE/SpectrumGenerator.h"
 #include "CRADLE/ConfigParser.h"
+
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Core/ReactionChannel.h"
 #include "PDS/Core/ParticleDefinition.h"
@@ -12,8 +13,12 @@
 #include <cmath>
 #include <map>
 
-std::default_random_engine ReactionEngine::randomGen;
 namespace ublas = boost::numeric::ublas;
+//namespace modes = PDS::core::ReactionModeName;
+
+namespace CRADLE {
+
+std::default_random_engine ReactionEngine::randomGen;
 
 ReactionEngine::ReactionEngine(){
   RegisterBasicSpectrumGenerators();
@@ -157,3 +162,5 @@ inline std::string ReactionEngine::GetInfoForFile(PDS::core::DynamicParticle dp)
   oss << dp.GetName() << "\t" << dp.GetParticle().GetExcitationEnergy() << "\t" << dp.GetKinEnergy() << "\t" << fourMomentum(0) << "\t" << fourMomentum(1) << "\t" << fourMomentum(2) << "\t" << fourMomentum(3);
   return oss.str();
 }
+
+}//end of CRADLE namespace
