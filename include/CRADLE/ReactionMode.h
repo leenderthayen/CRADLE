@@ -1,71 +1,49 @@
 #ifndef CRADLE_REACTION_MODE_H
 #define CRADLE_REACTION_MODE_H
 
-#include "PDS/Core/DynamicParticle.h"
 #include "CRADLE/SpectrumGenerator.h"
+
+#include "PDS/Core/DynamicParticle.h"
 
 #include <vector>
 #include <string>
 
 namespace CRADLE {
 
-class ReactionMode{
+  typedef std::vector<PDS::core::DynamicParticle> (*Activator)(PDS::core::DynamicParticle&,
+    double, double, std::map<std::string, SpectrumGenerator>*);
+  typedef double (*BranchingCalculator)(PDS::core::Particle&, double);
+
+  struct Process {
+    double staticBranchingRatio = -1;
+    BranchingCalculator bc;
+    Activator a;
+    std::map<std::string, SpectrumGenerator> generators;
+  };
+
+  class ReactionMode {
   public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double Q, double finalExcitationEnergy);
-    virtual ~ReactionMode() = 0;
+    ReactionMode();
+    ~ReactionMode() {};
+    std::vector<PDS::core::DynamicParticle> Activate(PDS::core::DynamicParticle&, double Q, double finalExcitationEnergy);
 
-  protected:
-    static inline std::map<std::string, SpectrumGenerator*>*  generators = nullptr;
-};
+    inline void AddProcess(Process p) { processes.push_back(p); }
+    inline std::vector<Process>& GetProcesses() { return processes; }
 
-class BetaMinus: public ReactionMode {
-  public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double);
+    bool RemoveProcessAtIndex(unsigned i);
+  private:
+    std::vector<Process> processes;
+    //std::vector<PDS::core::DynamicParticle> ActivateProcess(PDS::core::DynamicParticle&, double, double);
+  };
 
-  protected:
-    BetaMinus();
-
-};
-
-class BetaPlus: public ReactionMode {
-  public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double);
-
-  protected:
-    BetaPlus();
-};
-
-class ConversionElectron: public ReactionMode {
-    public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double);
-
-  protected:
-    ConversionElectron();
-};
-
-class Proton: public ReactionMode {
-    public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double);
-
-  protected:
-    Proton();
-};
-
-class Alpha: public ReactionMode {
-    public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double);
-
-  protected:
-    Alpha();
-};
-
-class Gamma: public ReactionMode {
-    public:
-    static std::vector<PDS::core::DynamicParticle> activate(PDS::core::DynamicParticle&, double, double);
-
-  protected:
-    Gamma();
-};
+  class ReactionModeFactory {
+    static ReactionMode& DefaultBetaMinus();
+    static ReactionMode& DefaultBetaPlus();
+    static ReactionMode& DefaultProtonSeparation();
+    static ReactionMode& DefaultNeutronSeparation();
+    static ReactionMode& DefaultAlpha();
+    static ReactionMode& DefaultGamma();
+  };
 
 }//end of CRADLE namespace
 #endif
