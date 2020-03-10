@@ -24,7 +24,7 @@ TEST_CASE("Test BSG Spectral generation") {
   PDS::ParticleFactory::SetGeant4RadDirectory(Geant4RadDir);
   PDS::ParticleFactory::SetGeant4PhotonDirectory(Geant4PhotonDir);
 
-  double Q = 256.0;
+  double Q = 256.0 * keV;
 
   PDS::core::Particle p1 = PDS::ParticleFactory::CreateNewParticleFromGeant4(20, 45, 0.);
   PDS::core::Particle p2 = PDS::ParticleFactory::CreateNewParticleFromGeant4(21, 45, 0.);
@@ -62,7 +62,7 @@ TEST_CASE("Multiple initializations") {
   PDS::ParticleFactory::SetGeant4RadDirectory(Geant4RadDir);
   PDS::ParticleFactory::SetGeant4PhotonDirectory(Geant4PhotonDir);
 
-  double Q = 256.0;
+  double Q = 256.0 * keV;
 
   PDS::core::Particle p1 = PDS::ParticleFactory::CreateNewParticleFromGeant4(20, 45, 0.);
   PDS::core::Particle p2 = PDS::ParticleFactory::CreateNewParticleFromGeant4(21, 45, 0.);
@@ -73,7 +73,7 @@ TEST_CASE("Multiple initializations") {
   REQUIRE((*spectrum)[0][1] != 0);
   REQUIRE((*spectrum)[1][0] != 0);
 
-  double Q2 = 3502.0;
+  double Q2 = 3502.0 * keV;
 
   PDS::core::Particle p3 = PDS::ParticleFactory::CreateNewParticleFromGeant4(2, 6, 0.);
   PDS::core::Particle p4 = PDS::ParticleFactory::CreateNewParticleFromGeant4(3, 6, 0.);
@@ -87,8 +87,4 @@ TEST_CASE("Multiple initializations") {
   REQUIRE((*spectrum2)[1][0] != 0);
 
   REQUIRE((*spectrum2)[1][1] != (*spectrum)[1][1]);
-}
-
-TEST_CASE("Test integration with ReactionEngine") {
-
 }

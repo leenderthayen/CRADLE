@@ -1,6 +1,5 @@
 #include "CRADLE/SpectrumGenerator.h"
 #include "CRADLE/Utilities.h"
-//#include "CRADLEConfig.h"
 #include "PDS/Core/Nucleus.h"
 #include "spdlog/spdlog.h"
 #include <string>
@@ -18,10 +17,14 @@ namespace CRADLE {
     }
 
     std::vector<std::vector<double> >* SpectrumGenerator::GetDistribution(const std::string name) {
-      if (registeredDistributions.count(name) == 0) {
+      if (!DistributionExists(name)) {
         throw std::invalid_argument("Distribution not registered.");
       }
       return registeredDistributions.at(name);
+    }
+
+    bool SpectrumGenerator::DistributionExists(const std::string name) {
+      return registeredDistributions.count(name);
     }
 
     std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
@@ -30,6 +33,16 @@ namespace CRADLE {
       deltaDist->push_back(pair);
 
       return deltaDist;
+    }
+
+    std::vector<std::vector<double> >* SpectrumGenerator::GetSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+      std::ostringstream oss;
+      oss << "ID" << initState->GetID() << "_to_ID" << finalState->GetID() << "_Q" << Q / keV;
+      std::string name = oss.str();
+      if (!DistributionExists(name)) {
+        RegisterDistribution(name, GenerateSpectrum(initState, fnalState, Q));
+      }
+      return GetDistribution(name);
     }
 
     std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {

@@ -14,39 +14,31 @@ namespace ublas = boost::numeric::ublas;
 
 namespace CRADLE {
 
-std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator& sg, CouplingConstants couplingConstants, BetaDecay betaDecay) {
+std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicParticle& initState, double Q, double daughterExEn) {
 
   PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
-  std::ostringstream oss;
-  oss << initNucleusDef->GetName();
   //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
   PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()+1,initNucleusDef->GetA(),daughterExEn);
   PDS::core::DynamicParticle e = PDS::ParticleFactory::CreateNewDynamicParticle("e-",0);
   PDS::core::DynamicParticle enubar = PDS::ParticleFactory::CreateNewDynamicParticle("enubar",0);
 
-  // std::cout << "Recoil " << recoil->GetCharge() << " " << recoil->GetNeutrons() << " " << recoil << std::endl;
-
-  oss.str("");
-  oss.clear();
-  PDS::core::Nucleus* recoilNucleusDef = static_cast<PDS::core::Nucleus*>(recoil.GetParticle().GetParticleDefinition());
-  oss << "BetaMinus:Z" << recoilNucleusDef->GetZ() << "A" << recoilNucleusDef->GetA() << "Q" << Q;
   //Work in the COM frame
   ublas::vector<double> elFourMomentum (4);
 
-  std::vector<std::vector<double> >* dist;
-  // std::cout << "Try getting distribution" << std::endl;
-  try {
-    dist = sg.GetDistribution(oss.str());
-  } catch (const std::invalid_argument& e) {
-    // bool advancedFermi = false;
-    // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
-    //   advancedFermi = true;
-    // }
-    // std::cout << "Distribution not found" << std::endl;
-    // std::cout << oss.str() << " " << spectrumGen << std::endl;
-    sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState.GetParticle(), recoil.GetParticle(), Q));
-    dist = sg.GetDistribution(oss.str());
-  }
+  // std::vector<std::vector<double> >* dist;
+  // // std::cout << "Try getting distribution" << std::endl;
+  // try {
+  //   dist = sg.GetDistribution(oss.str());
+  // } catch (const std::invalid_argument& e) {
+  //   // bool advancedFermi = false;
+  //   // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
+  //   //   advancedFermi = true;
+  //   // }
+  //   // std::cout << "Distribution not found" << std::endl;
+  //   // std::cout << oss.str() << " " << spectrumGen << std::endl;
+  //   sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState.GetParticle(), recoil.GetParticle(), Q));
+  //   dist = sg.GetDistribution(oss.str());
+  // }
 
   // std::cout << "Found distribution" << std::endl;
 
@@ -90,45 +82,36 @@ std::vector<PDS::core::DynamicParticle> BetaMinus::activate(PDS::core::DynamicPa
 
 std::vector<PDS::core::DynamicParticle> BetaPlus::activate(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator& sg, CouplingConstants couplingConstants, BetaDecay betaDecay) {
   PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
-  // std::cout << "In BetaMinus Decay " << std::endl;
-  // std::cout << "Address: " << initState << std::endl;
-  std::ostringstream oss;
-  oss << initNucleusDef->GetName();
-  //std::cout << oss.str() << std::endl;
   //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
   PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
   PDS::core::DynamicParticle pos = PDS::ParticleFactory::CreateNewDynamicParticle("e+",0);
   PDS::core::DynamicParticle enu = PDS::ParticleFactory::CreateNewDynamicParticle("enu",0);
 
-  oss.str("");
-  oss.clear();
-  PDS::core::Nucleus* recoilNucleusDef = static_cast<PDS::core::Nucleus*>(recoil.GetParticle().GetParticleDefinition());
-  oss << "BetaMinus:Z" << recoilNucleusDef->GetZ() << "A" << recoilNucleusDef->GetA() << "Q" << Q;
   //Work in the COM frame
 
-  std::vector<std::vector<double> >* dist;
-  // std::cout << "Try getting distribution" << std::endl;
-  try {
-    dist = sg.GetDistribution(oss.str());
-  } catch (const std::invalid_argument& e) {
-    // bool advancedFermi = false;
-    // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
-    //   advancedFermi = true;
-    // }
-    // std::cout << "Distribution not found" << std::endl;
-    // std::cout << oss.str() << " " << spectrumGen << std::endl;
-    sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState.GetParticle(), recoil.GetParticle(), Q));
-    dist = sg.GetDistribution(oss.str());
-  }
-
-  double mf = 0.;
-  double mgt = 0.;
-  if (betaDecay.Default == "Fermi") {
-    mf = 1.;
-  }
-  else {
-    mgt = 1.;
-  }
+  // std::vector<std::vector<double> >* dist;
+  // // std::cout << "Try getting distribution" << std::endl;
+  // try {
+  //   dist = sg.GetDistribution(oss.str());
+  // } catch (const std::invalid_argument& e) {
+  //   // bool advancedFermi = false;
+  //   // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
+  //   //   advancedFermi = true;
+  //   // }
+  //   // std::cout << "Distribution not found" << std::endl;
+  //   // std::cout << oss.str() << " " << spectrumGen << std::endl;
+  //   sg.RegisterDistribution(oss.str(), sg.GenerateSpectrum(initState.GetParticle(), recoil.GetParticle(), Q));
+  //   dist = sg.GetDistribution(oss.str());
+  // }
+  //
+  // double mf = 0.;
+  // double mgt = 0.;
+  // if (betaDecay.Default == "Fermi") {
+  //   mf = 1.;
+  // }
+  // else {
+  //   mgt = 1.;
+  // }
 
   double a = utilities::CalculateBetaNeutrinoAsymmetry(couplingConstants.CS, couplingConstants.CT, couplingConstants.CV, couplingConstants.CA, mf, mgt);
 

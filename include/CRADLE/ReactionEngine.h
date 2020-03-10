@@ -21,7 +21,7 @@ struct BetaDecay;
 
 
 typedef std::vector<PDS::core::DynamicParticle> (*activator)(PDS::core::DynamicParticle&,
-  double, double, SpectrumGenerator&,CouplingConstants,BetaDecay);
+  double, double);
 typedef std::map<PDS::core::ReactionModeName, activator> reaction_mode_map;
 typedef std::map<PDS::core::ReactionModeName, SpectrumGenerator&> spectrum_generator_map;
 
