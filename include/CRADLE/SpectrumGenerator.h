@@ -19,10 +19,11 @@ namespace CRADLE {
     const std::vector<std::vector<double> >* GetSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
 
   private:
-    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double) = 0;
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
     bool DistributionExists(const std::string);
+    
+    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double) = 0;
 
     std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
   };
@@ -40,7 +41,7 @@ namespace CRADLE {
   class ExternalBSG: public SpectrumGenerator {
   public:
     ExternalBSG(std::string);
-    ~ExternalBSG() {};
+    ~ExternalBSG();
 
     const BSG::Generator* GetGenerator() const;
 

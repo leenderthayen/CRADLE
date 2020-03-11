@@ -64,7 +64,7 @@ endif()
 # set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include CACHE PATH
 #   "Installation directory for header files")
 
-add_library(Cradle src/ConfigParser.cc src/Cradle.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc src/Event.cc)
+add_library(Cradle SHARED src/ConfigParser.cc src/Cradle.cc src/ReactionEngine.cc src/ReactionMode.cc src/SpectrumGenerator.cc src/Event.cc)
 add_executable(CRADLE++ src/CRADLE++.cc)
 
 find_package(Boost)
