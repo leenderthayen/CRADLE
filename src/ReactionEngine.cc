@@ -19,7 +19,7 @@ namespace CRADLE {
   std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(PDS::core::DynamicParticle& initState) {
     std::vector<PDS::core::DynamicParticle> finalStates;
     //Decay time in center of mass frame
-    double tauDecay = 0.;
+    double tauDecay = PDS::util::GetExponentialSample(1.0/initState.GetParticle().GetLifetime());
 
     PDS::core::ReactionChannel rc = initState.GetParticle().GetRandomReactionChannel();
     try {

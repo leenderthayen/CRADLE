@@ -1,7 +1,7 @@
 #include "CRADLE/ReactionMode.h"
 #include "CRADLE/DecayStructures.h"
 
-#include "PDS/Util/Miscellaneous.h"
+#include "PDS/Util/Random.h"
 
 namespace CRADLE {
   ReactionMode::ReactionMode () {

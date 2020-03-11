@@ -4,7 +4,12 @@ set(CRADLE_MAIN main.cc)
 
 set(CRADLE_UTESTS_SOURCES
   test_external_bsg.cc
-  test_config_parser.cc)
+  test_config_parser.cc
+  test_reaction_engine.cc
+  test_spectrum_generator.cc
+  test_reaction_mode.cc
+  test_reaction_mode_factory.cc
+  test_event.cc)
 
 enable_testing()
 
