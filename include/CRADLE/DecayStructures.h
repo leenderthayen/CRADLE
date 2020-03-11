@@ -15,7 +15,7 @@ namespace ublas = boost::numeric::ublas;
 
 namespace CRADLE {
   namespace decay {
-    inline std::vector<PDS::core::DynamicParticle> SimpleBetaMinus(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator& sg) {
+    inline std::vector<PDS::core::DynamicParticle> SimpleBetaMinus(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, SpectrumGenerator*> sg) {
 
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
@@ -26,12 +26,15 @@ namespace CRADLE {
       //Work in the COM frame
       ublas::vector<double> elFourMomentum (4);
 
-      double elEnergy = utilities::RandomFromDistribution(sg.GetSpectrum(iniState.GetParticle(), recoil.GetParticle(), Q))+utilities::EMASSC2;
+      double elEnergy = utilities::RandomFromDistribution(
+        *(sg["electron_energy"]->GetSpectrum(initState.GetParticle(), recoil.GetParticle(), Q)))
+        +utilities::EMASSC2;
       double elMomentum = std::sqrt(elEnergy*elEnergy-std::pow(utilities::EMASSC2, 2.));
       ublas::vector<double> enuDir = utilities::RandomDirection();
 
-      p.push_back(1.);
-      p.push_back(a*elMomentum/elEnergy);
+      std::vector<double> p;
+      // p.push_back(1.);
+      // p.push_back(a*elMomentum/elEnergy);
       ublas::vector<double> eDir = utilities::GetParticleDirection(enuDir, p);
 
       elFourMomentum(0) = elEnergy;
@@ -52,35 +55,35 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> SimpleBetaPlus(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator& sg, CouplingConstants couplingConstants, BetaDecay betaDecay) {
+    inline std::vector<PDS::core::DynamicParticle> SimpleBetaPlus(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, SpectrumGenerator*> sg) {
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
       PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
       PDS::core::DynamicParticle pos = PDS::ParticleFactory::CreateNewDynamicParticle("e+",0);
       PDS::core::DynamicParticle enu = PDS::ParticleFactory::CreateNewDynamicParticle("enu",0);
 
-      double posEnergy = utilities::RandomFromDistribution(*dist) + utilities::EMASSC2;
-      double posMomentum = std::sqrt(posEnergy*posEnergy-std::pow(utilities::EMASSC2, 2.));
-      ublas::vector<double> enuDir = utilities::RandomDirection();
-
-      std::vector<double> p;
-      p.push_back(1.);
-      p.push_back(a*posMomentum/posEnergy);
-      ublas::vector<double> posDir = utilities::GetParticleDirection(enuDir, p);
-
-      ublas::vector<double> posFourMomentum (4);
-      posFourMomentum(0) = posEnergy;
-      posFourMomentum(1) = posMomentum*posDir[0];
-      posFourMomentum(2) = posMomentum*posDir[1];
-      posFourMomentum(3) = posMomentum*posDir[2];
-
-      pos.SetFourMomentum(posFourMomentum);
-
-      ublas::vector<double> velocity = -initState.GetVelocity();
-
-      double E0 = Q-2*utilities::EMASSC2;
-      utilities::ThreeBodyDecay(velocity, pos, enu, recoil, enuDir, E0);
-
+      // double posEnergy = utilities::RandomFromDistribution(*dist) + utilities::EMASSC2;
+      // double posMomentum = std::sqrt(posEnergy*posEnergy-std::pow(utilities::EMASSC2, 2.));
+      // ublas::vector<double> enuDir = utilities::RandomDirection();
+      //
+      // std::vector<double> p;
+      // p.push_back(1.);
+      // p.push_back(a*posMomentum/posEnergy);
+      // ublas::vector<double> posDir = utilities::GetParticleDirection(enuDir, p);
+      //
+      // ublas::vector<double> posFourMomentum (4);
+      // posFourMomentum(0) = posEnergy;
+      // posFourMomentum(1) = posMomentum*posDir[0];
+      // posFourMomentum(2) = posMomentum*posDir[1];
+      // posFourMomentum(3) = posMomentum*posDir[2];
+      //
+      // pos.SetFourMomentum(posFourMomentum);
+      //
+      // ublas::vector<double> velocity = -initState.GetVelocity();
+      //
+      // double E0 = Q-2*utilities::EMASSC2;
+      // utilities::ThreeBodyDecay(velocity, pos, enu, recoil, enuDir, E0);
+      //
       std::vector<PDS::core::DynamicParticle> finalStates;
       finalStates.push_back(recoil);
       finalStates.push_back(pos);
@@ -89,7 +92,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> ConversionElectron(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator&, CouplingConstants, BetaDecay) {
+    inline std::vector<PDS::core::DynamicParticle> ConversionElectron(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, SpectrumGenerator*> sg) {
       std::vector<PDS::core::DynamicParticle> finalStates;
 
       ublas::vector<double> velocity = -initState.GetVelocity();
@@ -103,7 +106,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> ProtonSeparation(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator&, CouplingConstants, BetaDecay) {
+    inline std::vector<PDS::core::DynamicParticle> ProtonSeparation(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, SpectrumGenerator*> sg) {
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       std::ostringstream oss;
       oss << initState.GetParticle().GetParticleDefinition()->GetName();
@@ -120,7 +123,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> Alpha(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator&, CouplingConstants, BetaDecay) {
+    inline std::vector<PDS::core::DynamicParticle> Alpha(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, SpectrumGenerator*> sg) {
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       std::ostringstream oss;
       oss << initState.GetParticle().GetParticleDefinition()->GetName();
@@ -137,7 +140,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> Gamma(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, SpectrumGenerator&, CouplingConstants, BetaDecay) {
+    inline std::vector<PDS::core::DynamicParticle> Gamma(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, SpectrumGenerator*> sg) {
       std::vector<PDS::core::DynamicParticle> finalStates;
 
       ublas::vector<double> velocity = -initState.GetVelocity();

@@ -6,7 +6,7 @@
 namespace CRADLE {
 
   ReactionEngine::ReactionEngine(){
-    RegisterBasicReactionModes();
+    RegisterDefaultReactionModes();
   }
 
   Event ReactionEngine::ProcessParticle(PDS::core::DynamicParticle& initState) {
@@ -17,17 +17,28 @@ namespace CRADLE {
   }
 
   std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(PDS::core::DynamicParticle& initState) {
+    std::vector<PDS::core::DynamicParticle> finalStates;
     //Decay time in center of mass frame
     double tauDecay = 0.;
+
+    PDS::core::ReactionChannel rc = initState.GetParticle().GetRandomReactionChannel();
+    try {
+      const ReactionMode& rm = GetReactionMode(rc.GetReactionModeName());
+      finalStates = rm.Activate(initState, rc.GetQValue(), rc.GetFinalExcitationEnergy());
+    } catch (int e) {
+      //TODO
+    }
+
+    return finalStates;
   }
 
-  void ReactionEngine::RegisterReactionMode(PDS::core::ReactionModeName modeName, ReactionMode& reactionMode){
+  void ReactionEngine::RegisterReactionMode(PDS::core::ReactionModeName modeName, ReactionMode reactionMode){
     try {
       auto it = reactionDictionary.find(modeName);
-      if (it != registeredReactionModeMap.end())
-        registeredReactionModeMap[modeName] = reactionMode;
+      if (it != reactionDictionary.end())
+        reactionDictionary[modeName] = reactionMode;
       else
-        registeredReactionModeMap.insert({modeName, reactionMode});
+        reactionDictionary.insert({modeName, reactionMode});
     } catch (const std::invalid_argument &e) {
           std::cout << "Cannot register activator method. Invalid mode name." << std::endl;
     }
@@ -40,6 +51,19 @@ namespace CRADLE {
     //RegisterReactionMode(PDS::core::ReactionModeName::InternalConversion, &ConversionElectron::activate);
     RegisterReactionMode(PDS::core::ReactionModeName::BetaPlus, ReactionModeFactory::DefaultBetaPlus());
     RegisterReactionMode(PDS::core::ReactionModeName::BetaMinus, ReactionModeFactory::DefaultBetaMinus());
+  }
+
+  const ReactionMode& ReactionEngine::GetReactionMode(PDS::core::ReactionModeName modeName) {
+    try {
+      auto it = reactionDictionary.find(modeName);
+      if (it != reactionDictionary.end()) {
+        return reactionDictionary[modeName];
+      } else {
+        throw;
+      }
+    } catch (const std::invalid_argument &e) {
+      std::cout << "Cannot register activator method. Invalid mode name." << std::endl;
+    }
   }
 
 // std::string ReactionEngine::GenerateEvent(int eventNr, std::string initStateName, double initExcitationEn, ConfigOptions configOptions) {

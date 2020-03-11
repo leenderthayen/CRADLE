@@ -31,7 +31,7 @@ TEST_CASE("Test BSG Spectral generation") {
 
   REQUIRE(p1.GetName() == "45Ca");
 
-  std::vector<std::vector<double> >* spectrum = external.GenerateSpectrum(p1, p2, Q);
+  const std::vector<std::vector<double> >* spectrum = external.GetSpectrum(p1, p2, Q);
 
   const BSG::Generator* generator = external.GetGenerator();
 
@@ -67,7 +67,7 @@ TEST_CASE("Multiple initializations") {
   PDS::core::Particle p1 = PDS::ParticleFactory::CreateNewParticleFromGeant4(20, 45, 0.);
   PDS::core::Particle p2 = PDS::ParticleFactory::CreateNewParticleFromGeant4(21, 45, 0.);
 
-  std::vector<std::vector<double> >* spectrum = external.GenerateSpectrum(p1, p2, Q);
+  const std::vector<std::vector<double> >* spectrum = external.GetSpectrum(p1, p2, Q);
 
   REQUIRE((*spectrum)[0][0] != 0);
   REQUIRE((*spectrum)[0][1] != 0);
@@ -80,7 +80,7 @@ TEST_CASE("Multiple initializations") {
 
   REQUIRE(p3.GetName() == "6He");
 
-  std::vector<std::vector<double> >* spectrum2 = external.GenerateSpectrum(p3, p4, Q2);
+  const std::vector<std::vector<double> >* spectrum2 = external.GetSpectrum(p3, p4, Q2);
 
   REQUIRE((*spectrum2)[0][0] != 0);
   REQUIRE((*spectrum2)[0][1] != 0);

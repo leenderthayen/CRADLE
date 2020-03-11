@@ -1,12 +1,14 @@
 #include "CRADLE/ReactionMode.h"
 #include "CRADLE/DecayStructures.h"
 
+#include "PDS/Util/Miscellaneous.h"
+
 namespace CRADLE {
   ReactionMode::ReactionMode () {
 
   }
 
-  std::vector<PDS::core::DynamicParticle> ReactionMode::Activate(PDS::core::DynamicParticle& initState, double Q, double finalExcitationEnergy) {
+  std::vector<PDS::core::DynamicParticle> ReactionMode::Activate(PDS::core::DynamicParticle& initState, double Q, double finalExcitationEnergy) const {
     std::vector<double> brs;
 
     //Loop over processes to calculate BR
@@ -21,7 +23,7 @@ namespace CRADLE {
     }
 
     //Random index based on relative branching ratios
-    int index = utilities::GetWeightedRandomIndex(brs);
+    int index = PDS::util::GetWeightedRandomIndex(brs);
 
     return processes[index].a(initState, Q, finalExcitationEnergy, processes[index].generators);
   }
@@ -35,9 +37,10 @@ namespace CRADLE {
   }
 
   ReactionMode& ReactionModeFactory::DefaultBetaMinus() {
+    //TODO reactionMode is only on stack
     ReactionMode reactionMode;
 
-    std::map<std::string, SpectrumGenerator> sg = {"electron_energy", SimpleBetaDecay::GetInstance()};
+    std::map<std::string, SpectrumGenerator*> sg = {{"electron_energy", nullptr}};
     Process p = {1., nullptr, &(decay::SimpleBetaMinus), sg};
     reactionMode.AddProcess(p);
 
@@ -47,9 +50,33 @@ namespace CRADLE {
   ReactionMode& ReactionModeFactory::DefaultBetaPlus() {
     ReactionMode reactionMode;
 
-    std::map<std::string, SpectrumGenerator> sg = {"positron_energy", SimpleBetaDecay::GetInstance()};
+    std::map<std::string, SpectrumGenerator*> sg = {{"positron_energy", nullptr}};
     Process p = {1., nullptr, &(decay::SimpleBetaPlus), sg};
     reactionMode.AddProcess(p);
+
+    return reactionMode;
+  }
+
+  ReactionMode& ReactionModeFactory::DefaultAlpha() {
+    ReactionMode reactionMode;
+
+    //TODO
+
+    return reactionMode;
+  }
+
+  ReactionMode& ReactionModeFactory::DefaultGamma() {
+    ReactionMode reactionMode;
+
+    //TODO
+
+    return reactionMode;
+  }
+
+  ReactionMode& ReactionModeFactory::DefaultProtonSeparation() {
+    ReactionMode reactionMode;
+
+    //TODO
 
     return reactionMode;
   }

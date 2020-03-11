@@ -35,12 +35,12 @@ namespace CRADLE {
       return deltaDist;
     }
 
-    std::vector<std::vector<double> >* SpectrumGenerator::GetSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+    const std::vector<std::vector<double> >* SpectrumGenerator::GetSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
       std::ostringstream oss;
-      oss << "ID" << initState->GetID() << "_to_ID" << finalState->GetID() << "_Q" << Q / keV;
+      oss << "ID" << initState.GetID() << "_to_ID" << finalState.GetID() << "_Q" << Q / keV;
       std::string name = oss.str();
       if (!DistributionExists(name)) {
-        RegisterDistribution(name, GenerateSpectrum(initState, fnalState, Q));
+        RegisterDistribution(name, GenerateSpectrum(initState, finalState, Q));
       }
       return GetDistribution(name);
     }
@@ -58,9 +58,9 @@ namespace CRADLE {
 
       SpectrumGenerator::~SpectrumGenerator() { }
 
-      DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
-
-      SimpleBetaDecay::SimpleBetaDecay() {}
+      // DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
+      //
+      // SimpleBetaDecay::SimpleBetaDecay() {}
 
       //#ifdef USE_BSG
 
