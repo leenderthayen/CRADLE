@@ -4,27 +4,30 @@
 #include "CRADLE/SpectrumGenerator.h"
 
 #include "PDS/Core/DynamicParticle.h"
+#include "PDS/Units/GlobalSystemOfUnits.h"
 
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace CRADLE {
 
   typedef std::vector<PDS::core::DynamicParticle> (*Activator)(PDS::core::DynamicParticle&,
-    double, double, std::map<std::string, SpectrumGenerator*>);
+    double, double, std::map<std::string, std::shared_ptr<SpectrumGenerator> >);
   typedef double (*BranchingCalculator)(PDS::core::Particle&, double);
 
   struct Process {
     double staticBranchingRatio = -1;
     BranchingCalculator bc;
     Activator a;
-    std::map<std::string, SpectrumGenerator*> generators;
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > generators;
   };
 
   class ReactionMode {
   public:
     ReactionMode();
-    ~ReactionMode() {};
+    ReactionMode(Process);
+    ~ReactionMode();
     std::vector<PDS::core::DynamicParticle> Activate(PDS::core::DynamicParticle&, double Q, double finalExcitationEnergy) const;
 
     inline void AddProcess(Process p) { processes.push_back(p); }
@@ -33,17 +36,16 @@ namespace CRADLE {
     bool RemoveProcessAtIndex(unsigned i);
   private:
     std::vector<Process> processes;
-    //std::vector<PDS::core::DynamicParticle> ActivateProcess(PDS::core::DynamicParticle&, double, double);
   };
 
   class ReactionModeFactory {
   public:
-    static ReactionMode& DefaultBetaMinus();
-    static ReactionMode& DefaultBetaPlus();
-    static ReactionMode& DefaultProtonSeparation();
-    static ReactionMode& DefaultNeutronSeparation();
-    static ReactionMode& DefaultAlpha();
-    static ReactionMode& DefaultGamma();
+    static ReactionMode DefaultBetaMinus(bool advancedFermiFunction = false, double stepSize = 1.0 * keV);
+    static ReactionMode DefaultBetaPlus(bool advancedFermiFunction = false, double stepSize = 1.0 * keV);
+    static ReactionMode DefaultProtonSeparation();
+    static ReactionMode DefaultNeutronSeparation();
+    static ReactionMode DefaultAlpha();
+    static ReactionMode DefaultGamma();
   };
 
 }//end of CRADLE namespace

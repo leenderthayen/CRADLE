@@ -9,7 +9,7 @@
 
 namespace CRADLE {
   struct Vertex {
-    std::vector<PDS::core::DynamicParticle*> particles;
+    std::vector<PDS::core::DynamicParticle> particles;
     std::array<double, 4> position;
     PDS::core::ReactionModeName reactionModeName;
   };
@@ -20,7 +20,9 @@ namespace CRADLE {
     ~Event();
 
     void Info();
-    void AddVertex(std::vector<PDS::core::DynamicParticle*>, std::array<double, 4>, PDS::core::ReactionModeName);
+    void AddVertex(std::vector<PDS::core::DynamicParticle>, std::array<double, 4>, PDS::core::ReactionModeName);
+
+    inline std::vector<Vertex> GetVertices() { return vertices; }
 
     inline void AddVertex(Vertex& v) { vertices.push_back(v); }
   private:

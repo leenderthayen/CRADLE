@@ -8,6 +8,13 @@ namespace CRADLE {
 
   }
 
+  ReactionMode::ReactionMode(Process p) {
+    processes.push_back(p);
+  }
+
+  ReactionMode::~ReactionMode() {
+  }
+
   std::vector<PDS::core::DynamicParticle> ReactionMode::Activate(PDS::core::DynamicParticle& initState, double Q, double finalExcitationEnergy) const {
     std::vector<double> brs;
 
@@ -36,47 +43,39 @@ namespace CRADLE {
     return false;
   }
 
-  ReactionMode& ReactionModeFactory::DefaultBetaMinus() {
-    //TODO reactionMode is only on stack
-    ReactionMode reactionMode;
-
-    std::map<std::string, SpectrumGenerator*> sg = {{"electron_energy", nullptr}};
+  ReactionMode ReactionModeFactory::DefaultBetaMinus(bool aff, double stepSize) {
+    std::shared_ptr<SpectrumGenerator> bbsg(new BasicBetaSpectrumGenerator(aff, stepSize));
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg = {{"electron_energy", bbsg}};
     Process p = {1., nullptr, &(decay::SimpleBetaMinus), sg};
-    reactionMode.AddProcess(p);
 
-    return reactionMode;
+    return ReactionMode(p);
   }
 
-  ReactionMode& ReactionModeFactory::DefaultBetaPlus() {
-    ReactionMode reactionMode;
-
-    std::map<std::string, SpectrumGenerator*> sg = {{"positron_energy", nullptr}};
+  ReactionMode ReactionModeFactory::DefaultBetaPlus(bool aff, double stepSize) {
+    std::shared_ptr<SpectrumGenerator> bbsg(new BasicBetaSpectrumGenerator(aff, stepSize));
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg = {{"positron_energy", bbsg}};
     Process p = {1., nullptr, &(decay::SimpleBetaPlus), sg};
-    reactionMode.AddProcess(p);
+
+    return ReactionMode(p);
+  }
+
+  ReactionMode ReactionModeFactory::DefaultAlpha() {
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg;
+    Process p = {1., nullptr, &(decay::Alpha), sg};
+
+    return reactionMode(p);
+  }
+
+  ReactionMode ReactionModeFactory::DefaultGamma() {
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg;
+    Process p = {1., nullptr, &(decay::Gamma), sg};
 
     return reactionMode;
   }
 
-  ReactionMode& ReactionModeFactory::DefaultAlpha() {
-    ReactionMode reactionMode;
-
-    //TODO
-
-    return reactionMode;
-  }
-
-  ReactionMode& ReactionModeFactory::DefaultGamma() {
-    ReactionMode reactionMode;
-
-    //TODO
-
-    return reactionMode;
-  }
-
-  ReactionMode& ReactionModeFactory::DefaultProtonSeparation() {
-    ReactionMode reactionMode;
-
-    //TODO
+  ReactionMode ReactionModeFactory::DefaultProtonSeparation() {
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg;
+    Process p = {1., nullptr, &(decay::Proton), sg};
 
     return reactionMode;
   }

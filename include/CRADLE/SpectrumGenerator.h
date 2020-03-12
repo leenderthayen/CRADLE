@@ -2,6 +2,7 @@
 #define CRADLE_SPECTRUM_GENERATOR_H
 
 #include "PDS/Core/ParticleDefinition.h"
+#include "PDS/Units/GlobalSystemOfUnits.h"
 
 #include "BSG/Generator.h"
 
@@ -22,7 +23,7 @@ namespace CRADLE {
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
     bool DistributionExists(const std::string);
-    
+
     virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double) = 0;
 
     std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
@@ -33,9 +34,14 @@ namespace CRADLE {
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
   };
 
-  class SimpleBetaDecay: public SpectrumGenerator {
+  class BasicBetaSpectrumGenerator: public SpectrumGenerator {
+  public:
+    BasicBetaSpectrumGenerator(bool a = false, double ss = 1.0 * keV);
   private:
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
+
+    bool advancedFermiFunction;
+    double stepSize;
   };
 
   class ExternalBSG: public SpectrumGenerator {

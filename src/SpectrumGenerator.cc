@@ -62,14 +62,19 @@ namespace CRADLE {
   }
 
   //-----------------------------------------------------------------------------
-  //SimpleBetaDecay
+  //BasicBetaSpectrumGenerator
 
-  std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+  BasicBetaSpectrumGenerator::BasicBetaSpectrumGenerator(bool aff, double ss) {
+    advancedFermiFunction = aff;
+    stepSize = ss;
+  }
+
+  std::vector<std::vector<double> >* BasicBetaSpectrumGenerator::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
     PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticleDefinition());
     PDS::core::Nucleus* finalNucleusDef = static_cast<PDS::core::Nucleus*>(finalState.GetParticleDefinition());
     std::vector<std::vector<double> >* spectrum = NHL::beta::GenerateBetaSpectrum(
       (finalNucleusDef->GetZ() - initNucleusDef->GetZ())*finalNucleusDef->GetZ(),
-      finalNucleusDef->GetZ()+finalNucleusDef->GetA(), Q, true);
+      finalNucleusDef->GetZ()+finalNucleusDef->GetA(), Q, advancedFermiFunction);
 
       return spectrum;
   }

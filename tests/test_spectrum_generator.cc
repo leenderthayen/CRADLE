@@ -26,12 +26,14 @@ TEST_CASE("Initialization") {
     REQUIRE((*spectrum)[0][0] == Q);
   }
 
-  SECTION("SimpleBetaDecay") {
-    CRADLE::SimpleBetaDecay sbd;
+  SECTION("BasicBetaSpectrumGenerator") {
+    CRADLE::BasicBetaSpectrumGenerator sbd;
 
     const std::vector<std::vector<double> >* spectrum = sbd.GetSpectrum(p1, p2, Q);
 
-    
+    REQUIRE((*spectrum)[0][0] != 0);
+    REQUIRE((*spectrum)[0][1] != 0);
+    REQUIRE((*spectrum)[1][0] != 0);
   }
 
 
