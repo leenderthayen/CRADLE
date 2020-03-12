@@ -55,7 +55,7 @@ namespace utilities {
 
   inline double Random(double begin, double end) { return rand() / (double)RAND_MAX * (end - begin) + begin; };
 
-  inline double RandomFromDistribution(std::vector<std::vector<double> >& pd) {
+  inline double RandomFromDistribution(const std::vector<std::vector<double> >& pd) {
     double begin = pd[0][0];
     double end = pd[pd.size()-1][0];
     double stepSize = pd[1][0] - pd[0][0];
@@ -89,7 +89,7 @@ namespace utilities {
     return std::sqrt(sum);
   }
 
-  inline double FourDimDot(vector<double>& a, vector<double>& b) {
+  inline double FourDimDot(const vector<double>& a, const vector<double>& b) {
     //Mostly minus convention
     return a[0]*b[0]-(a[1]*b[1]+a[2]*b[2]+a[3]*b[3]);
   }

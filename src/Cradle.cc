@@ -43,46 +43,46 @@ namespace CRADLE {
     reactionEngine = _reactionEngine;
   }
 
-  bool Cradle::MainLoop(int nrParticles, int nThreads) {
-    //cout << "Starting Main Loop " << endl;
-    std::ofstream fileStream;
-    //Fix
-    fileStream.open(outputName.c_str());
-
-    fileStream << reactionEngine->GenerateEvent(0,initStateName,initExcitationEn,*configOptions);
-    int Q = (nrParticles-1)/nThreads;
-    int R = (nrParticles-1)%nThreads;
-
-    std::future<std::string> f[nThreads];
-    for (int t = 0; t < nThreads; t++) {
-      if(t<R) f[t] = std::async(std::launch::async, &Cradle::GenerateEvents, this, Q+1);
-      else f[t] = std::async(std::launch::async, &Cradle::GenerateEvents, this, Q);
-
-    }
-
-    for (int t = 0; t < nThreads; t++) {
-      fileStream << f[t].get();
-
-    }
-
-    //std::cout << "Done! Time taken: ";
-    fileStream.flush();
-    fileStream.close();
-    return true;
-  }
-
-  std::string Cradle::GenerateEvents(int nrEvents){
-    std::ios::sync_with_stdio(false);
-    // boost::progress_display show_progress(nrEvents);
-    // boost::progress_timer t;
-
-    std::ostringstream threadDataSS;
-    for(int i=0; i < nrEvents ; i++){
-      threadDataSS << reactionEngine->GenerateEvent(i, initStateName, initExcitationEn, *configOptions);
-      // ++show_progress;
-    }
-    return threadDataSS.str();
-  }
+  // bool Cradle::MainLoop(int nrParticles, int nThreads) {
+  //   //cout << "Starting Main Loop " << endl;
+  //   std::ofstream fileStream;
+  //   //Fix
+  //   fileStream.open(outputName.c_str());
+  //
+  //   fileStream << reactionEngine->GenerateEvent(0,initStateName,initExcitationEn,*configOptions);
+  //   int Q = (nrParticles-1)/nThreads;
+  //   int R = (nrParticles-1)%nThreads;
+  //
+  //   std::future<std::string> f[nThreads];
+  //   for (int t = 0; t < nThreads; t++) {
+  //     if(t<R) f[t] = std::async(std::launch::async, &Cradle::GenerateEvents, this, Q+1);
+  //     else f[t] = std::async(std::launch::async, &Cradle::GenerateEvents, this, Q);
+  //
+  //   }
+  //
+  //   for (int t = 0; t < nThreads; t++) {
+  //     fileStream << f[t].get();
+  //
+  //   }
+  //
+  //   //std::cout << "Done! Time taken: ";
+  //   fileStream.flush();
+  //   fileStream.close();
+  //   return true;
+  // }
+  //
+  // std::string Cradle::GenerateEvents(int nrEvents){
+  //   std::ios::sync_with_stdio(false);
+  //   // boost::progress_display show_progress(nrEvents);
+  //   // boost::progress_timer t;
+  //
+  //   std::ostringstream threadDataSS;
+  //   for(int i=0; i < nrEvents ; i++){
+  //     threadDataSS << reactionEngine->GenerateEvent(i, initStateName, initExcitationEn, *configOptions);
+  //     // ++show_progress;
+  //   }
+  //   return threadDataSS.str();
+  // }
 
   //Initialization/loading
 

@@ -1,13 +1,13 @@
 #ifndef CRADLE_DECAY_MANAGER_H
 #define CRADLE_DECAY_MANAGER_H
 
-#include <vector>
-#include <map>
-#include <string>
-
 #include "CRADLE/ConfigParser.h"
 
 #include "spdlog/spdlog.h"
+
+#include <vector>
+#include <map>
+#include <string>
 
 namespace CRADLE {
 
@@ -21,15 +21,15 @@ class Cradle {
 
     void Initialise(std::string, int argc = 0, const char** argv = nullptr);
     void Initialise(ConfigOptions);
-    bool Next();
-    bool MainLoop(int,int);
+    // bool Next();
+    // bool MainLoop(int,int);
 
     void SetReactionEngine(ReactionEngine* );
 
     inline ReactionEngine* GetReactionEngine() { return reactionEngine; }
 
   private:
-    std::string GenerateEvents(int);
+    //std::string GenerateEvents(int);
 
     void InitialiseLoggers();
 

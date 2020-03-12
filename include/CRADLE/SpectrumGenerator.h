@@ -2,67 +2,60 @@
 #define CRADLE_SPECTRUM_GENERATOR_H
 
 #include "PDS/Core/ParticleDefinition.h"
+#include "PDS/Units/GlobalSystemOfUnits.h"
+
+#include "BSG/Generator.h"
 
 #include <vector>
 #include <string>
 #include <map>
 
-//#ifdef USE_BSG
-#include "BSG/Generator.h"
-//#endif
-
 namespace CRADLE {
 
-class SpectrumGenerator {
+  class SpectrumGenerator {
   public:
-    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double) = 0;
     SpectrumGenerator();
     virtual ~SpectrumGenerator();
+
+    const std::vector<std::vector<double> >* GetSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
 
   private:
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
-    
+    bool DistributionExists(const std::string);
+
+    virtual std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double) = 0;
+
     std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
-};
+  };
 
-class DeltaSpectrumGenerator: public SpectrumGenerator {
+  class DeltaSpectrumGenerator: public SpectrumGenerator {
+  private:
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
+  };
+
+  class BasicBetaSpectrumGenerator: public SpectrumGenerator {
   public:
-    static DeltaSpectrumGenerator& GetInstance() {
-      static DeltaSpectrumGenerator instance;
-      return instance;
-    }
+    BasicBetaSpectrumGenerator(bool a = false, double ss = 1.0 * keV);
+  private:
     std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
 
-  protected:
-    DeltaSpectrumGenerator();
-};
+    bool advancedFermiFunction;
+    double stepSize;
+  };
 
-class SimpleBetaDecay: public SpectrumGenerator {
-  public:
-    static SimpleBetaDecay& GetInstance() {
-      static SimpleBetaDecay instance;
-      return instance;
-    }
-    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
-
-  protected:
-    SimpleBetaDecay();
-};
-
-//#ifdef USE_BSG
-class ExternalBSG: public SpectrumGenerator {
+  class ExternalBSG: public SpectrumGenerator {
   public:
     ExternalBSG(std::string);
-    ~ExternalBSG() {};
-    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
+    ~ExternalBSG();
 
     const BSG::Generator* GetGenerator() const;
 
   private:
     BSG::Generator* generator = nullptr;
-};
-//#endif // End of USE_BSG if
+
+    std::vector<std::vector<double> >* GenerateSpectrum(PDS::core::Particle&, PDS::core::Particle&, double);
+  };
 
 }//end of CRADLE namespace
 
