@@ -2,6 +2,7 @@
 #include "CRADLE/ReactionMode.h"
 
 #include "PDS/Core/ReactionChannel.h"
+#include "PDS/Core/Vertex.h"
 
 #include <stdexcept>
 
@@ -11,16 +12,24 @@ namespace CRADLE {
     RegisterDefaultReactionModes();
   }
 
-  Event ReactionEngine::ProcessParticle(PDS::core::DynamicParticle& initState) {
-    Event event;
+  PDS::core::Vertex ReactionEngine::ProcessParticle(PDS::core::DynamicParticle& initState, PDS::core::Vertex& productionVertex) {
+    PDS::core::Vertex vertex;
     PDS::core::ReactionModeName modeName;
     std::array<double, 4> vertexPos;
 
     std::vector<PDS::core::DynamicParticle> finalStates = ProcessDecay(initState, vertexPos, modeName);
 
-    event.AddVertex(finalStates, vertexPos, modeName);
+    vertexPos += productionVertex;
 
-    return event;
+    vertex.AddParticleIn(initState);
+    for (auto & p : finalStates) {
+      p.SetProductionVertex(v);
+      vertex.AddParticleOut(p);
+    }
+
+    vertex.SetPosition(vertexPos);
+
+    return vertex;
   }
 
   std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(PDS::core::DynamicParticle& initState,
@@ -76,42 +85,5 @@ namespace CRADLE {
       std::cout << "Cannot register activator method. Invalid mode name." << std::endl;
     }
   }
-
-std::string ReactionEngine::GenerateEvent(int eventNr, std::string initStateName, double initExcitationEn, ConfigOptions configOptions) {
-  double time = 0.;
-  std::ostringstream eventDataSS;
-  std::vector<PDS::core::DynamicParticle> particleStack;
-  PDS::core::DynamicParticle ini = PDS::ParticleFactory::CreateNewDynamicParticle(initStateName,initExcitationEn);
-  particleStack.push_back(ini);
-  while (!particleStack.empty()) {
-    PDS::core::DynamicParticle dp = particleStack.back();
-    //cout << "Decaying particle " << p->GetName() << endl;
-    std::vector<PDS::core::DynamicParticle> finalStates;
-    //TODO: add similar method in PDS
-    double decayTime = GetDecayTime(dp.GetParticle().GetLifetime());
-
-    if ((time + decayTime) <= configOptions.cuts.Lifetime) {
-      try {
-        finalStates = Decay(dp,configOptions);
-        time += decayTime;
-        // cout << "Decay finished" << endl;
-      } catch (const std::invalid_argument& e) {
-        // cout << "Decay Mode for particle " << p->GetName() << " not found.
-        // Aborting." << endl;
-        return "";
-      }
-    } else {
-      // cout << "Particle " << p->GetName() << " is stable" << endl;
-      eventDataSS << eventNr << "\t" << time << "\t" << GetInfoForFile(dp) << "\n";
-    }
-//    delete particleStack.back();
-    particleStack.pop_back();
-    if (!finalStates.empty()) {
-      particleStack.insert(particleStack.end(), finalStates.begin(),
-                           finalStates.end());
-    }
-  }
-  return eventDataSS.str();
-}
 
 }//end of CRADLE namespace

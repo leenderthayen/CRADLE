@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 #include <random>
+#include <array>
 
 namespace CRADLE {
 
@@ -21,7 +22,7 @@ namespace CRADLE {
     void RegisterDefaultReactionModes();
     void RegisterReactionMode(PDS::core::ReactionModeName, ReactionMode);
 
-    Event ProcessParticle(PDS::core::DynamicParticle&);
+    PDS::core::Vertex ProcessParticle(PDS::core::DynamicParticle&, std::array<double, 4>&);
 
   private:
     static inline std::default_random_engine randomGen;
