@@ -3,7 +3,7 @@
 
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Core/ParticleDefinition.h"
-#include
+#include "PDS/Core/Vertex.h"
 
 #include <vector>
 #include <array>
@@ -16,18 +16,20 @@ namespace CRADLE {
     Event();
     ~Event();
 
-    void Info();
+    void Info() {};
     void AddVertex(std::vector<std::shared_ptr<PDS::core::DynamicParticle> >, std::array<double, 4>, PDS::core::ReactionModeName);
-    void GetInfo();
+    void GetInfo() {};
+    void Print() {};
 
-    friend std::ostream& operator<< (std::ostream &out, const Event &event);
-    friend std::istream& operator>> (std::istream &in, Event &event);
+    //friend std::ostream& operator<< (std::ostream &out, const Event &event);
+    //friend std::istream& operator>> (std::istream &in, Event &event);
 
-    inline const std::vector<PDS::core::Vertex> GetVertices() const { return vertices; }
-    inline void AddVertex(PDS::core::Vertex& v) { vertices.push_back(v); }
-    inline const PDS::core::Vertex& GetLastVertex() const { return vertices.back(); }
+    inline const std::vector<std::shared_ptr<PDS::core::Vertex> > GetVertices() const { return vertices; }
+    inline void AddVertex(std::shared_ptr<PDS::core::Vertex> v) { vertices.push_back(v); }
+    inline const PDS::core::Vertex& GetLastVertex() const { return *(vertices.back()).get(); }
+
   private:
-    std::vector<PDS::core::Vertex> vertices;
+    std::vector<std::shared_ptr<PDS::core::Vertex> > vertices;
     //TODO additional meta data
   };
 }

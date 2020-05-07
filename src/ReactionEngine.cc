@@ -5,6 +5,7 @@
 #include "PDS/Core/Vertex.h"
 
 #include <stdexcept>
+#include <utility>
 
 namespace CRADLE {
 
@@ -12,27 +13,36 @@ namespace CRADLE {
     RegisterDefaultReactionModes();
   }
 
-  PDS::core::Vertex ReactionEngine::ProcessParticle(PDS::core::DynamicParticle& initState, PDS::core::Vertex& productionVertex) {
-    PDS::core::Vertex vertex;
-    PDS::core::ReactionModeName modeName;
+  std::shared_ptr<PDS::core::Vertex> ReactionEngine::ProcessParticle(
+    std::shared_ptr<PDS::core::DynamicParticle> initState,
+    const std::array<double, 4>& productionPos) {
+
+    //Make the new vertex
+    //TODO ID
+    std::shared_ptr<PDS::core::Vertex> vertex = std::make_shared<PDS::core::Vertex>(1);
     std::array<double, 4> vertexPos;
+    //
+    PDS::core::ReactionModeName modeName;
+    //
+    std::vector<PDS::core::DynamicParticle> finalStates = ProcessDecay(*initState.get(), vertexPos, modeName);
 
-    std::vector<PDS::core::DynamicParticle> finalStates = ProcessDecay(initState, vertexPos, modeName);
+    //TODO Fix, pref. make own Lorentz vector class
+    //vertexPos += productionPos;
 
-    vertexPos += productionVertex;
+    initState->SetDestructionVertex(vertex);
+    vertex->AddParticleIn(initState);
+    vertex->SetReactionModeName(modeName);
+    vertex->SetPosition(vertexPos);
 
-    vertex.AddParticleIn(initState);
     for (auto & p : finalStates) {
-      p.SetProductionVertex(v);
-      vertex.AddParticleOut(p);
+      p.SetProductionVertex(vertex);
+      vertex->AddParticleOut(std::make_shared<PDS::core::DynamicParticle>(std::move(p)));
     }
-
-    vertex.SetPosition(vertexPos);
 
     return vertex;
   }
 
-  std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(PDS::core::DynamicParticle& initState,
+  std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(const PDS::core::DynamicParticle& initState,
     std::array<double, 4>& vertexPos, PDS::core::ReactionModeName& modeName) {
 
     std::vector<PDS::core::DynamicParticle> finalStates;

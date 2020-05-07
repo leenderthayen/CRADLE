@@ -3,6 +3,8 @@
 
 #include "CRADLE/ConfigParser.h"
 
+#include "PDS/Core/DynamicParticle.h"
+
 #include "spdlog/spdlog.h"
 
 #include <vector>
@@ -23,28 +25,28 @@ namespace CRADLE {
 
     void Initialise(std::string, int argc = 0, const char** argv = nullptr);
     void Initialise(ConfigOptions);
-    void Next();
+    //void Next();
     void GenerateEvents(int);
 
     //TODO vector.back() on empty container causes undefined behaviour
-    inline Event GetLastEvent() { return events.back(); };
+    //Event& GetLastEvent();
 
     void SetReactionEngine(std::shared_ptr<ReactionEngine>);
 
-    inline ReactionEngine* GetReactionEngine() { return reactionEngine; }
+    inline std::shared_ptr<ReactionEngine> GetReactionEngine() { return reactionEngine; }
 
   private:
-    bool MainLoop(int, int);
+    void EventLoop(int, int);
 
     void InitialiseLoggers();
 
-    PDS::core::DynamicParticle ConstructInitialParticle();
+    std::shared_ptr<PDS::core::DynamicParticle> ConstructInitialParticle();
+    std::shared_ptr<PDS::core::Vertex> ConstructInitialVertex();
 
     void FlushEvents();
 
-    Event BreadthFirstDecay(const PDS::core::DynamicParticle&, int maxDepth);
-    Event DepthFirstDecay(const PDS::core::DynamicParticle&, int maxDepth);
-
+    std::shared_ptr<Event> BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex> prodVertex, int maxDepth);
+    //Event DepthFirstDecay(const PDS::core::DynamicParticle&, int maxDepth);
 
     std::string outputName;
     std::string initStateName;

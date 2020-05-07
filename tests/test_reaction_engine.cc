@@ -5,7 +5,13 @@
 
 #include "PDS/Factory/ParticleFactory.h"
 
+#include <memory>
+
 TEST_CASE("Initialization") {
+  CRADLE::ReactionEngine re;
+}
+
+TEST_CASE("Processing") {
   CRADLE::ReactionEngine re;
 
   PDS::ParticleFactory::RegisterBasicParticles();
@@ -20,15 +26,13 @@ TEST_CASE("Initialization") {
   double Q = 3502.0 * keV;
   double E = 0;
 
-  PDS::core::Particle part = PDS::ParticleFactory::CreateNewParticleFromGeant4(2, 6, 0.);
+  std::shared_ptr<PDS::core::DynamicParticle> dynPart =
+  std::make_shared<PDS::core::DynamicParticle>(PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(2, 6, 0.));
+  std::array<double, 4> initPos;
 
-  PDS::core::DynamicParticle dynPart(part);
+  SECTION("Processing") {
+    std::shared_ptr<PDS::core::Vertex> vertex = re.ProcessParticle(dynPart, initPos);
 
-  CRADLE::Event e = re.ProcessParticle(dynPart);
-
-  std::vector<CRADLE::Vertex> vertices = e.GetVertices();
-
-  std::vector<PDS::core::DynamicParticle> v = vertices[0].particles;
-
-  REQUIRE(v.size() == 3);
+    REQUIRE(vertex->GetParticlesOut().size() == 3);
+  }
 }

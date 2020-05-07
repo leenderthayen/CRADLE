@@ -15,7 +15,7 @@ namespace CRADLE {
   ReactionMode::~ReactionMode() {
   }
 
-  std::vector<PDS::core::DynamicParticle> ReactionMode::Activate(PDS::core::DynamicParticle& initState, double Q, double finalExcitationEnergy) const {
+  std::vector<PDS::core::DynamicParticle> ReactionMode::Activate(const PDS::core::DynamicParticle& initState, double Q, double finalExcitationEnergy) const {
     std::vector<double> brs;
 
     //Loop over processes to calculate BR
@@ -63,20 +63,20 @@ namespace CRADLE {
     std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg;
     Process p = {1., nullptr, &(decay::Alpha), sg};
 
-    return reactionMode(p);
+    return ReactionMode(p);
   }
 
   ReactionMode ReactionModeFactory::DefaultGamma() {
     std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg;
     Process p = {1., nullptr, &(decay::Gamma), sg};
 
-    return reactionMode;
+    return ReactionMode(p);
   }
 
   ReactionMode ReactionModeFactory::DefaultProtonSeparation() {
     std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg;
-    Process p = {1., nullptr, &(decay::Proton), sg};
+    Process p = {1., nullptr, &(decay::ProtonSeparation), sg};
 
-    return reactionMode;
+    return ReactionMode(p);
   }
 }//end of CRADLE namespace

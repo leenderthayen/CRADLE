@@ -17,7 +17,7 @@ namespace ublas = boost::numeric::ublas;
 
 namespace CRADLE {
   namespace decay {
-    inline std::vector<PDS::core::DynamicParticle> SimpleBetaMinus(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
+    inline std::vector<PDS::core::DynamicParticle> SimpleBetaMinus(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
 
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
@@ -53,7 +53,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> SimpleBetaPlus(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
+    inline std::vector<PDS::core::DynamicParticle> SimpleBetaPlus(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
       PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
@@ -90,7 +90,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> ConversionElectron(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
+    inline std::vector<PDS::core::DynamicParticle> ConversionElectron(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
       std::vector<PDS::core::DynamicParticle> finalStates;
 
       ublas::vector<double> velocity = -initState.GetVelocity();
@@ -104,7 +104,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> ProtonSeparation(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
+    inline std::vector<PDS::core::DynamicParticle> ProtonSeparation(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //std::ostringstream oss;
       //oss << initState.GetParticle().GetParticleDefinition()->GetName();
@@ -121,7 +121,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> Alpha(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
+    inline std::vector<PDS::core::DynamicParticle> Alpha(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
       PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //std::ostringstream oss;
       //oss << initState.GetParticle().GetParticleDefinition()->GetName();
@@ -138,7 +138,7 @@ namespace CRADLE {
       return finalStates;
     }
 
-    inline std::vector<PDS::core::DynamicParticle> Gamma(PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
+    inline std::vector<PDS::core::DynamicParticle> Gamma(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
       std::vector<PDS::core::DynamicParticle> finalStates;
 
       ublas::vector<double> velocity = -initState.GetVelocity();

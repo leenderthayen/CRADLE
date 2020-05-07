@@ -17,7 +17,7 @@ TEST_CASE("Test External BSG Initialization") {
 TEST_CASE("Test BSG Spectral generation") {
   CRADLE::ExternalBSG external("");
 
-  std::string homeDir = "/Users/leenderthayen";
+  std::string homeDir = "/Users/leenderthayen/Work";
   std::string Geant4RadDir = homeDir + "/Nuclear_Databases/Geant4/RadioactiveDecay5.4";
   std::string Geant4PhotonDir = homeDir + "/Nuclear_Databases/Geant4/PhotonEvaporation5.5";
 
@@ -55,7 +55,7 @@ TEST_CASE("Test BSG Spectral generation") {
 TEST_CASE("Multiple initializations") {
   CRADLE::ExternalBSG external("");
 
-  std::string homeDir = "/Users/leenderthayen";
+  std::string homeDir = "/Users/leenderthayen/Work";
   std::string Geant4RadDir = homeDir + "/Nuclear_Databases/Geant4/RadioactiveDecay5.4";
   std::string Geant4PhotonDir = homeDir + "/Nuclear_Databases/Geant4/PhotonEvaporation5.5";
 
