@@ -9,8 +9,8 @@ namespace CRADLE {
 
 struct NuclearOptions {
   std::string Name = "";
-  int Charge = 1;
-  int Nucleons = 1;
+  int Charge = 8;
+  int Nucleons = 20;
   double Energy = 0.0;
 };
 

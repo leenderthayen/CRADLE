@@ -2,8 +2,12 @@
 #include "CRADLE/ReactionMode.h"
 
 #include "PDS/Core/ReactionChannel.h"
+#include "PDS/Core/Vertex.h"
+#include "PDS/Math/LorentzAlgebra.h"
+#include "PDS/Units/GlobalPhysicalConstants.h"
 
 #include <stdexcept>
+#include <utility>
 
 namespace CRADLE {
 
@@ -11,20 +15,35 @@ namespace CRADLE {
     RegisterDefaultReactionModes();
   }
 
-  Event ReactionEngine::ProcessParticle(PDS::core::DynamicParticle& initState) {
-    Event event;
+  std::shared_ptr<PDS::core::Vertex> ReactionEngine::ProcessParticle(
+    std::shared_ptr<PDS::core::DynamicParticle> initState,
+    const ublas::vector<double>& productionPos) {
+
+    //Make the new vertex
+    //TODO ID
+    std::shared_ptr<PDS::core::Vertex> vertex = std::make_shared<PDS::core::Vertex>(1);
+    ublas::vector<double> vertexPos(4);
+
     PDS::core::ReactionModeName modeName;
-    std::array<double, 4> vertexPos;
 
-    std::vector<PDS::core::DynamicParticle> finalStates = ProcessDecay(initState, vertexPos, modeName);
+    std::vector<PDS::core::DynamicParticle> finalStates = ProcessDecay(*initState.get(), vertexPos, modeName);
 
-    event.AddVertex(finalStates, vertexPos, modeName);
+    vertexPos += productionPos;
 
-    return event;
+    initState->SetDestructionVertex(vertex);
+    vertex->AddParticleIn(initState);
+    vertex->SetReactionModeName(modeName);
+    vertex->SetPosition(vertexPos);
+
+    for (auto & p : finalStates) {
+      p.SetProductionVertex(vertex);
+      vertex->AddParticleOut(std::make_shared<PDS::core::DynamicParticle>(std::move(p)));
+    }
+    return vertex;
   }
 
-  std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(PDS::core::DynamicParticle& initState,
-    std::array<double, 4>& vertexPos, PDS::core::ReactionModeName& modeName) {
+  std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(const PDS::core::DynamicParticle& initState,
+    ublas::vector<double>& vertexPos, PDS::core::ReactionModeName& modeName) {
 
     std::vector<PDS::core::DynamicParticle> finalStates;
     //Decay time in center of mass frame
@@ -34,11 +53,26 @@ namespace CRADLE {
     try {
       const ReactionMode& rm = GetReactionMode(rc.GetReactionModeName());
       finalStates = rm.Activate(initState, rc.GetQValue(), rc.GetFinalExcitationEnergy());
+      modeName = rc.GetReactionModeName();
     } catch (int e) {
       //TODO
     }
 
-    //TODO Lorentz transformation into lab frame
+    // Decay products are already in lab frame, except for a four-vector translation offset
+    // The momentum of the initial state is recorded, the decay is performed
+    // in the center of mass frame, and the final products are boosted back to the lab frame
+    // where the origin of the COM and lab frame coincide
+
+    // While docs say it should be initialized to 0, it doesn't
+    ublas::vector<double> decayPosCOM(4);
+    // spacetime interval must be done explicitly with c_light for other units to work
+    decayPosCOM(0) = tauDecay * c_light;
+    decayPosCOM(1) = 0;
+    decayPosCOM(2) = 0;
+    decayPosCOM(3) = 0;
+
+    ublas::vector<double> velocity = -initState.GetVelocity();
+    vertexPos = PDS::util::LorentzBoost(velocity, decayPosCOM);
 
     return finalStates;
   }
@@ -73,45 +107,8 @@ namespace CRADLE {
         throw;
       }
     } catch (const std::invalid_argument &e) {
-      std::cout << "Cannot register activator method. Invalid mode name." << std::endl;
+      throw "Cannot register activator method. Invalid mode name.";
     }
   }
-
-std::string ReactionEngine::GenerateEvent(int eventNr, std::string initStateName, double initExcitationEn, ConfigOptions configOptions) {
-  double time = 0.;
-  std::ostringstream eventDataSS;
-  std::vector<PDS::core::DynamicParticle> particleStack;
-  PDS::core::DynamicParticle ini = PDS::ParticleFactory::CreateNewDynamicParticle(initStateName,initExcitationEn);
-  particleStack.push_back(ini);
-  while (!particleStack.empty()) {
-    PDS::core::DynamicParticle dp = particleStack.back();
-    //cout << "Decaying particle " << p->GetName() << endl;
-    std::vector<PDS::core::DynamicParticle> finalStates;
-    //TODO: add similar method in PDS
-    double decayTime = GetDecayTime(dp.GetParticle().GetLifetime());
-
-    if ((time + decayTime) <= configOptions.cuts.Lifetime) {
-      try {
-        finalStates = Decay(dp,configOptions);
-        time += decayTime;
-        // cout << "Decay finished" << endl;
-      } catch (const std::invalid_argument& e) {
-        // cout << "Decay Mode for particle " << p->GetName() << " not found.
-        // Aborting." << endl;
-        return "";
-      }
-    } else {
-      // cout << "Particle " << p->GetName() << " is stable" << endl;
-      eventDataSS << eventNr << "\t" << time << "\t" << GetInfoForFile(dp) << "\n";
-    }
-//    delete particleStack.back();
-    particleStack.pop_back();
-    if (!finalStates.empty()) {
-      particleStack.insert(particleStack.end(), finalStates.begin(),
-                           finalStates.end());
-    }
-  }
-  return eventDataSS.str();
-}
 
 }//end of CRADLE namespace

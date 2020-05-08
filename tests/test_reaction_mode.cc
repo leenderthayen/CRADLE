@@ -13,7 +13,7 @@
 #include <string>
 #include <memory>
 
-std::vector<PDS::core::DynamicParticle> TestActivator(PDS::core::DynamicParticle& i,
+std::vector<PDS::core::DynamicParticle> TestActivator(const PDS::core::DynamicParticle& i,
   double Q, double E, std::map<std::string, std::shared_ptr<CRADLE::SpectrumGenerator> > sg) {
   std::vector<PDS::core::DynamicParticle> v;
 
@@ -51,7 +51,7 @@ TEST_CASE("Activation") {
 TEST_CASE("Beta decay") {
   PDS::ParticleFactory::RegisterBasicParticles();
 
-  std::shared_ptr<CRADLE::SpectrumGenerator> sbd(new CRADLE::BasicBetaSpectrumGenerator(false, 1.0 * keV));
+  std::shared_ptr<CRADLE::SpectrumGenerator> sbd = std::make_shared<CRADLE::BasicBetaSpectrumGenerator>(false, 1.0 * keV);
   std::map<std::string, std::shared_ptr<CRADLE::SpectrumGenerator> > m = {{"electron_energy", sbd}};
 
   SECTION("Mock up activator") {
@@ -66,7 +66,7 @@ TEST_CASE("Beta decay") {
   }
 
   SECTION("Simple beta decay activator") {
-    std::string homeDir = "/Users/leenderthayen";
+    std::string homeDir = "/Users/leenderthayen/Work";
     std::string Geant4RadDir = homeDir + "/Nuclear_Databases/Geant4/RadioactiveDecay5.4";
     std::string Geant4PhotonDir = homeDir + "/Nuclear_Databases/Geant4/PhotonEvaporation5.5";
 

@@ -3,30 +3,39 @@
 
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Core/ParticleDefinition.h"
+#include "PDS/Core/Vertex.h"
 
 #include <vector>
 #include <array>
+#include <memory>
+#include <iostream>
 
 namespace CRADLE {
-  struct Vertex {
-    std::vector<PDS::core::DynamicParticle> particles;
-    std::array<double, 4> position;
-    PDS::core::ReactionModeName reactionModeName;
-  };
-
   class Event {
   public:
-    Event();
-    ~Event();
+    Event(unsigned _ID) : ID(_ID) {};
+    ~Event() {};
 
-    void Info();
-    void AddVertex(std::vector<PDS::core::DynamicParticle>, std::array<double, 4>, PDS::core::ReactionModeName);
+    void Info() {};
+    void AddVertex(std::vector<std::shared_ptr<PDS::core::DynamicParticle> >, std::array<double, 4>, PDS::core::ReactionModeName);
+    void GetInfo() {};
+    void Print() {};
 
-    inline std::vector<Vertex> GetVertices() { return vertices; }
+    //friend std::ostream& operator<< (std::ostream &out, const Event &event);
+    //friend std::istream& operator>> (std::istream &in, Event &event);
 
-    inline void AddVertex(Vertex& v) { vertices.push_back(v); }
+    inline const std::vector<std::shared_ptr<PDS::core::Vertex> >& GetVertices() const { return vertices; }
+    inline void AddVertex(std::shared_ptr<PDS::core::Vertex>& v) { vertices.push_back(v); }
+    inline void AddVertices(std::vector<std::shared_ptr<PDS::core::Vertex> > v) { vertices.insert(vertices.end(), v.begin(), v.end()); }
+    inline const PDS::core::Vertex& GetLastVertex() const { return *(vertices.back()).get(); }
+
+    inline unsigned GetID() const { return ID; }
+    inline void SetID(unsigned _ID) { ID = _ID; }
+
   private:
-    std::vector<Vertex> vertices;
+    std::vector<std::shared_ptr<PDS::core::Vertex> > vertices;
+    unsigned ID;
+    //TODO additional meta data
   };
 }
 

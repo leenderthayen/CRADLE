@@ -7,9 +7,15 @@
 #include "PDS/Core/DynamicParticle.h"
 #include "PDS/Core/ReactionChannel.h"
 
+#include <boost/numeric/ublas/vector.hpp>
+
 #include <map>
 #include <vector>
 #include <random>
+#include <array>
+#include <memory>
+
+namespace ublas = boost::numeric::ublas;
 
 namespace CRADLE {
 
@@ -21,13 +27,13 @@ namespace CRADLE {
     void RegisterDefaultReactionModes();
     void RegisterReactionMode(PDS::core::ReactionModeName, ReactionMode);
 
-    Event ProcessParticle(PDS::core::DynamicParticle&);
+    std::shared_ptr<PDS::core::Vertex> ProcessParticle(std::shared_ptr<PDS::core::DynamicParticle>, const ublas::vector<double>&);
 
   private:
     static inline std::default_random_engine randomGen;
     std::map<PDS::core::ReactionModeName, ReactionMode> reactionDictionary;
 
-    std::vector<PDS::core::DynamicParticle> ProcessDecay(PDS::core::DynamicParticle&);
+    std::vector<PDS::core::DynamicParticle> ProcessDecay(const PDS::core::DynamicParticle&, ublas::vector<double>&, PDS::core::ReactionModeName&);
 
     const ReactionMode& GetReactionMode(PDS::core::ReactionModeName);
   };

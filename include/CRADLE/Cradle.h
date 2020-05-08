@@ -2,18 +2,23 @@
 #define CRADLE_DECAY_MANAGER_H
 
 #include "CRADLE/ConfigParser.h"
+#include "CRADLE/Event.h"
+
+#include "PDS/Core/DynamicParticle.h"
 
 #include "spdlog/spdlog.h"
 
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
+#include <atomic>
 
 namespace CRADLE {
 
-class ReactionEngine;
+  class ReactionEngine;
 
-class Cradle {
+  class Cradle {
   public:
 
     Cradle(std::string);
@@ -21,29 +26,41 @@ class Cradle {
 
     void Initialise(std::string, int argc = 0, const char** argv = nullptr);
     void Initialise(ConfigOptions);
-    // bool Next();
-    // bool MainLoop(int,int);
+    void EventLoopMT(int, int);
+    void EventLoop(int);
 
-    void SetReactionEngine(ReactionEngine* );
+    void SetReactionEngine(std::shared_ptr<ReactionEngine>);
 
-    inline ReactionEngine* GetReactionEngine() { return reactionEngine; }
+    inline std::shared_ptr<ReactionEngine> GetReactionEngine() const { return reactionEngine; }
+
+    inline std::vector<Event> GetEvents() const { return events; }
+
+    std::shared_ptr<PDS::core::DynamicParticle> ConstructInitialParticle();
+    std::shared_ptr<PDS::core::Vertex> ConstructInitialVertex();
 
   private:
-    //std::string GenerateEvents(int);
-
     void InitialiseLoggers();
+
+    void FlushEvents();
+
+    std::vector<std::shared_ptr<PDS::core::Vertex> > UnlimitedDecay(const std::shared_ptr<PDS::core::Vertex>& prodVertex);
+    Event BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex>& prodVertex, int maxDepth);
+    //Event DepthFirstDecay(const PDS::core::DynamicParticle&, int maxDepth);
 
     std::string outputName;
     std::string initStateName;
     double initExcitationEn;
-    ReactionEngine* reactionEngine;
-    ConfigOptions* configOptions;
+    std::shared_ptr<ReactionEngine> reactionEngine;
+    ConfigOptions configOptions;
+    std::vector<Event> events;
 
     std::shared_ptr<spdlog::logger> consoleLogger;
     std::shared_ptr<spdlog::logger> debugFileLogger;
     std::shared_ptr<spdlog::logger> rawSpectrumLogger;
     std::shared_ptr<spdlog::logger> resultsFileLogger;
-};
+
+    std::atomic<unsigned long long> eventCounter = 1;
+  };
 
 }//end of CRADLE namespace
 #endif

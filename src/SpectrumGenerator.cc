@@ -40,7 +40,7 @@ namespace CRADLE {
     return registeredDistributions.count(name);
   }
 
-  const std::vector<std::vector<double> >* SpectrumGenerator::GetSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+  const std::vector<std::vector<double> >* SpectrumGenerator::GetSpectrum(const PDS::core::Particle& initState, const PDS::core::Particle& finalState, double Q) {
     std::ostringstream oss;
     oss << "ID" << initState.GetID() << "_to_ID" << finalState.GetID() << "_Q" << Q / keV;
     std::string name = oss.str();
@@ -53,7 +53,7 @@ namespace CRADLE {
   //-----------------------------------------------------------------------------
   //DeltaSpectrumGenerator
 
-  std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+  std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(const PDS::core::Particle& initState, const PDS::core::Particle& finalState, double Q) {
     std::vector<std::vector<double> >* deltaDist = new std::vector<std::vector<double> >();
     std::vector<double> pair = {Q, 1.0};
     deltaDist->push_back(pair);
@@ -69,7 +69,7 @@ namespace CRADLE {
     stepSize = ss;
   }
 
-  std::vector<std::vector<double> >* BasicBetaSpectrumGenerator::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+  std::vector<std::vector<double> >* BasicBetaSpectrumGenerator::GenerateSpectrum(const PDS::core::Particle& initState, const PDS::core::Particle& finalState, double Q) {
     PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticleDefinition());
     PDS::core::Nucleus* finalNucleusDef = static_cast<PDS::core::Nucleus*>(finalState.GetParticleDefinition());
     std::vector<std::vector<double> >* spectrum = NHL::beta::GenerateBetaSpectrum(
@@ -96,7 +96,7 @@ namespace CRADLE {
     return generator;
   }
 
-  std::vector<std::vector<double> >* ExternalBSG::GenerateSpectrum(PDS::core::Particle& initState, PDS::core::Particle& finalState, double Q) {
+  std::vector<std::vector<double> >* ExternalBSG::GenerateSpectrum(const PDS::core::Particle& initState, const PDS::core::Particle& finalState, double Q) {
     generator->SetInitialState(initState);
     generator->SetFinalState(finalState);
     generator->SetQValue(Q);

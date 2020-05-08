@@ -12,9 +12,9 @@
 
 namespace CRADLE {
 
-  typedef std::vector<PDS::core::DynamicParticle> (*Activator)(PDS::core::DynamicParticle&,
+  typedef std::vector<PDS::core::DynamicParticle> (*Activator)(const PDS::core::DynamicParticle&,
     double, double, std::map<std::string, std::shared_ptr<SpectrumGenerator> >);
-  typedef double (*BranchingCalculator)(PDS::core::Particle&, double);
+  typedef double (*BranchingCalculator)(const PDS::core::Particle&, double);
 
   struct Process {
     double staticBranchingRatio = -1;
@@ -28,7 +28,7 @@ namespace CRADLE {
     ReactionMode();
     ReactionMode(Process);
     ~ReactionMode();
-    std::vector<PDS::core::DynamicParticle> Activate(PDS::core::DynamicParticle&, double Q, double finalExcitationEnergy) const;
+    std::vector<PDS::core::DynamicParticle> Activate(const PDS::core::DynamicParticle&, double Q, double finalExcitationEnergy) const;
 
     inline void AddProcess(Process p) { processes.push_back(p); }
     inline const std::vector<Process>& GetProcesses() const { return processes; }

@@ -5,30 +5,35 @@
 
 #include "PDS/Factory/ParticleFactory.h"
 
+#include <memory>
+#include <iostream>
+
 TEST_CASE("Initialization") {
+  CRADLE::ReactionEngine re;
+}
+
+TEST_CASE("Processing") {
   CRADLE::ReactionEngine re;
 
   PDS::ParticleFactory::RegisterBasicParticles();
 
-  std::string homeDir = "/Users/leenderthayen";
+  std::string homeDir = "/Users/leenderthayen/Work";
   std::string Geant4RadDir = homeDir + "/Nuclear_Databases/Geant4/RadioactiveDecay5.4";
   std::string Geant4PhotonDir = homeDir + "/Nuclear_Databases/Geant4/PhotonEvaporation5.5";
 
   PDS::ParticleFactory::SetGeant4RadDirectory(Geant4RadDir);
   PDS::ParticleFactory::SetGeant4PhotonDirectory(Geant4PhotonDir);
 
-  double Q = 3502.0 * keV;
-  double E = 0;
+  std::shared_ptr<PDS::core::DynamicParticle> dynPart =
+  std::make_shared<PDS::core::DynamicParticle>(PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(2, 6, 0.));
+  ublas::vector<double> initPos;
 
-  PDS::core::Particle part = PDS::ParticleFactory::CreateNewParticleFromGeant4(2, 6, 0.);
+  REQUIRE(dynPart->GetParticle().GetCharge() == 2);
 
-  PDS::core::DynamicParticle dynPart(part);
+  std::shared_ptr<PDS::core::Vertex> vertex = re.ProcessParticle(dynPart, initPos);
 
-  CRADLE::Event e = re.ProcessParticle(dynPart);
-
-  std::vector<CRADLE::Vertex> vertices = e.GetVertices();
-
-  std::vector<PDS::core::DynamicParticle> v = vertices[0].particles;
-
-  REQUIRE(v.size() == 3);
+  REQUIRE(vertex->GetParticlesOut().size() == 3);
+  for (auto & p : vertex->GetParticlesOut()) {
+    std::cout << p->GetName() << std::endl;
+  }
 }
