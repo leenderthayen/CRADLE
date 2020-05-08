@@ -13,8 +13,8 @@
 namespace CRADLE {
   class Event {
   public:
-    Event();
-    ~Event();
+    Event(unsigned _ID) : ID(_ID) {};
+    ~Event() {};
 
     void Info() {};
     void AddVertex(std::vector<std::shared_ptr<PDS::core::DynamicParticle> >, std::array<double, 4>, PDS::core::ReactionModeName);
@@ -24,8 +24,9 @@ namespace CRADLE {
     //friend std::ostream& operator<< (std::ostream &out, const Event &event);
     //friend std::istream& operator>> (std::istream &in, Event &event);
 
-    inline const std::vector<std::shared_ptr<PDS::core::Vertex> > GetVertices() const { return vertices; }
-    inline void AddVertex(std::shared_ptr<PDS::core::Vertex> v) { vertices.push_back(v); }
+    inline const std::vector<std::shared_ptr<PDS::core::Vertex> >& GetVertices() const { return vertices; }
+    inline void AddVertex(std::shared_ptr<PDS::core::Vertex>& v) { vertices.push_back(v); }
+    inline void AddVertices(std::vector<std::shared_ptr<PDS::core::Vertex> > v) { vertices.insert(vertices.end(), v.begin(), v.end()); }
     inline const PDS::core::Vertex& GetLastVertex() const { return *(vertices.back()).get(); }
 
     inline unsigned GetID() const { return ID; }

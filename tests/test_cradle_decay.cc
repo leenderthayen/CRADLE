@@ -26,17 +26,16 @@ TEST_CASE("Initialization") {
   }
 
   SECTION("Generate event") {
-    cradle.GenerateEvents(2);
+    cradle.EventLoop(30);
 
     for (auto & e : cradle.GetEvents()) {
-      std::cout << "Event " << e.GetID() << std::endl;
       for (auto & v : e.GetVertices()) {
-        std::cout << "Vertex " << v->GetID() << std::endl;
+        std::cout << "ID " << e.GetID() << "." << v->GetID() << " POS " << v->GetPosition()(0) / s / c_light << " " << v->GetPosition()(1) / mm << " " << v->GetPosition()(2) / mm << " " << v->GetPosition()(3) / mm << std::endl;
         for(auto & p : v->GetParticlesIn()) {
-          std::cout << "IN " << p->GetName() << "(" << p->GetParticle().GetExcitationEnergy() / keV << ") E " << p->GetKinEnergy() / keV << std::endl;
+          std::cout << "ID " << e.GetID() << "." << v->GetID() << " IN " << p->GetName() << "(" << p->GetParticle().GetExcitationEnergy() / keV << ") E " << p->GetKinEnergy() / keV << std::endl;
         }
         for (auto & p : v->GetParticlesOut()) {
-          std::cout << "OUT " << p->GetName() << "(" << p->GetParticle().GetExcitationEnergy() / keV << ") E " << p->GetKinEnergy() / keV << std::endl;
+          std::cout << "ID " << e.GetID() << "." << v->GetID() << " OUT " << p->GetName() << "(" << p->GetParticle().GetExcitationEnergy() / keV << ") E " << p->GetKinEnergy() / keV << std::endl;
         }
       }
     }

@@ -10,8 +10,6 @@
 #include <queue>
 #include <utility>
 
-#include <iostream>
-
 namespace CRADLE {
 
   Cradle::Cradle(std::string _outputName) : outputName(_outputName) {
@@ -35,8 +33,6 @@ namespace CRADLE {
     initStateName = configOptions.nuclearOptions.Name;
     initExcitationEn = configOptions.nuclearOptions.Energy;
     outputName = configOptions.general.Output;
-
-    //  PDS::ParticleFactory::GenerateNucleus(initStateName, configOptions.nuclearOptions.Charge, configOptions.nuclearOptions.Nucleons);
   }
 
   void Cradle::SetReactionEngine(std::shared_ptr<ReactionEngine> _reactionEngine){
@@ -50,8 +46,13 @@ namespace CRADLE {
   }
 
   std::shared_ptr<PDS::core::Vertex> Cradle::ConstructInitialVertex() {
+    // Initial vertex has ID 0
     std::shared_ptr<PDS::core::Vertex> initVertex = std::make_shared<PDS::core::Vertex>(0);
-    std::array<double, 4> initPos = {0, 0, 0, 0};
+    ublas::vector<double> initPos(4);
+    initPos(0) = 0;
+    initPos(1) = 0;
+    initPos(2) = 0;
+    initPos(3) = 0;
 
     initVertex->SetPosition(initPos);
 
@@ -62,13 +63,11 @@ namespace CRADLE {
     return initVertex;
   }
 
-  Event Cradle::BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex> prodVertex, int maxDepth) {
-    Event event;
-    std::vector<PDS::core::Vertex> vertexCollection;
+  // Simple FIFO (First In, First Out) decayer with no cuts
+  // Using std::queue, simply decays until all products are stable
+  std::vector<std::shared_ptr<PDS::core::Vertex> > Cradle::UnlimitedDecay(const std::shared_ptr<PDS::core::Vertex>& prodVertex) {
+    std::vector<std::shared_ptr<PDS::core::Vertex> > vertexCollection;
     std::queue<std::shared_ptr<PDS::core::DynamicParticle> > queue;
-
-    int currentDepth = 0;
-    int depthIndex = 0;
 
     for (auto & p : prodVertex->GetParticlesOut()) {
       if (!p->IsStable()) {
@@ -76,45 +75,83 @@ namespace CRADLE {
       }
     }
 
+    unsigned vertexID = 1;
+
     while (!queue.empty()) {
-      //std::cout << queue.front()->GetName() << std::endl;
-      //reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition());
-      event.AddVertex(reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition()));
+      std::shared_ptr<PDS::core::Vertex> v =
+      reactionEngine->ProcessParticle(queue.front(), queue.front()->GetProductionVertex()->GetPosition());
       queue.pop();
-      // --depthIndex;
-      // if (depthIndex < 0) {
-      //   ++currentDepth;
-      //   depthIndex = queue.size()-1;
-      //   for (auto & p : event.GetLastVertex().GetParticlesOut()) {
-      //     if (!p.IsStable()) {
-      //       ++depthIndex;
-      //     }
-      //   }
-      //   //depthIndex = event.GetLastVertex().GetParticlesOut().size()-1;
-      // }
-      for (auto & p : event.GetLastVertex().GetParticlesOut()) {
+      v->SetID(vertexID);
+      vertexID++;
+      vertexCollection.push_back(v);
+      for (auto & p : vertexCollection.back()->GetParticlesOut()) {
         if (!p->IsStable()) {
           queue.push(p);
         }
       }
     }
+    return vertexCollection;
+  }
+
+  Event Cradle::BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex>& prodVertex, int maxDepth) {
+    Event event(0);
+    std::vector<PDS::core::Vertex> vertexCollection;
+    std::queue<std::shared_ptr<PDS::core::DynamicParticle> > queue;
+
+    // int currentDepth = 0;
+    // int depthIndex = 0;
+    //
+    // for (auto & p : prodVertex->GetParticlesOut()) {
+    //   if (!p->IsStable()) {
+    //     queue.push(p);
+    //   }
+    // }
+    //
+    // while (!queue.empty()) {
+    //   //std::cout << queue.front()->GetName() << std::endl;
+    //   //reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition());
+    //   event.AddVertex(reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition()));
+    //   queue.pop();
+    //   // --depthIndex;
+    //   // if (depthIndex < 0) {
+    //   //   ++currentDepth;
+    //   //   depthIndex = queue.size()-1;
+    //   //   for (auto & p : event.GetLastVertex().GetParticlesOut()) {
+    //   //     if (!p.IsStable()) {
+    //   //       ++depthIndex;
+    //   //     }
+    //   //   }
+    //   //   //depthIndex = event.GetLastVertex().GetParticlesOut().size()-1;
+    //   // }
+    //   for (auto & p : event.GetLastVertex().GetParticlesOut()) {
+    //     if (!p->IsStable()) {
+    //       queue.push(p);
+    //     }
+    //   }
+    // }
     return event;
   }
 
 
-  void Cradle::GenerateEvents(int nrEvents) {
+  void Cradle::EventLoop(int nrEvents) {
     //Check why this is
     std::ios::sync_with_stdio(false);
 
     for (int i = 0; i < nrEvents; ++i) {
+      Event event(eventCounter);
+      eventCounter++;
+
       std::shared_ptr<PDS::core::Vertex> v = ConstructInitialVertex();
-      events.push_back(BreadthFirstDecay(v, 1));
+      event.AddVertex(v);
+      event.AddVertices(UnlimitedDecay(v));
+
+      events.push_back(event);
     }
   }
 
-  void Cradle::EventLoop(int nrEvents, int nrThreads) {
-    int Q = (nrEvents-1)/nrThreads;
-    int R = (nrEvents-1)%nrThreads;
+  void Cradle::EventLoopMT(int nrEvents, int nrThreads) {
+    // int Q = (nrEvents-1)/nrThreads;
+    // int R = (nrEvents-1)%nrThreads;
 
     // std::future<std::string> f[nrThreads];
     // for (int t = 0; t < nrThreads; t++) {

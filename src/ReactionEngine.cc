@@ -3,6 +3,8 @@
 
 #include "PDS/Core/ReactionChannel.h"
 #include "PDS/Core/Vertex.h"
+#include "PDS/Math/LorentzAlgebra.h"
+#include "PDS/Units/GlobalPhysicalConstants.h"
 
 #include <stdexcept>
 #include <utility>
@@ -15,19 +17,18 @@ namespace CRADLE {
 
   std::shared_ptr<PDS::core::Vertex> ReactionEngine::ProcessParticle(
     std::shared_ptr<PDS::core::DynamicParticle> initState,
-    const std::array<double, 4>& productionPos) {
+    const ublas::vector<double>& productionPos) {
 
     //Make the new vertex
     //TODO ID
     std::shared_ptr<PDS::core::Vertex> vertex = std::make_shared<PDS::core::Vertex>(1);
-    std::array<double, 4> vertexPos;
-    //
+    ublas::vector<double> vertexPos(4);
+
     PDS::core::ReactionModeName modeName;
-    //
+
     std::vector<PDS::core::DynamicParticle> finalStates = ProcessDecay(*initState.get(), vertexPos, modeName);
 
-    //TODO Fix, pref. make own Lorentz vector class
-    //vertexPos += productionPos;
+    vertexPos += productionPos;
 
     initState->SetDestructionVertex(vertex);
     vertex->AddParticleIn(initState);
@@ -38,12 +39,11 @@ namespace CRADLE {
       p.SetProductionVertex(vertex);
       vertex->AddParticleOut(std::make_shared<PDS::core::DynamicParticle>(std::move(p)));
     }
-
     return vertex;
   }
 
   std::vector<PDS::core::DynamicParticle> ReactionEngine::ProcessDecay(const PDS::core::DynamicParticle& initState,
-    std::array<double, 4>& vertexPos, PDS::core::ReactionModeName& modeName) {
+    ublas::vector<double>& vertexPos, PDS::core::ReactionModeName& modeName) {
 
     std::vector<PDS::core::DynamicParticle> finalStates;
     //Decay time in center of mass frame
@@ -53,11 +53,26 @@ namespace CRADLE {
     try {
       const ReactionMode& rm = GetReactionMode(rc.GetReactionModeName());
       finalStates = rm.Activate(initState, rc.GetQValue(), rc.GetFinalExcitationEnergy());
+      modeName = rc.GetReactionModeName();
     } catch (int e) {
       //TODO
     }
 
-    //TODO Lorentz transformation into lab frame
+    // Decay products are already in lab frame, except for a four-vector translation offset
+    // The momentum of the initial state is recorded, the decay is performed
+    // in the center of mass frame, and the final products are boosted back to the lab frame
+    // where the origin of the COM and lab frame coincide
+
+    // While docs say it should be initialized to 0, it doesn't
+    ublas::vector<double> decayPosCOM(4);
+    // spacetime interval must be done explicitly with c_light for other units to work
+    decayPosCOM(0) = tauDecay * c_light;
+    decayPosCOM(1) = 0;
+    decayPosCOM(2) = 0;
+    decayPosCOM(3) = 0;
+
+    ublas::vector<double> velocity = -initState.GetVelocity();
+    vertexPos = PDS::util::LorentzBoost(velocity, decayPosCOM);
 
     return finalStates;
   }
@@ -92,7 +107,7 @@ namespace CRADLE {
         throw;
       }
     } catch (const std::invalid_argument &e) {
-      std::cout << "Cannot register activator method. Invalid mode name." << std::endl;
+      throw "Cannot register activator method. Invalid mode name.";
     }
   }
 

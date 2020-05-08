@@ -44,8 +44,6 @@ namespace CRADLE {
       momentum3(2) = p3(1);
       momentum3(3) = p3(2);
 
-      //std::cout << "\t" << inner_prod(p1, p2)/p2Norm/c << std::endl;
-
       // Perform Lorentz boost back to lab frame
       finalState1.SetFourMomentum(LorentzBoost(velocity, momentum1));
       finalState2.SetFourMomentum(LorentzBoost(velocity, momentum2));
