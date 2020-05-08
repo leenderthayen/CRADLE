@@ -9,7 +9,8 @@ set(CRADLE_UTESTS_SOURCES
   test_spectrum_generator.cc
   test_reaction_mode.cc
   test_reaction_mode_factory.cc
-  test_event.cc)
+  test_event.cc
+  test_cradle_decay.cc)
 
 enable_testing()
 

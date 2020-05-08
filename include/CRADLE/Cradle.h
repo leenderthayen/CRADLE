@@ -2,6 +2,7 @@
 #define CRADLE_DECAY_MANAGER_H
 
 #include "CRADLE/ConfigParser.h"
+#include "CRADLE/Event.h"
 
 #include "PDS/Core/DynamicParticle.h"
 
@@ -15,7 +16,6 @@
 namespace CRADLE {
 
   class ReactionEngine;
-  class Event;
 
   class Cradle {
   public:
@@ -33,19 +33,23 @@ namespace CRADLE {
 
     void SetReactionEngine(std::shared_ptr<ReactionEngine>);
 
-    inline std::shared_ptr<ReactionEngine> GetReactionEngine() { return reactionEngine; }
+    inline std::shared_ptr<ReactionEngine> GetReactionEngine() const { return reactionEngine; }
+
+    inline std::vector<Event> GetEvents() const { return events; }
+
+    Event BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex> prodVertex, int maxDepth);
+
+    std::shared_ptr<PDS::core::DynamicParticle> ConstructInitialParticle();
+    std::shared_ptr<PDS::core::Vertex> ConstructInitialVertex();
 
   private:
     void EventLoop(int, int);
 
     void InitialiseLoggers();
 
-    std::shared_ptr<PDS::core::DynamicParticle> ConstructInitialParticle();
-    std::shared_ptr<PDS::core::Vertex> ConstructInitialVertex();
-
     void FlushEvents();
 
-    std::shared_ptr<Event> BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex> prodVertex, int maxDepth);
+
     //Event DepthFirstDecay(const PDS::core::DynamicParticle&, int maxDepth);
 
     std::string outputName;

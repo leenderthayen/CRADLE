@@ -28,8 +28,12 @@ namespace CRADLE {
     inline void AddVertex(std::shared_ptr<PDS::core::Vertex> v) { vertices.push_back(v); }
     inline const PDS::core::Vertex& GetLastVertex() const { return *(vertices.back()).get(); }
 
+    inline unsigned GetID() const { return ID; }
+    inline void SetID(unsigned _ID) { ID = _ID; }
+
   private:
     std::vector<std::shared_ptr<PDS::core::Vertex> > vertices;
+    unsigned ID;
     //TODO additional meta data
   };
 }

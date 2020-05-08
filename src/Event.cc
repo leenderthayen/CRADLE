@@ -2,7 +2,7 @@
 
 namespace CRADLE {
   Event::Event() {
-
+    ID = 0;
   }
 
   Event::~Event() {

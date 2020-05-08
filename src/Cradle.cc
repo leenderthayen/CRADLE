@@ -10,11 +10,14 @@
 #include <queue>
 #include <utility>
 
+#include <iostream>
+
 namespace CRADLE {
 
   Cradle::Cradle(std::string _outputName) : outputName(_outputName) {
     InitialiseLoggers();
     PDS::ParticleFactory::RegisterBasicParticles();
+    reactionEngine = std::make_shared<ReactionEngine>();
   }
 
   Cradle::~Cradle() {
@@ -23,7 +26,6 @@ namespace CRADLE {
   void Cradle::Initialise(std::string configFilename, int argc, const char** argv) {
     ConfigOptions configOptions = ParseOptions(configFilename, argc, argv);
     Initialise(configOptions);
-    reactionEngine = std::make_shared<ReactionEngine>();
   }
 
   void Cradle::Initialise(ConfigOptions _configOptions) {
@@ -47,21 +49,21 @@ namespace CRADLE {
     return std::make_shared<PDS::core::DynamicParticle>(std::move(dynPart));
   }
 
-  // std::shared_ptr<PDS::core::Vertex> Cradle::ConstructInitialVertex() {
-  //   std::shared_ptr<PDS::core::Vertex> initVertex = std::make_shared<PDS::core::Vertex>(1);
-  //   std::array<double, 4> initPos = {0, 0, 0, 0};
-  //
-  //   initVertex->SetPosition(initPos);
-  //
-  //   std::shared_ptr<PDS::core::DynamicParticle> initState = ConstructInitialParticle();
-  //   initState.
-  //   initVertex->AddParticleIn(initState);
-  //
-  //   return initVertex;
-  // }
+  std::shared_ptr<PDS::core::Vertex> Cradle::ConstructInitialVertex() {
+    std::shared_ptr<PDS::core::Vertex> initVertex = std::make_shared<PDS::core::Vertex>(0);
+    std::array<double, 4> initPos = {0, 0, 0, 0};
 
-  std::shared_ptr<Event> Cradle::BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex> prodVertex, int maxDepth) {
-    std::shared_ptr<Event> event;
+    initVertex->SetPosition(initPos);
+
+    std::shared_ptr<PDS::core::DynamicParticle> initState = ConstructInitialParticle();
+    initState->SetProductionVertex(initVertex);
+    initVertex->AddParticleOut(initState);
+
+    return initVertex;
+  }
+
+  Event Cradle::BreadthFirstDecay(const std::shared_ptr<PDS::core::Vertex> prodVertex, int maxDepth) {
+    Event event;
     std::vector<PDS::core::Vertex> vertexCollection;
     std::queue<std::shared_ptr<PDS::core::DynamicParticle> > queue;
 
@@ -75,7 +77,9 @@ namespace CRADLE {
     }
 
     while (!queue.empty()) {
-      event->AddVertex(reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition()));
+      //std::cout << queue.front()->GetName() << std::endl;
+      //reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition());
+      event.AddVertex(reactionEngine->ProcessParticle(queue.front(), prodVertex->GetPosition()));
       queue.pop();
       // --depthIndex;
       // if (depthIndex < 0) {
@@ -88,7 +92,7 @@ namespace CRADLE {
       //   }
       //   //depthIndex = event.GetLastVertex().GetParticlesOut().size()-1;
       // }
-      for (auto & p : event->GetLastVertex().GetParticlesOut()) {
+      for (auto & p : event.GetLastVertex().GetParticlesOut()) {
         if (!p->IsStable()) {
           queue.push(p);
         }
@@ -103,7 +107,8 @@ namespace CRADLE {
     std::ios::sync_with_stdio(false);
 
     for (int i = 0; i < nrEvents; ++i) {
-      //Next();
+      std::shared_ptr<PDS::core::Vertex> v = ConstructInitialVertex();
+      events.push_back(BreadthFirstDecay(v, 1));
     }
   }
 
