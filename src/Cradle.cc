@@ -59,6 +59,7 @@ namespace CRADLE {
     std::shared_ptr<PDS::core::DynamicParticle> initState = ConstructInitialParticle();
     initState->SetProductionVertex(initVertex);
     initVertex->AddParticleOut(initState);
+    initVertex->AddParticleIn(initState);
 
     return initVertex;
   }

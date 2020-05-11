@@ -19,7 +19,7 @@ namespace CRADLE {
   namespace decay {
     inline std::vector<PDS::core::DynamicParticle> SimpleBetaMinus(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
 
-      PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
+      const PDS::core::Nucleus* initNucleusDef = static_cast<const PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
       PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()+1,initNucleusDef->GetA(),daughterExEn);
       PDS::core::DynamicParticle e = PDS::ParticleFactory::CreateNewDynamicParticle("electron", 0);
@@ -54,7 +54,7 @@ namespace CRADLE {
     }
 
     inline std::vector<PDS::core::DynamicParticle> SimpleBetaPlus(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
-      PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
+      const PDS::core::Nucleus* initNucleusDef = static_cast<const PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //TODO: design general approach for the creation of a dynamic particle with charge Z+1 from dynamic particle with charge Z
       PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
       PDS::core::DynamicParticle pos = PDS::ParticleFactory::CreateNewDynamicParticle("e+",0);
@@ -105,7 +105,7 @@ namespace CRADLE {
     }
 
     inline std::vector<PDS::core::DynamicParticle> ProtonSeparation(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
-      PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
+      const PDS::core::Nucleus* initNucleusDef = static_cast<const PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //std::ostringstream oss;
       //oss << initState.GetParticle().GetParticleDefinition()->GetName();
       PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-1,initNucleusDef->GetA(),daughterExEn);
@@ -122,7 +122,7 @@ namespace CRADLE {
     }
 
     inline std::vector<PDS::core::DynamicParticle> Alpha(const PDS::core::DynamicParticle& initState, double Q, double daughterExEn, std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg) {
-      PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
+      const PDS::core::Nucleus* initNucleusDef = static_cast<const PDS::core::Nucleus*>(initState.GetParticle().GetParticleDefinition());
       //std::ostringstream oss;
       //oss << initState.GetParticle().GetParticleDefinition()->GetName();
       PDS::core::DynamicParticle recoil = PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(initNucleusDef->GetZ()-2,initNucleusDef->GetA()-4,daughterExEn);
