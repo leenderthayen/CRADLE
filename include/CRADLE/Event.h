@@ -38,7 +38,7 @@ namespace CRADLE {
     inline void SetID(unsigned _ID) { ID = _ID; }
 
     static inline std::array<std::string, 6> VertexFormat = {"ID", "t[ns]", "delta t[ns]", "x[mm]", "y[mm]", "z[mm]"};
-    static inline std::array<std::string, 11> ParticleFormat = {"PDGID", "Symbol", "Name", "Mass[MeV]", "ProdVertex",
+    static inline std::array<std::string, 11> ParticleFormat = {"PDGID\t", "Symbol", "Name", "Mass[MeV]", "ProdVertex",
     "DestrVertex", "Ekin[MeV]", "px", "py", "pz", "Eexc [MeV]"};
 
   private:

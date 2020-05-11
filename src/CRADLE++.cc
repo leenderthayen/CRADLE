@@ -3,15 +3,6 @@
 #include <string>
 #include <iostream>
 
-void ShowInfo() {
-  std::string author = "L. Hayen (lmhayen@ncsu.edu)";
-  std::cout << "-----------------------------------------------" << std::endl;
-  //cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
-  //cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
-  std::cout << "-  Author: " << author << std::endl;
-  std::cout << "-----------------------------------------------\n" << std::endl;
-}
-
 int main (int argc, const char* argv[]) {
   ShowInfo();
 
@@ -20,7 +11,7 @@ int main (int argc, const char* argv[]) {
   std::string outputName = "output";
 
   CLI::App app{"CRADLE++ standalone"};
-  app.add_option("-i,--input", iniFilename, "INI input file for transition information")->required();
+  app.add_option("-i,--input", iniFilename, "INI input file for transition information");
   app.add_option("-c,--config", configFilename, "INI config file for calculation information");
   app.add_option("-o,--output", outputName, "Name for file output. No extensions.");
 
@@ -30,9 +21,9 @@ int main (int argc, const char* argv[]) {
     app.exit(e);
   }
 
-  CRADLE::Cradle* cradle = new CRADLE::Cradle(outputName);
+  CRADLE::Cradle cradle(outputName);
 
-  cradle->Initialise(configFilename, argc, argv);
+  cradle.Initialise(configFilename, argc, argv);
 
   /*OptionContainer::GetInstance(argc, argv);
 
