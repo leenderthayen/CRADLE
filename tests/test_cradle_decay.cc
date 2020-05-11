@@ -40,4 +40,12 @@ TEST_CASE("Initialization") {
       }
     }
   }
+
+  SECTION("Print event") {
+    cradle.EventLoop(2);
+
+    for (auto & e : cradle.GetEvents()) {
+      std::cout << e << std::endl;
+    }
+  }
 }

@@ -70,8 +70,8 @@ namespace CRADLE {
   }
 
   std::vector<std::vector<double> >* BasicBetaSpectrumGenerator::GenerateSpectrum(const PDS::core::Particle& initState, const PDS::core::Particle& finalState, double Q) {
-    PDS::core::Nucleus* initNucleusDef = static_cast<PDS::core::Nucleus*>(initState.GetParticleDefinition());
-    PDS::core::Nucleus* finalNucleusDef = static_cast<PDS::core::Nucleus*>(finalState.GetParticleDefinition());
+    const PDS::core::Nucleus* initNucleusDef = static_cast<const PDS::core::Nucleus*>(initState.GetParticleDefinition());
+    const PDS::core::Nucleus* finalNucleusDef = static_cast<const PDS::core::Nucleus*>(finalState.GetParticleDefinition());
     std::vector<std::vector<double> >* spectrum = NHL::beta::GenerateBetaSpectrum(
       (finalNucleusDef->GetZ() - initNucleusDef->GetZ())*finalNucleusDef->GetZ(),
       finalNucleusDef->GetZ()+finalNucleusDef->GetA(), Q, advancedFermiFunction);

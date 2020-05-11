@@ -20,7 +20,7 @@ namespace CRADLE {
     const ublas::vector<double>& productionPos) {
 
     //Make the new vertex
-    //TODO ID
+    //TODO ID, now taken care of in Cradle.cc, should be here?
     std::shared_ptr<PDS::core::Vertex> vertex = std::make_shared<PDS::core::Vertex>(1);
     ublas::vector<double> vertexPos(4);
 
