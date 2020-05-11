@@ -46,6 +46,8 @@ namespace CRADLE {
     static ReactionMode DefaultNeutronSeparation();
     static ReactionMode DefaultAlpha();
     static ReactionMode DefaultGamma();
+    static ReactionMode ExternalBSGBetaPlus(std::string configFile);
+    static ReactionMode ExternalBSGBetaMinus(std::string configFile);
   };
 
 }//end of CRADLE namespace

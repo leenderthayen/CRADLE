@@ -7,6 +7,7 @@
 #include "spdlog/spdlog.h"
 
 #include <string>
+#include <memory>
 
 namespace CRADLE {
 
@@ -83,17 +84,16 @@ namespace CRADLE {
   //ExternalBSG
 
   ExternalBSG::ExternalBSG(std::string configFilename) {
-    generator = new BSG::Generator();
+    generator = std::make_shared<BSG::Generator>();
 
     generator->InitialiseOptionsFromConfigFile(configFilename);
   }
 
   ExternalBSG::~ExternalBSG() {
-    delete generator;
   }
 
   const BSG::Generator* ExternalBSG::GetGenerator() const {
-    return generator;
+    return generator.get();
   }
 
   std::vector<std::vector<double> >* ExternalBSG::GenerateSpectrum(const PDS::core::Particle& initState, const PDS::core::Particle& finalState, double Q) {

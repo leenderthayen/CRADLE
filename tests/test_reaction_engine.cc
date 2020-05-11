@@ -26,7 +26,7 @@ TEST_CASE("Processing") {
 
   std::shared_ptr<PDS::core::DynamicParticle> dynPart =
   std::make_shared<PDS::core::DynamicParticle>(PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(2, 6, 0.));
-  ublas::vector<double> initPos;
+  ublas::vector<double> initPos(4);
 
   REQUIRE(dynPart->GetParticle().GetCharge() == 2);
 

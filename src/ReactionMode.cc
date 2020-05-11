@@ -43,8 +43,24 @@ namespace CRADLE {
     return false;
   }
 
+  ReactionMode ReactionModeFactory::ExternalBSGBetaMinus(std::string configFile) {
+    std::shared_ptr<SpectrumGenerator> extbsg = std::make_shared<ExternalBSG>(configFile);
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg = {{"electron_energy", extbsg}};
+    Process p = {1., nullptr, &(decay::SimpleBetaMinus), sg};
+
+    return ReactionMode(p);
+  }
+
+  ReactionMode ReactionModeFactory::ExternalBSGBetaPlus(std::string configFile) {
+    std::shared_ptr<SpectrumGenerator> extbsg = std::make_shared<ExternalBSG>(configFile);
+    std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg = {{"positron_energy", extbsg}};
+    Process p = {1., nullptr, &(decay::SimpleBetaPlus), sg};
+
+    return ReactionMode(p);
+  }
+
   ReactionMode ReactionModeFactory::DefaultBetaMinus(bool aff, double stepSize) {
-    std::shared_ptr<SpectrumGenerator> bbsg(new BasicBetaSpectrumGenerator(aff, stepSize));
+    std::shared_ptr<SpectrumGenerator> bbsg = std::make_shared<BasicBetaSpectrumGenerator>(aff, stepSize);
     std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg = {{"electron_energy", bbsg}};
     Process p = {1., nullptr, &(decay::SimpleBetaMinus), sg};
 
@@ -52,7 +68,7 @@ namespace CRADLE {
   }
 
   ReactionMode ReactionModeFactory::DefaultBetaPlus(bool aff, double stepSize) {
-    std::shared_ptr<SpectrumGenerator> bbsg(new BasicBetaSpectrumGenerator(aff, stepSize));
+    std::shared_ptr<SpectrumGenerator> bbsg = std::make_shared<BasicBetaSpectrumGenerator>(aff, stepSize);
     std::map<std::string, std::shared_ptr<SpectrumGenerator> > sg = {{"positron_energy", bbsg}};
     Process p = {1., nullptr, &(decay::SimpleBetaPlus), sg};
 

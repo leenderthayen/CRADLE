@@ -1,8 +1,12 @@
 #include "catch.hpp"
 
 #include "CRADLE/SpectrumGenerator.h"
+#include "CRADLE/ReactionMode.h"
+#include "CRADLE/ReactionEngine.h"
+
 #include "PDS/Factory/ParticleFactory.h"
 #include "PDS/Factory/NuclearDataLoaders.h"
+#include "PDS/Core/ReactionChannel.h"
 
 #include "BSG/Generator.h"
 
@@ -87,4 +91,32 @@ TEST_CASE("Multiple initializations") {
   REQUIRE((*spectrum2)[1][0] != 0);
 
   REQUIRE((*spectrum2)[1][1] != (*spectrum)[1][1]);
+}
+
+TEST_CASE("Registration with Reaction Engine using factory") {
+  //Default processes are registered
+  CRADLE::ReactionEngine re;
+
+  re.RegisterReactionMode(PDS::core::ReactionModeName::BetaMinus, CRADLE::ReactionModeFactory::ExternalBSGBetaMinus(""));
+
+  PDS::ParticleFactory::RegisterBasicParticles();
+
+  std::string homeDir = "/Users/leenderthayen/Work";
+  std::string Geant4RadDir = homeDir + "/Nuclear_Databases/Geant4/RadioactiveDecay5.4";
+  std::string Geant4PhotonDir = homeDir + "/Nuclear_Databases/Geant4/PhotonEvaporation5.5";
+
+  PDS::ParticleFactory::SetGeant4RadDirectory(Geant4RadDir);
+  PDS::ParticleFactory::SetGeant4PhotonDirectory(Geant4PhotonDir);
+
+  std::shared_ptr<PDS::core::DynamicParticle> dynPart =
+  std::make_shared<PDS::core::DynamicParticle>(PDS::ParticleFactory::GetNewDynamicParticleFromGeant4(2, 6, 0.));
+  ublas::vector<double> initPos(4);
+
+  std::shared_ptr<PDS::core::Vertex> vertex = re.ProcessParticle(dynPart, initPos);
+
+  REQUIRE(vertex->GetParticlesOut().size() == 3);
+
+  for (auto & p : vertex->GetParticlesOut()) {
+    std::cout << p->GetName() << " [" << p->GetKinEnergy() << "]" <<  std::endl;
+  }
 }

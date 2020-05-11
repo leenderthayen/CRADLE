@@ -81,6 +81,7 @@ namespace CRADLE {
     try {
       auto it = reactionDictionary.find(modeName);
       if (it != reactionDictionary.end())
+      //TODO Garbage collection of previous one
         reactionDictionary[modeName] = reactionMode;
       else
         reactionDictionary.insert(std::make_pair(modeName, reactionMode));

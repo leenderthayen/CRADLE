@@ -52,7 +52,7 @@ namespace CRADLE {
     const BSG::Generator* GetGenerator() const;
 
   private:
-    BSG::Generator* generator = nullptr;
+    std::shared_ptr<BSG::Generator> generator = nullptr;
 
     std::vector<std::vector<double> >* GenerateSpectrum(const PDS::core::Particle&, const PDS::core::Particle&, double);
   };

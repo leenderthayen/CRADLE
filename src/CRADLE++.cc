@@ -4,8 +4,6 @@
 #include <iostream>
 
 int main (int argc, const char* argv[]) {
-  ShowInfo();
-
   std::string iniFilename;
   std::string configFilename;
   std::string outputName = "output";
