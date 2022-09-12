@@ -156,13 +156,15 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   filename << "z" << Z << ".a" << A;
   std::ifstream radDataFile((filename.str()).c_str());
 
-  //cout << "Generating nucleus " << name << endl;
+  cout << "Generating nucleus " << name << endl;
 
   string line;
   double excitationEnergy = 0.;
   double lifetime;
   Particle* p = new Particle(name, utilities::GetApproximateMass(Z, A), Z,
                              (A - Z), 0., 0);
+
+  cout << filename.str() << endl;
 
   while (getline(radDataFile, line)) {
     if (!line.compare(0, 1, "#")) {
@@ -176,7 +178,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
       iss >> p >> excitationEnergy >> flag >> lifetime;
       continue;
     }
-    //cout << "Lifetime: " << lifetime << endl;
+    cout << "Lifetime: " << lifetime << endl;
     string mode;
     double daughterExcitationEnergy = 0;
     double intensity = 0;
@@ -186,14 +188,14 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
     istringstream iss(line);
     iss >> mode >> daughterExcitationEnergy >> flag >> intensity >> Q >> modifier;
-    /*cout << "Mode: " << mode << endl;
+    cout << "Mode: " << mode << endl;
     cout << "Daughter Energy" << daughterExcitationEnergy << endl;
     cout << "Intensity: " << intensity << endl;
     cout << "Q: " << Q << endl;
-    cout << "Modifier: " << modifier << endl;*/
+    cout << "Modifier: " << modifier << endl;
     if (Q > 0.) {
-      /*cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
-      excitationEnergy << " to " << daughterExcitationEnergy << endl;*/
+      cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
+      excitationEnergy << " to " << daughterExcitationEnergy << endl;
       if (mode.find("shellEC") != string::npos) {
         // TODO
         continue;
@@ -236,7 +238,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
         >> convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
         mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
 
-        //cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
+        cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
         DecayChannel* dcGamma =
             new DecayChannel("Gamma", &GetDecayMode("Gamma"), E, intensity / (1. + convIntensity),
                              lifetime, initEnergy, initEnergy - E);

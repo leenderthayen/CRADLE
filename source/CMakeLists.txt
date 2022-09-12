@@ -31,8 +31,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread")
 add_executable(CRADLE++ CRADLE++.cc ${sources} ${headers})
 
 target_link_libraries(CRADLE++ ${Boost_LIBRARIES})
-target_link_libraries(CRADLE++ ${GSL_LIBRARIES})
+#target_link_libraries(CRADLE++ ${GSL_LIBRARIES})
 target_link_libraries(CRADLE++ ${EXTRA_LIBS})
+target_link_libraries(CRADLE++ "-L/usr/local/Cellar/gsl/2.7/lib -lgsl -lgslcblas")
 
 add_custom_command(TARGET CRADLE++
                    POST_BUILD
