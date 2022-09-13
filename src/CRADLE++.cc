@@ -1,34 +1,27 @@
-#include "DecayManager.hh"
-#include "OptionContainer.hh"
-#include "SpectrumGenerator.hh"
-#include <iostream>
 #include <string>
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
+#include <iostream>
 
-#include "CRADLEConfig.h"
+int main (int argc, const char* argv[]) {
+  std::string iniFilename;
+  std::string configFilename;
+  std::string outputName = "output";
 
-namespace po = boost::program_options;
+  CLI::App app{"CRADLE++ standalone"};
+  app.add_option("-i,--input", iniFilename, "INI input file for transition information");
+  app.add_option("-c,--config", configFilename, "INI config file for calculation information");
+  app.add_option("-o,--output", outputName, "Name for file output. No extensions.");
 
-using std::cout;
-using std::endl;
-using std::cerr;
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError &e) {
+    app.exit(e);
+  }
 
-void ShowInfo() {
-  std::string author = "L. Hayen (leendert.hayen@kuleuven.be)";
-  cout << "-----------------------------------------------" << endl;
-  cout << "-  CRADLE++ version " << std::string(CRADLE_VERSION) << "      -" << endl;
-  cout << "-  Last update: " << std::string(CRADLE_LAST_UPDATE) << endl;
-  cout << "-  Author: " << author << endl;
-  cout << "-----------------------------------------------\n" << endl;
-}
+  /*CRADLE::Cradle cradle(outputName);
 
-int main (int argc, char* argv[]) {
-  ShowInfo();
+  cradle.Initialise(configFilename, argc, argv);
 
   OptionContainer::GetInstance(argc, argv);
-
   if (!(OptExists("config") && OptExists("name") && OptExists("charge") && OptExists("nucleons"))) {
     cout << "Specify configuration file, isotope name, charge and number of nucleons. Use the --help option for more documentation." << endl;
   } else {
@@ -50,7 +43,6 @@ int main (int argc, char* argv[]) {
       if (GetOpt(int, "General.Verbosity") > 0)
         dm.ListRegisteredParticles();
     }
-  }
-  cout << "Exiting..." << endl;
+  }*/
   return 0;
 }

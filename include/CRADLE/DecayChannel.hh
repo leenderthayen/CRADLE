@@ -1,11 +1,13 @@
 #ifndef DECAYCHANNEL
 #define DECAYCHANNEL
 
-class Particle;
-class DecayMode;
-
 #include <vector>
 #include <string>
+
+namespace CRADLE {
+
+class Particle;
+class DecayMode;
 
 using std::string;
 
@@ -30,4 +32,6 @@ class DecayChannel {
     string modeName;
     DecayMode* decayMode;
 };
+
+}//End of CRADLE namespace
 #endif

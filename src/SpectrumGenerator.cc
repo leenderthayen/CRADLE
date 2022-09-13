@@ -34,6 +34,14 @@ std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(Particle* i
   return spectrum;
 }
 
+std::vector<std::vector<double> >* AdvancedBetaDecay::GenerateSpectrum(Particle* initState, Particle* finalState, double Q) {
+  std::vector<std::vector<double> >* spectrum = utilities::GenerateBetaSpectrum(
+  (finalState->GetCharge() - initState->GetCharge())*finalState->GetCharge(),
+  finalState->GetCharge()+finalState->GetNeutrons(), Q, true);
+
+  return spectrum;
+}
+
 SpectrumGenerator::SpectrumGenerator() { }
 
 SpectrumGenerator::~SpectrumGenerator() { }
@@ -41,6 +49,8 @@ SpectrumGenerator::~SpectrumGenerator() { }
 DeltaSpectrumGenerator::DeltaSpectrumGenerator() { }
 
 SimpleBetaDecay::SimpleBetaDecay() {}
+
+AdvancedBetaDecay::AdvancedBetaDecay() {}
 
 #ifdef USE_BSG
 std::vector<std::vector<double> >* BSG::GenerateSpectrum(Particle* initState, Particle* finalState, double Q) {

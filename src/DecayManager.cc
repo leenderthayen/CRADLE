@@ -1,10 +1,10 @@
-#include "DecayManager.hh"
-#include "Utilities.hh"
-#include "DecayChannel.hh"
-#include "Particle.hh"
-#include "DecayMode.hh"
-#include "OptionContainer.hh"
-#include "SpectrumGenerator.hh"
+#include "CRADLE/DecayManager.hh"
+#include "CRADLE/Utilities.hh"
+#include "CRADLE/DecayChannel.hh"
+#include "CRADLE/Particle.hh"
+#include "CRADLE/DecayMode.hh"
+#include "CRADLE/SpectrumGenerator.hh"
+
 #include <boost/progress.hpp>
 #include <fstream>
 #include <sstream>
@@ -12,8 +12,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <future>
-
-using namespace std;
 
 template<typename A, typename B>
 std::pair<B,A> flip_pair(const std::pair<A,B> &p)
@@ -29,6 +27,8 @@ std::multimap<B,A> flip_map(const std::map<A,B> &src)
                    flip_pair<A,B>);
     return dst;
 }
+
+namespace CRADLE {
 
 DecayManager::~DecayManager() {
   // cout << "Destroying decaymanager" << endl;
@@ -343,3 +343,4 @@ bool DecayManager::MainLoop(int nrParticles) {
   fileStream.close();
   return true;
 }
+}//End of CRADLE namespace

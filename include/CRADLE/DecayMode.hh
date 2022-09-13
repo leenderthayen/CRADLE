@@ -5,6 +5,8 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <string>
 
+namespace CRADLE {
+
 class Particle;
 class SpectrumGenerator;
 
@@ -107,4 +109,6 @@ class Gamma: public DecayMode {
     Gamma(Gamma const& copy);
     Gamma& operator=(Gamma const& copy);
 };
+
+}//End of CRADLE namespace
 #endif

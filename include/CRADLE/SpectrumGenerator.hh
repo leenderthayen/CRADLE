@@ -6,6 +6,8 @@
 
 #include "CRADLEConfig.h"
 
+namespace CRADLE {
+
 class Particle;
 
 class SpectrumGenerator {
@@ -43,21 +45,20 @@ class SimpleBetaDecay: public SpectrumGenerator {
     SimpleBetaDecay& operator=(SimpleBetaDecay const& copy);
 };
 
-#ifdef USE_BSG
-class BSG: public SpectrumGenerator {
+class AdvancedBetaDecay: public SpectrumGenerator {
   public:
-    static BSG& GetInstance() {
-      static BSG instance;
+    static AdvancedBetaDecay& GetInstance() {
+      static AdvancedBetaDecay instance;
       return instance;
     }
     std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
 
   protected:
-    BSG();
-    BSG(BSG const& copy);
-    BSG& operator=(BSG const& copy);
-    void WriteINIFile(const std::string, Particle*, Particle*, double);
+    AdvancedBetaDecay();
+    AdvancedBetaDecay(AdvancedBetaDecay const& copy);
+    AdvancedBetaDecay& operator=(AdvancedBetaDecay const& copy);
 };
-#endif // End of USE_BSG if
+
+}//End of CRADLE namespace
 
 #endif // End of SPECTRUMGENERATOR if

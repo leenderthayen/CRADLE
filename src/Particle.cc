@@ -1,9 +1,11 @@
-#include "Particle.hh"
-#include "DecayChannel.hh"
-#include "OptionContainer.hh"
+#include "CRADLE/Particle.hh"
+#include "CRADLE/DecayChannel.hh"
+
 #include <stdlib.h>
 #include <stdexcept>
 #include <cmath>
+
+namespace CRADLE {
 
 std::default_random_engine Particle::randomGen;
 
@@ -87,3 +89,4 @@ std::vector<Particle*> Particle::Decay() {
     throw e;
   }
 }
+}//End of CRADLE namespace

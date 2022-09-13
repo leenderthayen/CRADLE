@@ -1,11 +1,13 @@
-#include "DecayMode.hh"
-#include "DecayManager.hh"
-#include "Particle.hh"
-#include "Utilities.hh"
-#include "OptionContainer.hh"
-#include "SpectrumGenerator.hh"
+#include "CRADLE/DecayMode.hh"
+#include "CRADLE/DecayManager.hh"
+#include "CRADLE/Particle.hh"
+#include "CRADLE/Utilities.hh"
+#include "CRADLE/SpectrumGenerator.hh"
+
 #include <string>
 #include <sstream>
+
+namespace CRADLE {
 
 void DecayMode::ThreeBodyDecay(ublas::vector<double>& velocity, Particle* finalState1, Particle* finalState2, Particle* finalState3, ublas::vector<double>& dir2, double Q) {
   //Perform decay in CoM frame
@@ -321,3 +323,5 @@ Proton::Proton () { }
 Alpha::Alpha () { }
 
 Gamma::Gamma () { }
+
+}//End of CRADLE namespace

@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+namespace CRADLE {
+
 class Particle;
 class DecayMode;
 class SpectrumGenerator;
@@ -47,4 +49,6 @@ class DecayManager {
     double initExcitationEn;
     int NRTHREADS;
 };
+
+}//End of CRADLE namespace
 #endif

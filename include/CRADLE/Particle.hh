@@ -7,6 +7,8 @@
 #include <sstream>
 #include <random>
 
+namespace CRADLE {
+
 class DecayChannel;
 
 namespace ublas = boost::numeric::ublas;
@@ -76,5 +78,7 @@ class Particle {
     };
     inline std::vector<DecayChannel*>& GetDecayChannels() { return decayChannels; };
 };
+
+}//End of CRADLE namespace
 
 #endif
