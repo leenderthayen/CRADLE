@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include "CRADLEConfig.h"
-
 namespace CRADLE {
 
 class Particle;

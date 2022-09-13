@@ -21,6 +21,8 @@
 #include "gsl/gsl_complex_math.h"
 #include "gsl/gsl_sf_dilog.h"
 
+#include "CRADLE/Screening.hh"
+
 namespace CRADLE {
 
 namespace utilities {
@@ -31,6 +33,7 @@ namespace utilities {
   const double EMASSC2 = 510.9989461;//keV
   const double PMASSC2 = 938272.046;//keV
   const double NMASSC2 = 939565.4133;//keV
+  const double ALPHAMASSC2 = 3727379.4066;//keV
   const double FINESTRUCTUREMASSC2 = 3727379.508;//keV
   const double FINESTRUCTURE = 0.0072973525664;
   const double E = 2.718281828459045;
@@ -480,19 +483,21 @@ namespace utilities {
     return (1.15+1.8*std::pow(A, -2./3.)-1.2*std::pow(A, -4./3.))*EMASSC2*1000./HBAR/C*std::pow(A, 1./3.);
   }
 
-  inline double GetSpectrumHeight(double Z, double A, double Q, double E, bool advancedFermi) {
+  inline double GetSpectrumHeight(int Z, int A, double Q, double E, bool advanced) {
     double W = E/EMASSC2+1.;
     double W0 = Q/EMASSC2+1.;
     double R = ApproximateRadius(A);
-    if (advancedFermi) {
-      return PhaseSpace(W, W0)*FermiFunction(Z, W, R);
+    if (advanced) {
+      int betaType = (int)((Z > 0) - (Z < 0));
+      Z = std::abs(Z);
+      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType);
     }
     else {
       return PhaseSpace(W, W0)*SimpleFermiFunction(Z, GetSpeed(E, EMASSC2));
     }
   }
 
-  inline std::vector<std::vector<double> >* GenerateBetaSpectrum(double Z, double A, double Q, bool advancedFermi) {
+  inline std::vector<std::vector<double> >* GenerateBetaSpectrum(int Z, int A, double Q, bool advancedFermi) {
     std::vector<std::vector<double> >* dist = new std::vector<std::vector<double> >();
     double stepSize = 1.0;
 

@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+#include "CRADLE/ConfigParser.hh"
+
 namespace CRADLE {
 
 class Particle;
@@ -20,6 +22,8 @@ class DecayManager {
 
     ~DecayManager();
 
+    void Initialise(std::string, int argc = 0, const char** argv = nullptr);
+    void Initialise(ConfigOptions);
     bool Initialise(std::string, int, int, double, std::string, int);
     bool MainLoop(int);
     bool GenerateNucleus(std::string, int, int);
@@ -35,6 +39,7 @@ class DecayManager {
     Particle* GetNewParticle(const std::string, int Z=0, int A=0);
     DecayMode& GetDecayMode(const std::string);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
+
   private:
     DecayManager() {};
     DecayManager(DecayManager const&);
@@ -44,10 +49,12 @@ class DecayManager {
     std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
     //std::vector<Particle*> particleStack;
     std::map<const std::string, Particle*> registeredParticles;
-    std::string filename;
+    std::string outputName;
     std::string initStateName;
     double initExcitationEn;
     int NRTHREADS;
+
+    ConfigOptions configOptions;
 };
 
 }//End of CRADLE namespace

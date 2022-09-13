@@ -1,4 +1,4 @@
-#include "CRADLE/ConfigParser.h"
+#include "CRADLE/ConfigParser.hh"
 
 #include "CLI11.hpp"
 
