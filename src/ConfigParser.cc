@@ -19,11 +19,15 @@ namespace CRADLE {
 
   void SetCmdOptions (CLI::App& app, NuclearOptions& cmdOptions) {
 
-    CLI::App* cmd = app.add_subcommand("NuclearOptions","This is the nuclear options command.")->ignore_case();
-    cmd->add_option("-n,--name", cmdOptions.Name, "Name of initial particle.");
+    CLI::App* cmd = app.add_subcommand("Nucleus","This is the initial nucleus options command.")->ignore_case()->required();
+    cmd->add_option("-n,--name", cmdOptions.Name, "Name of initial particle.")->required();
     cmd->add_option("-Z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
     cmd->add_option("-N,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
     cmd->add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
+
+    cmd->callback([&]() {
+      std::cout << "Parsing initial nucleus " << cmdOptions.Name << std::endl;	    
+    });
 
   }
 
@@ -33,8 +37,6 @@ namespace CRADLE {
     comp->add_option("-l,--loop", general.Loop, "Number of events to generate.");
     comp->add_option("-t,--threads", general.Threads, "Number of threads (2 x #CPU).");
     comp->add_option("-o,--output", general.Output, "Name of the output file.");
-    comp->add_option("-u,--usebsg", general.Usebsg, "Choose whether or not to use BSG.");
-
   }
 
   void SetCouplingConstants (CLI::App& app, CouplingConstants& couplingConstants) {

@@ -64,7 +64,6 @@ namespace utilities {
   inline double RandomFromDistribution(std::vector<std::vector<double> >& pd) {
     double begin = pd[0][0];
     double end = pd[pd.size()-1][0];
-    double stepSize = pd[1][0] - pd[0][0];
     double max = 0.;
 
     for (std::vector<std::vector<double> >::size_type i = 0; i != pd.size(); i++) {
@@ -178,7 +177,7 @@ namespace utilities {
     return (common + specific) * 2. / (1. + gamma);
   }
 
-  inline double UCorrection(double W, int Z, double R, int betaType) {
+  inline double UCorrection(double W, int Z, int betaType) {
     double result = 1.;
     double a0 = -5.6E-5 - betaType * 4.94E-5 * Z + 6.23E-8 * std::pow(Z, 2);
     double a1 = 5.17E-6 + betaType * 2.517E-6 * Z + 2.00E-8 * std::pow(Z, 2);
@@ -295,7 +294,7 @@ namespace utilities {
   inline double Spence(double x) { return -gsl_sf_dilog(x); }
 
   inline double RadiativeCorrection(double W, double W0, int Z,
-                                              double R, int betaType, double gA,
+                                              double R, double gA,
                                               double gM) {
     // 1st order, based on the 5th Wilkinson article
     double beta = std::sqrt(1.0 - 1.0 / W / W);
@@ -490,7 +489,7 @@ namespace utilities {
     if (advanced) {
       int betaType = (int)((Z > 0) - (Z < 0));
       Z = std::abs(Z);
-      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType);
+      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7);
     }
     else {
       return PhaseSpace(W, W0)*SimpleFermiFunction(Z, GetSpeed(E, EMASSC2));
@@ -569,11 +568,11 @@ namespace utilities {
     return dir;
   }
 
-  inline vector<double> GetParticleDirection(std::vector<vector<double> >& dirs, std::vector<std::vector<double> >& A) {
+  /*inline vector<double> GetParticleDirection(std::vector<vector<double> >& dirs, std::vector<std::vector<double> >& A) {
     vector<double> dir (3);
     //TODO
     return dir;
-  }
+  }*/
 
   inline vector<double> LorentzBoost(vector<double>& velocity, vector<double>& v) {
     double speed = GetNorm(velocity);

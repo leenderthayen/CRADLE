@@ -9,29 +9,28 @@ namespace CRADLE {
 
 struct NuclearOptions {
   std::string Name = "";
-  int Charge = 8;
-  int Nucleons = 20;
+  int Charge = 0;
+  int Nucleons = 0;
   double Energy = 0.0;
 };
 
 struct General {
-  int Verbosity = 0;
-  int Loop = 1;
+  int Verbosity = 1;
+  int Loop = 0;
   int Threads = 1;
   std::string Output = "output.txt";
-  bool Usebsg = true;
 };
 
 struct CouplingConstants {
   double CS = 0.0;
   double CV = 1.0;
   double CT = 0.0;
-  double CA = 1.2723;
+  double CA = 1.2754;
 };
 
 struct Cuts {
   double Distance = 0.0;
-  double Lifetime = 0.0;
+  double Lifetime = 20;
   double Energy = 0.0;
 };
 

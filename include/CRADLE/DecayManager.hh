@@ -40,6 +40,8 @@ class DecayManager {
     DecayMode& GetDecayMode(const std::string);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
 
+    ConfigOptions configOptions;
+
   private:
     DecayManager() {};
     DecayManager(DecayManager const&);
@@ -53,8 +55,6 @@ class DecayManager {
     std::string initStateName;
     double initExcitationEn;
     int NRTHREADS;
-
-    ConfigOptions configOptions;
 };
 
 }//End of CRADLE namespace

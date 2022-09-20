@@ -163,7 +163,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   filename << "z" << Z << ".a" << A;
   std::ifstream radDataFile((filename.str()).c_str());
 
-  cout << "Generating nucleus " << name << endl;
+  // cout << "Generating nucleus " << name << endl;
 
   string line;
   double excitationEnergy = 0.;
@@ -185,7 +185,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
       iss >> p >> excitationEnergy >> flag >> lifetime;
       continue;
     }
-    cout << "Lifetime: " << lifetime << endl;
+    // cout << "Lifetime: " << lifetime << endl;
     string mode;
     double daughterExcitationEnergy = 0;
     double intensity = 0;
@@ -195,14 +195,14 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
     std::istringstream iss(line);
     iss >> mode >> daughterExcitationEnergy >> flag >> intensity >> Q >> modifier;
-    cout << "Mode: " << mode << endl;
-    cout << "Daughter Energy" << daughterExcitationEnergy << endl;
-    cout << "Intensity: " << intensity << endl;
-    cout << "Q: " << Q << endl;
-    cout << "Modifier: " << modifier << endl;
+    // cout << "Mode: " << mode << endl;
+    // cout << "Daughter Energy" << daughterExcitationEnergy << endl;
+    // cout << "Intensity: " << intensity << endl;
+    // cout << "Q: " << Q << endl;
+    // cout << "Modifier: " << modifier << endl;
     if (Q > 0.) {
-      cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
-      excitationEnergy << " to " << daughterExcitationEnergy << endl;
+      // cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
+      // excitationEnergy << " to " << daughterExcitationEnergy << endl;
       if (mode.find("shellEC") != string::npos) {
         // TODO
         continue;
@@ -245,7 +245,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
         >> convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
         mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
 
-        cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
+        // cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
         DecayChannel* dcGamma =
             new DecayChannel("Gamma", &GetDecayMode("Gamma"), E, intensity / (1. + convIntensity),
                              lifetime, initEnergy, initEnergy - E);
@@ -269,52 +269,35 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
   bool DecayManager::Initialise(ConfigOptions _configOptions) {
     //cout << "Initialising..." << endl;
-    //TODO check
     configOptions = _configOptions;
     initStateName = configOptions.nuclearOptions.Name;
     initExcitationEn = configOptions.nuclearOptions.Energy;
     outputName = configOptions.general.Output;
     NRTHREADS = configOptions.general.Threads;
-    struct stat infoRD;
-    struct stat infoG;
-    int i = stat(
-        configOptions.envOptions.Radiationdata.c_str(),
-        &infoRD);
-    int j = stat(
-        configOptions.envOptions.Radiationdata.c_str(),
-        &infoG);
-    if (i == 0 && j == 0 && S_ISDIR(infoRD.st_mode) && S_ISDIR(infoG.st_mode)) {
-      return GenerateNucleus(initStateName, configOptions.nuclearOptions.Charge, configOptions.nuclearOptions.Nucleons);
+    if (initStateName != "" && configOptions.nuclearOptions.Nucleons > 0) {
+      struct stat infoRD;
+      struct stat infoG;
+      int i = stat(
+          configOptions.envOptions.Radiationdata.c_str(),
+          &infoRD);
+      int j = stat(
+          configOptions.envOptions.Radiationdata.c_str(),
+          &infoG);
+      if (i == 0 && j == 0 && S_ISDIR(infoRD.st_mode) && S_ISDIR(infoG.st_mode)) {
+        RegisterBasicParticles();
+	RegisterBasicDecayModes();
+	RegisterBasicSpectrumGenerators();
+        return GenerateNucleus(initStateName, configOptions.nuclearOptions.Charge, configOptions.nuclearOptions.Nucleons);
+      } else {
+              std::cerr << "ERROR: Data files not found. Set CRADLE_RadiationData and "
+                "CRADLE_GammaData to their correct folders." << std::endl;
+        return false;
+      }
     } else {
-            std::cerr << "ERROR: Data files not found. Set CRADLE_RadiationData and "
-              "CRADLE_GammaData to their correct folders." << std::endl;
+      std::cerr << "ERROR: Initial nucleus is not defined." << std::endl;
       return false;
     }
   }
-
-bool DecayManager::Initialise(string name, int Z, int A,
-                              double excitationEnergy, string _filename, int threads) {
-  cout << "Initialising..." << endl;
-  outputName = _filename;
-  initStateName = name;
-  initExcitationEn = excitationEnergy;
-  NRTHREADS = threads;
-  struct stat infoRD;
-  struct stat infoG;
-  int i = stat(
-      configOptions.envOptions.Radiationdata.c_str(),
-      &infoRD);
-  int j = stat(
-      configOptions.envOptions.Radiationdata.c_str(),
-      &infoG);
-  if (i == 0 && j == 0 && S_ISDIR(infoRD.st_mode) && S_ISDIR(infoG.st_mode)) {
-    return GenerateNucleus(name, Z, A);
-  } else {
-	  std::cerr << "ERROR: Data files not found. Set CRADLE_RadiationData and "
-            "CRADLE_GammaData to their correct folders." << std::endl;
-    return false;
-  }
-}
 
 std::string DecayManager::GenerateEvent(int eventNr) {
   double time = 0.;
@@ -354,7 +337,11 @@ std::string DecayManager::GenerateEvent(int eventNr) {
 
 bool DecayManager::MainLoop() {
   int nrParticles = configOptions.general.Loop;
-  cout << "Starting Main Loop " << endl;
+  if (nrParticles < 1) {
+    std::cerr << "ERROR: Incorrect number of events (" << nrParticles << ")" << std::endl;
+    return true;
+  }
+  cout << "Starting Main Loop (" << nrParticles << " events)" << endl;
   std::ofstream fileStream;
   fileStream.open(outputName.c_str());
 

@@ -126,20 +126,18 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   }
 
   // std::cout << "Found distribution" << std::endl;
+  DecayManager& dm = DecayManager::GetInstance();
 
   double mf = 0.;
   double mgt = 0.;
-  /*if (GetOpt(std::string, "BetaDecay.Default") == "Fermi") {
+  if (dm.configOptions.betaDecay.Default == "Fermi") {
     mf = 1.;
   }
   else {
     mgt = 1.;
   }
 
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(GetOpt(double, "Couplings.CS"),
-  GetOpt(double, "Couplings.CT"), GetOpt(double, "Couplings.CV"),
-  GetOpt(double, "Couplings.CA"), mf, mgt);*/
-  double a = 0;
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(dm.configOptions.couplingConstants.CS, dm.configOptions.couplingConstants.CT, dm.configOptions.couplingConstants.CV, dm.configOptions.couplingConstants.CA, mf, mgt);
   std::vector<double> p;
 
   double elEnergy = utilities::RandomFromDistribution(*dist)+utilities::EMASSC2;
@@ -203,19 +201,19 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   double posEnergy = utilities::RandomFromDistribution(*dist) + utilities::EMASSC2;
   double posMomentum = std::sqrt(posEnergy*posEnergy-std::pow(utilities::EMASSC2, 2.));
 
+  DecayManager& dm = DecayManager::GetInstance();
+
   double mf = 0.;
   double mgt = 0.;
-  /*if (GetOpt(std::string, "BetaDecay.Default") == "Fermi") {
+  if (dm.configOptions.betaDecay.Default == "Fermi") {
     mf = 1.;
   }
   else {
     mgt = 1.;
   }
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(GetOpt(double, "Couplings.CS"),
-  GetOpt(double, "Couplings.CT"),
-  GetOpt(double, "Couplings.CV"),
-  GetOpt(double, "Couplings.CA"), mf, mgt);*/
-  double a = 0;
+
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(dm.configOptions.couplingConstants.CS, dm.configOptions.couplingConstants.CT, dm.configOptions.couplingConstants.CV, dm.configOptions.couplingConstants.CA, mf, mgt);
+
   std::vector<double> p;
   p.push_back(1.);
   p.push_back(a*posMomentum/posEnergy);
