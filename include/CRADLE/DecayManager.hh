@@ -22,10 +22,10 @@ class DecayManager {
 
     ~DecayManager();
 
-    void Initialise(std::string, int argc = 0, const char** argv = nullptr);
-    void Initialise(ConfigOptions);
+    bool Initialise(std::string, int argc = 0, const char** argv = nullptr);
+    bool Initialise(ConfigOptions);
     bool Initialise(std::string, int, int, double, std::string, int);
-    bool MainLoop(int);
+    bool MainLoop();
     bool GenerateNucleus(std::string, int, int);
     void RegisterBasicParticles();
     void RegisterBasicDecayModes();

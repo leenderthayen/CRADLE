@@ -262,18 +262,34 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   return true;
 }
 
-  void DecayManager::Initialise(std::string configFilename, int argc, const char** argv) {
+  bool DecayManager::Initialise(std::string configFilename, int argc, const char** argv) {
     ConfigOptions configOptions = ParseOptions(configFilename, argc, argv);
-    Initialise(configOptions);
+    return Initialise(configOptions);
   }
 
-  void DecayManager::Initialise(ConfigOptions _configOptions) {
+  bool DecayManager::Initialise(ConfigOptions _configOptions) {
     //cout << "Initialising..." << endl;
     //TODO check
     configOptions = _configOptions;
     initStateName = configOptions.nuclearOptions.Name;
     initExcitationEn = configOptions.nuclearOptions.Energy;
     outputName = configOptions.general.Output;
+    NRTHREADS = configOptions.general.Threads;
+    struct stat infoRD;
+    struct stat infoG;
+    int i = stat(
+        configOptions.envOptions.Radiationdata.c_str(),
+        &infoRD);
+    int j = stat(
+        configOptions.envOptions.Radiationdata.c_str(),
+        &infoG);
+    if (i == 0 && j == 0 && S_ISDIR(infoRD.st_mode) && S_ISDIR(infoG.st_mode)) {
+      return GenerateNucleus(initStateName, configOptions.nuclearOptions.Charge, configOptions.nuclearOptions.Nucleons);
+    } else {
+            std::cerr << "ERROR: Data files not found. Set CRADLE_RadiationData and "
+              "CRADLE_GammaData to their correct folders." << std::endl;
+      return false;
+    }
   }
 
 bool DecayManager::Initialise(string name, int Z, int A,
@@ -309,7 +325,7 @@ std::string DecayManager::GenerateEvent(int eventNr) {
   particleStack.push_back(ini);
   while (!particleStack.empty()) {
     Particle* p = particleStack.back();
-    //cout << "Decaying particle " << p->GetName() << endl;
+    // cout << "Decaying particle " << p->GetName() << endl;
     vector<Particle*> finalStates;
     double decayTime = p->GetDecayTime();
 
@@ -319,8 +335,7 @@ std::string DecayManager::GenerateEvent(int eventNr) {
         time += decayTime;
         // cout << "Decay finished" << endl;
       } catch (const std::invalid_argument& e) {
-        // cout << "Decay Mode for particle " << p->GetName() << " not found.
-        // Aborting." << endl;
+        // cout << "Decay Mode for particle " << p->GetName() << " not found. Aborting." << endl;
         return "";
       }
     } else {
@@ -337,7 +352,8 @@ std::string DecayManager::GenerateEvent(int eventNr) {
   return eventDataSS.str();
 }
 
-bool DecayManager::MainLoop(int nrParticles) {
+bool DecayManager::MainLoop() {
+  int nrParticles = configOptions.general.Loop;
   cout << "Starting Main Loop " << endl;
   std::ofstream fileStream;
   fileStream.open(outputName.c_str());

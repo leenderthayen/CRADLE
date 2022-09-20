@@ -1,6 +1,9 @@
 #include <string>
 #include <iostream>
 
+#include "CLI11.hpp"
+#include "CRADLE/DecayManager.hh"
+
 int main (int argc, const char* argv[]) {
   std::string iniFilename;
   std::string configFilename;
@@ -15,6 +18,20 @@ int main (int argc, const char* argv[]) {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
     app.exit(e);
+  }
+
+  CRADLE::DecayManager& dm = CRADLE::DecayManager::GetInstance();
+  dm.RegisterBasicParticles();
+  dm.RegisterBasicDecayModes();
+  dm.RegisterBasicSpectrumGenerators();
+  bool success = dm.Initialise(configFilename, argc, argv);
+
+  if (success) {
+    dm.MainLoop();
+
+    dm.ListRegisteredParticles();
+  } else {
+    std::cout << "Specify configuration file, isotope name, charge and number of nucleons. Use the --help option for more documentation." << std::endl;
   }
 
   /*CRADLE::Cradle cradle(outputName);

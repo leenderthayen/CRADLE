@@ -69,7 +69,7 @@ endif()
 add_library(Cradle SHARED src/ConfigParser.cc src/DecayChannel.cc src/DecayManager.cc src/DecayMode.cc src/Particle.cc src/SpectrumGenerator.cc)
 add_executable(CRADLE++ src/CRADLE++.cc)
 
-find_package(Boost)
+find_package(Boost REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Threads)
 
@@ -85,8 +85,8 @@ target_include_directories(
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 
+target_link_libraries(Cradle PUBLIC "-L/usr/local/Cellar/gsl/2.7/lib -lgsl -lgslcblas")
 target_link_libraries(Cradle PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(Cradle PUBLIC ${GSL_LIBRARIES})
 target_link_libraries(Cradle PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries(CRADLE++ PRIVATE Cradle)
