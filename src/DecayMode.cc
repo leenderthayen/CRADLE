@@ -149,7 +149,7 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
     dist = spectrumGen->GenerateSpectrum(initState, recoil, Q);
     int i = 0;
     for (auto & element : *dist) {
-      double E = element[0];
+      double E = element[0]+utilities::EMASSC2;
       double SH = element[0];
       ((*dist)[i])[1] = SH*(1+gamma*fierz*utilities::EMASSC2/E);
     }
@@ -244,7 +244,7 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
     double gamma = std::sqrt(1-std::pow(utilities::FINESTRUCTURE*recoil->GetCharge(), 2.));
     int i = 0;
     for (auto & element : *dist) {
-      double E = element[0];
+      double E = element[0]+utilities::EMASSC2;
       double SH = element[0];
       ((*dist)[i])[1] = SH*(1-gamma*fierz*utilities::EMASSC2/E);
     }
