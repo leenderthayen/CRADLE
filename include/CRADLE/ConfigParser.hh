@@ -29,9 +29,9 @@ struct CouplingConstants {
 };
 
 struct Cuts {
-  double Distance = 0.0;
-  double Lifetime = 20;
-  double Energy = 0.0;
+  double Distance = 1.E10;
+  double Lifetime = 1.E10;
+  double Energy = 1.E10;
 };
 
 struct BetaDecay {

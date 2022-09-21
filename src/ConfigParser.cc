@@ -33,7 +33,7 @@ namespace CRADLE {
 
   void SetGeneralOptions (CLI::App& app, General& general) {
     CLI::App* comp = app.add_subcommand("General", "This is the general subcommand")->ignore_case();
-    comp->add_option("-v,--Verbosity", general.Verbosity, "Verbosity settings");
+    comp->add_option("-v,--verbosity", general.Verbosity, "Verbosity settings");
     comp->add_option("-l,--loop", general.Loop, "Number of events to generate.");
     comp->add_option("-t,--threads", general.Threads, "Number of threads (2 x #CPU).");
     comp->add_option("-o,--output", general.Output, "Name of the output file.");
@@ -50,9 +50,9 @@ namespace CRADLE {
 
   void SetCuts (CLI::App& app, Cuts& cuts) {
     CLI::App* comp = app.add_subcommand("Cuts", "This is the cuts subcommand")->ignore_case();
-    comp->add_option("--Distance", cuts.Distance, "");
-    comp->add_option("--Lifetime", cuts.Lifetime, "");
-    comp->add_option("--Energy", cuts.Energy, "");
+    comp->add_option("--distance", cuts.Distance, "")->ignore_case();
+    comp->add_option("--lifetime", cuts.Lifetime, "")->ignore_case();
+    comp->add_option("--energy", cuts.Energy, "")->ignore_case();
 
   }
 

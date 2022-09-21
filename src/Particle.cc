@@ -32,7 +32,7 @@ Particle::Particle(const Particle& orig) {
 }
 
 double Particle::GetLifetime() const {
-  double t = 1.e23;
+  double t = 1.e46;
   //double energyThreshold = GetOpt(double, "Cuts.Energy");
   double energyThreshold = 10;
   for(int i = 0; i < decayChannels.size(); ++i) {
@@ -48,9 +48,12 @@ double Particle::GetLifetime() const {
 double Particle::GetDecayTime() {
   double lifetime = GetLifetime();
   // std::cout << name << " Lifetime " << lifetime << std::endl;
-  std::exponential_distribution<double> distribution(1./lifetime);
-  double decayTime = distribution(randomGen);
-  return decayTime;
+  if (lifetime!= 1.e46) {
+    std::exponential_distribution<double> distribution(1./lifetime);
+    double decayTime = distribution(randomGen);
+    return decayTime;
+  }
+  return lifetime;
 }
 
 ublas::vector<double> Particle::GetVelocity() const {

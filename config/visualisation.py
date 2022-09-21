@@ -104,4 +104,4 @@ plt.ylabel('Counts')
 plt.title('Comparison of emitted proton spectrum')
 plt.legend()'''
 
-plt.show()
+plt.show(block=True)

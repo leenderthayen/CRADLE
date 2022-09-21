@@ -171,7 +171,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   Particle* p = new Particle(name, utilities::GetApproximateMass(Z, A), Z,
                              (A - Z), 0., 0);
 
-  cout << filename.str() << endl;
+  //cout << filename.str() << endl;
 
   while (getline(radDataFile, line)) {
     if (!line.compare(0, 1, "#")) {

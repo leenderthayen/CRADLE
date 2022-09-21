@@ -38,6 +38,7 @@ namespace utilities {
   const double FINESTRUCTURE = 0.0072973525664;
   const double E = 2.718281828459045;
   const double HBAR = 6.58211889e-16;//ev*s
+  const double NATURALLENGTH = HBAR*C/EMASSC2/1000.;//m
   const double a_CORR = -1.0;
   const double EULER_MASCHERONI_CONSTANT = 0.577215664901532;  /**< the Euler-Mascheroni constant */
 
@@ -164,9 +165,8 @@ namespace utilities {
       else
         sum += aNeg[i] * std::pow(W * r, i - 1);
     }*/
-    common = 1. + 13. / 60. * std::pow(FINESTRUCTURE * Z, 2) -
-             betaType * W * r * FINESTRUCTURE * Z * (41. - 26. * gamma) / 15. /
-                 (2. * gamma - 1) -
+    common = (1. + 13. / 60. * std::pow(FINESTRUCTURE * Z, 2) -
+             betaType * W * r * FINESTRUCTURE * Z * (41. - 26. * gamma) / 15. / (2. * gamma - 1)) -
              betaType * FINESTRUCTURE * Z * r * gamma * (17. - 2. * gamma) / 30. / W /
                  (2. * gamma - 1);
     //         sum;
@@ -479,17 +479,21 @@ namespace utilities {
   }
 
   inline double ApproximateRadius(double A) {
-    return (1.15+1.8*std::pow(A, -2./3.)-1.2*std::pow(A, -4./3.))*EMASSC2*1000./HBAR/C*std::pow(A, 1./3.);
+    // Return radius in m
+    return (1.15+1.8*std::pow(A, -2./3.)-1.2*std::pow(A, -4./3.))*std::pow(A, 1./3.)*1.E-15;
   }
 
   inline double GetSpectrumHeight(int Z, int A, double Q, double E, bool advanced) {
     double W = E/EMASSC2+1.;
     double W0 = Q/EMASSC2+1.;
-    double R = ApproximateRadius(A);
+    double R = std::sqrt(5./3.)*ApproximateRadius(A)/NATURALLENGTH;
     if (advanced) {
       int betaType = (int)((Z > 0) - (Z < 0));
       Z = std::abs(Z);
-      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7);
+      double cShape, cNS;
+      std::tie(cShape, cNS) = CCorrectionComponents(W, W0, Z, A, R, betaType, GAMOW_TELLER, 1.27, -229, 1, 4.*A, 1*A, 0);
+      double CCorr = cShape + cNS;
+      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7);
     }
     else {
       return PhaseSpace(W, W0)*SimpleFermiFunction(Z, GetSpeed(E, EMASSC2));
