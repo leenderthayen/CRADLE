@@ -45,7 +45,10 @@ namespace CRADLE {
     coupling->add_option("--CT", couplingConstants.CT, "Tensor coupling constant.");
     coupling->add_option("--CS", couplingConstants.CS, "Scalar coupling constant.");
     coupling->add_option("--CA", couplingConstants.CA, "Axial coupling constant.");
-
+    coupling->add_option("--CVP", couplingConstants.CVP, "Vector prime coupling constant.");
+    coupling->add_option("--CTP", couplingConstants.CTP, "Tensor prime coupling constant.");
+    coupling->add_option("--CSP", couplingConstants.CSP, "Scalar prime coupling constant.");
+    coupling->add_option("--CAP", couplingConstants.CAP, "Axial prime coupling constant.");
   }
 
   void SetCuts (CLI::App& app, Cuts& cuts) {

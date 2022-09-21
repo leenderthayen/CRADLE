@@ -23,9 +23,13 @@ struct General {
 
 struct CouplingConstants {
   double CS = 0.0;
+  double CSP = 0.0;
   double CV = 1.0;
+  double CVP = 0.0;
   double CT = 0.0;
+  double CTP = 0.0;
   double CA = 1.2754;
+  double CAP = 1.2754;
 };
 
 struct Cuts {

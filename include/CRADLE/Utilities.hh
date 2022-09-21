@@ -100,12 +100,16 @@ namespace utilities {
     return a[0]*b[0]-(a[1]*b[1]+a[2]*b[2]+a[3]*b[3]);
   }
 
-  inline double CalculateXiBetaDecay(double& cs, double& ct, double& cv, double& ca, double& mf, double& mgt) {
-    return mf*mf*(2.*cs*cs+2.*cv*cv)+mgt*mgt*(2.*ct*ct+2.*ca*ca);
+  inline double CalculateXiBetaDecay(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt) {
+    return mf*mf*(cs*cs+cv*cv+csp*csp+cvp*cvp)+mgt*mgt*(ct*ct+ctp*ctp+ca*ca+cap*cap);
   }
 
-  inline double CalculateBetaNeutrinoAsymmetry(double cs, double ct, double cv, double ca, double mf, double mgt) {
-    return (mf*mf*(-2.*cs*cs+2.*cv*cv)+mgt*mgt/3.*(2.*ct*ct-2.*ca*ca))/CalculateXiBetaDecay(cs, ct, cv, ca, mf, mgt);
+  inline double CalculateFierz(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt) {
+    return 2.*(mf*mf*(cs*cv+csp*cvp)+mgt*mgt*(ct*ca+ctp*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
+  }
+
+  inline double CalculateBetaNeutrinoAsymmetry(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt) {
+    return (mf*mf*(-cs*cs-csp*csp+cv*cv+cvp*cvp)+mgt*mgt/3.*(ct*ct+ctp*ctp-ca*ca-cap*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
   }
 
   inline vector<double> NormaliseVector(const vector<double>& v) {
