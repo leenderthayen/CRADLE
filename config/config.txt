@@ -1,10 +1,14 @@
 [General]
 Verbosity=1
-[Couplings]
+[Coupling]
 CS=0.
+CSP=0.
 CV=1.
+CVP=1.
 CT=0.
+CTP=0.
 CA=1.27
+CAP=1.27
 [Cuts]
 Distance=1.0
 Lifetime=1e9

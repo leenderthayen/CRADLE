@@ -553,23 +553,24 @@ namespace utilities {
     dir2 = NormaliseVector(dir2);
 
     std::vector<std::vector<double> > dist;
-    double stepSize = PI/180;
-    double currentAngle = 0.;
+    int N = 180;
+    double stepSize = 2./N;
+    double currentCosAngle = -1;
 
-    while (currentAngle <= PI) {
+    while (currentCosAngle <= 1) {
       std::vector<double> pair;
-      pair.push_back(currentAngle);
+      pair.push_back(currentCosAngle);
       double W = 0.;
       for (std::vector<double>::size_type i = 0; i != A.size(); i++) {
-        W+=A[i]*boost::math::legendre_p(i, std::cos(currentAngle));
+        W+=A[i]*boost::math::legendre_p(i, currentCosAngle);
       }
       pair.push_back(W);
       dist.push_back(pair);
-      currentAngle+=stepSize;
+      currentCosAngle+=stepSize;
     }
 
-    double theta = 1.-RandomFromDistribution(dist)/PI;
-    theta = std::acos(2*theta-1.);
+    double costheta = RandomFromDistribution(dist);
+    double theta = std::acos(theta);
     //std::cout << theta;
     vector<double> perp = CrossProduct(dir2, RandomDirection());
     vector<double> dir = RotateAroundVector(dir2, perp, theta);

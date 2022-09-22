@@ -132,7 +132,7 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
   double fierz = utilities::CalculateFierz(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
 
-  //std::cout << "fierz " << fierz << std::endl;
+  //std::cout << "fierz " << fierz << " a " << a << std::endl;
 
   std::vector<std::vector<double> >* dist;
   // std::cout << "Try getting distribution" << std::endl;
