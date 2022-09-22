@@ -47,6 +47,7 @@ struct BetaDecay {
 };
 
 struct EnvOptions {
+  std::string AMEdata;
   std::string Gammadata;
   std::string Radiationdata;
 };

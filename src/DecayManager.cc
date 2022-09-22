@@ -168,7 +168,11 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   string line;
   double excitationEnergy = 0.;
   double lifetime;
-  Particle* p = new Particle(name, utilities::GetApproximateMass(Z, A), Z,
+  double atomicMass = utilities::GetAMEMass(configOptions.envOptions.AMEdata, Z, A);
+  if (atomicMass == 0) {
+    atomicMass = utilities::GetApproximateMass(Z, A);
+  }
+  Particle* p = new Particle(name, atomicMass, Z,
                              (A - Z), 0., 0);
 
   //cout << filename.str() << endl;

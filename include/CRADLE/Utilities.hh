@@ -33,6 +33,7 @@ namespace utilities {
   const double EMASSC2 = 510.9989461;//keV
   const double PMASSC2 = 938272.046;//keV
   const double NMASSC2 = 939565.4133;//keV
+  const double UMASSC2 = 931494.10242;//keV
   const double ALPHAMASSC2 = 3727379.4066;//keV
   const double FINESTRUCTUREMASSC2 = 3727379.508;//keV
   const double FINESTRUCTURE = 0.0072973525664;
@@ -617,6 +618,55 @@ namespace utilities {
       }
     }
     return Z*PMASSC2+(A-Z)*NMASSC2-b;
+  }
+
+  inline double GetAMEMass(std::string filename, int Z, int A) {
+    std::ifstream ameDataFile(filename.c_str());
+    std::string line;
+
+    int skipHeader = 36;
+    int currentLine = 0;
+
+    while(getline(ameDataFile, line)) {
+      currentLine++;
+      if (currentLine <= skipHeader) {
+        continue;
+      } else {
+        int nMinusz;
+	int n;
+	int z;
+	int a;
+	std::string name;
+	std::string O;
+	double massExcess;
+	double massExcessUnc;
+	double bindingEnergy;
+	double bindingEnergyUnc;
+	std::string betaDecay;
+	double betaEnergy;
+	double betaEnergyUnc;
+	double atomicMass;
+	double atomicMassUnc;
+
+	nMinusz = std::stoi(line.substr(1, 3));
+	n = std::stoi(line.substr(4, 5));
+	z = std::stoi(line.substr(9, 5));
+	a = std::stoi(line.substr(14, 5));
+	name = line.substr(19, 4);
+	//O = line.substr(23, 5);
+	//std::cout << "Name " << name << std::endl;
+	//massExcess = std::stod(line.substr(30, 14));
+	//massExcessUnc
+	std::string atomicMassString = line.substr(106, 15).replace(3, 1, "");
+	std::replace(atomicMassString.begin(), atomicMassString.end(), '#', '.');
+	atomicMass = std::stod(atomicMassString)*1e-6*UMASSC2;
+	if (z == Z && a == A) {
+          std::cout << "Found AME atomic mass for " << a << name << ": " << atomicMass << std::endl;
+	  return atomicMass;
+	}
+      }
+    }
+    return 0.;
   }
 
   inline std::vector<std::vector<double> > ReadDistribution(const char * filename) {

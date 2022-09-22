@@ -70,6 +70,7 @@ namespace CRADLE {
   }
 
   void SetEnvironmentOptions (CLI::App& app, EnvOptions& envOptions) {
+    app.add_option("--AMEdata", envOptions.AMEdata, "AME2020 file location")->envname("AMEdata");
     app.add_option("--Gammadata", envOptions.Gammadata, "")->envname("Gammadata");
     app.add_option("--Radiationdata", envOptions.Radiationdata, "")->envname("Radiationdata");
 
