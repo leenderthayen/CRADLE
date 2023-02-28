@@ -73,7 +73,6 @@ namespace CRADLE {
     app.add_option("--AMEdata", envOptions.AMEdata, "AME2020 file location")->envname("AMEdata");
     app.add_option("--Gammadata", envOptions.Gammadata, "")->envname("Gammadata");
     app.add_option("--Radiationdata", envOptions.Radiationdata, "")->envname("Radiationdata");
-
   }
 
   ConfigOptions ParseOptions(std::string filename, int argc, const char** argv) {

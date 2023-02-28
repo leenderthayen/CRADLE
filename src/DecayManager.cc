@@ -163,7 +163,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   filename << "z" << Z << ".a" << A;
   std::ifstream radDataFile((filename.str()).c_str());
 
-  // cout << "Generating nucleus " << name << endl;
+  cout << "Generating nucleus " << name << endl;
 
   string line;
   double excitationEnergy = 0.;
@@ -175,7 +175,7 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   Particle* p = new Particle(name, atomicMass, Z,
                              (A - Z), 0., 0);
 
-  //cout << filename.str() << endl;
+  // cout << filename.str() << endl;
 
   while (getline(radDataFile, line)) {
     if (!line.compare(0, 1, "#")) {
@@ -199,14 +199,14 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
     std::istringstream iss(line);
     iss >> mode >> daughterExcitationEnergy >> flag >> intensity >> Q >> modifier;
-    // cout << "Mode: " << mode << endl;
-    // cout << "Daughter Energy" << daughterExcitationEnergy << endl;
-    // cout << "Intensity: " << intensity << endl;
-    // cout << "Q: " << Q << endl;
-    // cout << "Modifier: " << modifier << endl;
+    /*cout << "Mode: " << mode << endl;
+    cout << "Daughter Energy" << daughterExcitationEnergy << endl;
+    cout << "Intensity: " << intensity << endl;
+    cout << "Q: " << Q << endl;
+    cout << "Modifier: " << modifier << endl;*/
     if (Q > 0.) {
-      // cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
-      // excitationEnergy << " to " << daughterExcitationEnergy << endl;
+      /*cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
+      excitationEnergy << " to " << daughterExcitationEnergy << endl;*/
       if (mode.find("shellEC") != string::npos) {
         // TODO
         continue;
@@ -250,10 +250,14 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
         mCoeff2 >> mCoeff3 >> mCoeff4 >> mCoeff5;
 
         // cout << "Adding gamma decay level " << initEnergy << " " << E << endl;
-        DecayChannel* dcGamma =
+	if ((initEnergy - E) >= 0) {
+          DecayChannel* dcGamma =
             new DecayChannel("Gamma", &GetDecayMode("Gamma"), E, intensity / (1. + convIntensity),
                              lifetime, initEnergy, initEnergy - E);
-        p->AddDecayChannel(dcGamma);
+          p->AddDecayChannel(dcGamma);
+	} else {
+		std::cerr << "WARNING: Attempted to add gamma branch to a final state with negative excitation energy. Please check you are using the correct version of PhotonEvaporation.\nCurrent filename: " << gammaFileSS.str() << std::endl;
+	}
       }
       // iss >> initEnergy >> Q >> intensity >> polarity >> lifetime >> angMom >>
       //    convIntensity >> kCoeff >> lCoeff1 >> lCoeff2 >> lCoeff3 >> mCoeff1 >>
@@ -293,8 +297,8 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 	RegisterBasicSpectrumGenerators();
         return GenerateNucleus(initStateName, configOptions.nuclearOptions.Charge, configOptions.nuclearOptions.Nucleons);
       } else {
-              std::cerr << "ERROR: Data files not found. Set CRADLE_RadiationData and "
-                "CRADLE_GammaData to their correct folders." << std::endl;
+              std::cerr << "ERROR: Data files not found. Set Radiationdata and "
+                "Gammadata to their correct folders." << std::endl;
         return false;
       }
     } else {
