@@ -22,7 +22,7 @@ namespace CRADLE {
     CLI::App* cmd = app.add_subcommand("Nucleus","This is the initial nucleus options command.")->ignore_case()->required();
     cmd->add_option("-n,--name", cmdOptions.Name, "Name of initial particle.")->required();
     cmd->add_option("-Z,--charge", cmdOptions.Charge, "Charge as multiple of proton charge.");
-    cmd->add_option("-N,--nucleons", cmdOptions.Nucleons, "Number of nucleons.");
+    cmd->add_option("-A,--mass", cmdOptions.Nucleons, "Mass number.");
     cmd->add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
 
     cmd->callback([&]() {
