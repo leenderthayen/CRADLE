@@ -7,6 +7,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 #include <map>
 #include <boost/numeric/ublas/vector.hpp>
@@ -22,6 +23,11 @@
 #include "gsl/gsl_sf_dilog.h"
 
 #include "CRADLE/Screening.hh"
+#include "CRADLE/DecayManager.hh"
+#include "CRADLE/ConfigParser.hh"
+#include "CRADLE/DecayMode.hh"
+#include "CRADLE/Particle.hh"
+
 
 namespace CRADLE {
 
@@ -47,6 +53,79 @@ namespace utilities {
 
   const std::string atoms[] = {"H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt"};
 
+
+   /////// ajout de SL 12/05/2023///////////////////////
+  inline double GetJpi(int A, int Z, double levelEn)
+  {
+
+    DecayManager& dm = DecayManager::GetInstance();
+    std::string line;
+    std::ostringstream gammaFileSS;
+    gammaFileSS << dm.configOptions.envOptions.Gammadata;
+    gammaFileSS << "/z" << Z << ".a" << A;
+    std::ifstream gammaDataFile(gammaFileSS.str().c_str());
+
+    if (gammaDataFile.is_open()) {
+      while (getline(gammaDataFile, line)) {
+        int levelNr;
+        double initEnergy;
+        double lifetime;
+        double angMom;
+        std::string flag;
+
+        int nGammas;
+
+        std::istringstream iss(line);
+        iss >> levelNr >> flag >> initEnergy >> lifetime >> angMom >> nGammas;
+        for (int i = 0; i < nGammas; ++i) {
+          getline(gammaDataFile, line);
+          continue;
+      }
+
+        if (initEnergy >= levelEn-1. && initEnergy <= levelEn+1.)
+          {
+            return angMom;
+            break;
+          }
+
+      }
+    }
+    else
+    {
+      std::cerr << "Erreur lors de l'ouverture du fichier " << gammaFileSS.str() << std::endl;
+    }
+  }
+
+
+  inline std::string FindBetaType(Particle* initState, Particle* finalState)
+  {
+    DecayManager& dm = DecayManager::GetInstance();
+    std::string Type = "None";
+
+    int Z_init = initState->GetCharge();
+    int Z_final = finalState->GetCharge();
+
+    double Jpi_init = GetJpi(Z_init + initState->GetNeutrons(), Z_init, initState->GetExcitationEnergy());
+    double Jpi_final = GetJpi(Z_final + finalState->GetNeutrons(), Z_final, finalState->GetExcitationEnergy());
+
+    // std::cout<<"INITIAL :\t "<<"Jpi = "<<Jpi_init<<"  "<<"Energy = "<<parentExEn<<std::endl;
+    // std::cout<<"FINAL :\t\t "<<"Jpi = "<<Jpi_final<<"  "<<"Energy = "<<daughterExEn<<std::endl;
+
+    if (Jpi_final == 0. && Jpi_init == 0.)
+    {
+      Type = "Fermi";
+    }
+
+    else
+    {
+      Type = "Gamow-Teller";
+    }
+
+    return Type;
+
+  }
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
   inline vector<double> RandomDirection () {
     double z, phi;
     vector<double> v(3);
@@ -59,9 +138,9 @@ namespace utilities {
     v(2) = z;
 
     return v;
-  };
+  }
 
-  inline double Random(double begin, double end) { return rand() / (double)RAND_MAX * (end - begin) + begin; };
+  inline double Random(double begin, double end) { return rand() / (double)RAND_MAX * (end - begin) + begin; }
 
   inline double RandomFromDistribution(std::vector<std::vector<double> >& pd) {
     double begin = pd[0][0];
@@ -110,7 +189,7 @@ namespace utilities {
   }
 
   inline double CalculateBetaNeutrinoAsymmetry(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt) {
-    return (mf*mf*(-cs*cs-csp*csp+cv*cv+cvp*cvp)+mgt*mgt/3.*(ct*ct+ctp*ctp-ca*ca-cap*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
+    return 1.; //(mf*mf*(-cs*cs-csp*csp+cv*cv+cvp*cvp)+mgt*mgt/3.*(ct*ct+ctp*ctp-ca*ca-cap*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
   }
 
   inline vector<double> NormaliseVector(const vector<double>& v) {
@@ -158,31 +237,59 @@ namespace utilities {
     return result;
   }
 
-  inline double L0Correction(double W, int Z, double r, int betaType) {
+  inline double L0Correction(double W, int Z, double r, int betaType) {     /////////// L0 Correction ---- L0 (voir specific, ajouter le sum)
                                        //double aPos[], double aNeg[]) {
     double gamma = std::sqrt(1. - std::pow(FINESTRUCTURE * Z, 2.));
     double sum = 0;
     double common = 0;
     double specific = 0;
-    /*for (int i = 1; i < 7; i++) {
-      if (betaType == BETA_PLUS)
+
+    /////////////////////// Completion du code SL 10/05/2023
+    double bNeg = 0;
+    double aNeg[1] = {0};
+
+    double bPos[7][6] = { {0.0701, -2.572, 27.5971, -128.658, 272.264, -214.925},
+                          {-0.002308, 0.066463, -0.6407, 2.63606, -5.6317, 4.0011},
+                          {0.07936, -2.09284, 18.45462, -80.9375, 160.8384, -124.8927},
+                          {-0.93832, 22.02513, -197.00221, 807.1878, -1566.6077, 1156.3287},
+                          {4.276181, -96.82411, 835.26505, -3355.8441, 6411.3255, -4681.573},
+                          {-8.2135, 179.0862, -1492.1295, 5872.5362, -11038.7299, 7963.4701},
+                          {5.4583, -115.8922, 940.8305, -3633.9181, 6727.6296, -4795.0481} };
+    double aPos[7] = {0,0,0,0,0,0,0};
+
+    for (int n=0; n<=6; n++)
+    {
+      for (int x=1; x<=6; x++)
+      {
+        aPos[n] += bPos[n][x-1]*std::pow(FINESTRUCTURE*Z, x);
+      }
+    }
+
+
+    for (int i = 1; i < 7; i++) {
+      if (betaType == 1)
         sum += aPos[i] * std::pow(W * r, i - 1);
       else
         sum += aNeg[i] * std::pow(W * r, i - 1);
-    }*/
+    }
+
+    if (betaType == 1)
+      specific = aPos[0] * r / W + 0.22 * (r - 0.0164) * std::pow(FINESTRUCTURE * Z, 4.5) + sum;
+
+    else
+      specific = aNeg[0] * r / W + 0.41 * (r - 0.0164) * std::pow(FINESTRUCTURE * Z, 4.5) + sum;
+    ///////////////////////
+
     common = (1. + 13. / 60. * std::pow(FINESTRUCTURE * Z, 2) -
              betaType * W * r * FINESTRUCTURE * Z * (41. - 26. * gamma) / 15. / (2. * gamma - 1)) -
              betaType * FINESTRUCTURE * Z * r * gamma * (17. - 2. * gamma) / 30. / W /
                  (2. * gamma - 1);
-    //         sum;
-    /*if (betaType == BETA_PLUS)
-      specific = aPos[0] * r / W + 0.22 * (r - 0.0164) * std::pow(FINESTRUCTURE * Z, 4.5);
-    else
-      specific = aNeg[0] * r / W + 0.41 * (r - 0.0164) * std::pow(FINESTRUCTURE * Z, 4.5);*/
+
+
     return (common + specific) * 2. / (1. + gamma);
   }
 
-  inline double UCorrection(double W, int Z, int betaType) {
+  inline double UCorrection(double W, int Z, int betaType) {        //////////////U Correction ----- U (OK)
     double result = 1.;
     double a0 = -5.6E-5 - betaType * 4.94E-5 * Z + 6.23E-8 * std::pow(Z, 2);
     double a1 = 5.17E-6 + betaType * 2.517E-6 * Z + 2.00E-8 * std::pow(Z, 2);
@@ -191,15 +298,14 @@ namespace utilities {
     double p = std::sqrt(W * W - 1);
 
     result = 1. + a0 + a1 * p + a2 * p * p;
-  
+
     return result;
   }
 
-  inline std::tuple<double, double> CCorrectionComponents(
+  inline std::tuple<double, double> CCorrectionComponents(            ////////Shape Factor ----- C (OK)
       double W, double W0, int Z, int A, double R, int betaType, int decayType,
       double gA, double gP, double fc1, double fb, double fd,
       double ratioM121) {
-     
     double AC0, AC1, ACm1, AC2;
     double VC0, VC1, VCm1, VC2;
 
@@ -238,9 +344,9 @@ namespace utilities {
     } else if (decayType == GAMOW_TELLER) {
       cShape = 1. + AC0 + AC1 * W + ACm1 / W + AC2 * W * W;
     }
-   
+
     double cNS = 0;
-  
+
     if (decayType == GAMOW_TELLER) {
       double M = A * NMASSC2 / EMASSC2;
 
@@ -277,17 +383,29 @@ namespace utilities {
     return std::make_tuple(cShape, cNS);
   }
 
-  inline double QCorrection(double W, double W0, int Z, int A,
-                                      int betaType, int decayType,
-                                      double mixingRatio) {
-    double a = 0;
+  inline double QCorrection(double W, double W0, int Z, int A, ////////// Q Correction ---- Q (changement de la récupération de la valeur de a)
+                                      int betaType) {
 
-    if (decayType == FERMI)
-      a = 1.;
-    else if (decayType == GAMOW_TELLER)
-      a = -1. / 3.;
-    else if (mixingRatio > 0.)
-      a = (1. - std::pow(mixingRatio, 2.) / 3.) / (1. + std::pow(mixingRatio, 2));
+    DecayManager& dm = DecayManager::GetInstance();
+    double CS = dm.configOptions.couplingConstants.CS;
+    double CSP = dm.configOptions.couplingConstants.CSP;
+    double CV = dm.configOptions.couplingConstants.CV;
+    double CVP = dm.configOptions.couplingConstants.CVP;
+    double CA = dm.configOptions.couplingConstants.CA;
+    double CAP = dm.configOptions.couplingConstants.CAP;
+    double CT = dm.configOptions.couplingConstants.CT;
+    double CTP = dm.configOptions.couplingConstants.CTP;
+
+    double mf = 0.;
+    double mgt = 0.;
+    if (dm.configOptions.betaDecay.Default == "Fermi") {
+      mf = 1.;
+    }
+    else {
+      mgt = 1.;
+    }
+
+    double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
 
     double M = A * (PMASSC2 + NMASSC2) / 2. / EMASSC2;
 
@@ -298,7 +416,7 @@ namespace utilities {
 
   inline double Spence(double x) { return -gsl_sf_dilog(x); }
 
-  inline double RadiativeCorrection(double W, double W0, int Z,
+  inline double RadiativeCorrection(double W, double W0, int Z,     ////// Radiative Correction ------ R (OK)
                                               double R, double gA,
                                               double gM) {
     // 1st order, based on the 5th Wilkinson article
@@ -357,7 +475,7 @@ namespace utilities {
     return (1 + O1corr) * (L + O2corr + O3corr);
   }
 
-  inline double NeutrinoRadiativeCorrection(double Wv) {
+  inline double NeutrinoRadiativeCorrection(double Wv) { ////// vNeutrino Radiative Correction ------ Rnu (OK (attention à Wv) mais pas utilisé)
     double h = 0.;
     double pv = std::sqrt(Wv * Wv - 1);
     double beta = pv / Wv;
@@ -369,7 +487,7 @@ namespace utilities {
     return 1 + FINESTRUCTURE / 2 / M_PI * h;
   }
 
-  inline double RecoilCorrection(double W, double W0, int A,
+  inline double RecoilCorrection(double W, double W0, int A,  /////// RECOIL CORRECTION ------ Rn (OK mais pas utilisé)
                                              int decayType, double mixingRatio) {
     double Vr0, Vr1, Vr2, Vr3;
     double Ar0, Ar1, Ar2, Ar3;
@@ -401,7 +519,7 @@ namespace utilities {
     return 1;
   }
 
-  inline double AtomicScreeningCorrection(double W, int Z,
+  inline double AtomicScreeningCorrection(double W, int Z,          ///////// Atomic Screening ------- S (OK mais pas utilisé)
                                                     int betaType) {
     std::vector<double> Aby, Bby;
 
@@ -450,8 +568,21 @@ namespace utilities {
     return first * second * third * fourth * fifth;
   }
 
-  inline double AtomicExchangeCorrection(double W, double exPars[9]) {
+  // inline double AtomicExchangeCorrection(double W, double exPars[9]) {    ///////////// ATOMIC EXCHNAGE -------- X (OK avec exPars définit mais pas utilisé) (oir csv)
+  //   double E = W - 1;
+  //
+  //   return 1 + exPars[0] / E + exPars[1] / E / E +
+  //          exPars[2] * std::exp(-exPars[3] * E) +
+  //          exPars[4] * sin(std::pow(W - exPars[6], exPars[5]) + exPars[7]) /
+  //          std::pow(W, exPars[8]);
+  // }
+
+  //modified by SL 10/05/2023
+  inline double AtomicExchangeCorrection(double W, int Z) {    ///////////// ATOMIC EXCHNAGE -------- X (crée par SL 10/05/2023)
     double E = W - 1;
+
+    std::vector<double> exPars;
+    screening::AtomicExchangeFitParams(Z, exPars);
 
     return 1 + exPars[0] / E + exPars[1] / E / E +
            exPars[2] * std::exp(-exPars[3] * E) +
@@ -459,7 +590,7 @@ namespace utilities {
            std::pow(W, exPars[8]);
   }
 
-  inline double AtomicMismatchCorrection(double W, double W0, int Z,
+  inline double AtomicMismatchCorrection(double W, double W0, int Z, ///////////ATOMIC OVERLAP ------ r (OK mais pas utilisé)
                                                    int A, int betaType) {
     double dBdZ2 = (44.200 * std::pow(Z - betaType, 0.41) +
                     2.3196E-7 * std::pow(Z - betaType, 4.45)) /
@@ -496,9 +627,27 @@ namespace utilities {
       int betaType = (int)((Z > 0) - (Z < 0));
       Z = std::abs(Z);
       double cShape, cNS;
-      std::tie(cShape, cNS) = CCorrectionComponents(W, W0, Z, A, R, betaType, GAMOW_TELLER, 1.27, -229, 1, 4.*A, 1*A, 0);
+
+      if (dm.configOptions.betaDecay.Default == "Fermi") {
+        int decayType = 0;
+      }
+      if (dm.configOptions.betaDecay.Default == "Gamow-Teller")
+        int decayType = 1;
+      }
+      else{
+        int decayType = 2;
+      }
+
+      std::tie(cShape, cNS) = CCorrectionComponents(W, W0, Z, A, R, betaType, decayType, 1.27, -229, 1, 4.*A, 1*A, 0);
       double CCorr = cShape + cNS;
-      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7);
+      //My correction SL 10/05/2023
+      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*AtomicExchangeCorrection(W, Z)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7)*RecoilCorrection(W, W0, A, 0, 0)*AtomicMismatchCorrection(W, W0, Z, A, betaType)*QCorrection(W, W0, Z, A, betaType);
+
+      //Raw implementation
+      //return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7);
+
+      //No Correction
+      //return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType);
     }
     else {
       return PhaseSpace(W, W0)*SimpleFermiFunction(Z, GetSpeed(E, EMASSC2));
@@ -571,9 +720,9 @@ namespace utilities {
     }
 
     double costheta = RandomFromDistribution(dist);
-    double theta = std::acos(theta);
-    //std::cout << theta;
+    double theta = std::acos(costheta); //// remplacement de theta par costheta par SL 10/05/2023
     vector<double> perp = CrossProduct(dir2, RandomDirection());
+    perp = NormaliseVector(perp); ///Ajouté par SL 10/05/2023
     vector<double> dir = RotateAroundVector(dir2, perp, theta);
     return dir;
   }
@@ -624,6 +773,7 @@ namespace utilities {
     std::ifstream ameDataFile(filename.c_str());
     std::string line;
 
+
     int skipHeader = 36;
     int currentLine = 0;
 
@@ -657,6 +807,7 @@ namespace utilities {
 	//std::cout << "Name " << name << std::endl;
 	//massExcess = std::stod(line.substr(30, 14));
 	//massExcessUnc
+
 	std::string atomicMassString = line.substr(106, 15).replace(3, 1, "");
 	std::replace(atomicMassString.begin(), atomicMassString.end(), '#', '.');
 	atomicMass = std::stod(atomicMassString)*1e-6*UMASSC2;
