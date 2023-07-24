@@ -119,6 +119,8 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   double CAP = dm.configOptions.couplingConstants.CAP;
   double CT = dm.configOptions.couplingConstants.CT;
   double CTP = dm.configOptions.couplingConstants.CTP;
+  double a_conf = dm.configOptions.couplingConstants.a;
+  double b_conf = dm.configOptions.couplingConstants.b;
 
   double mf = 0.;
   double mgt = 0.;
@@ -130,8 +132,8 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
     mgt = 1.;
   }
 
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
-  double fierz = utilities::CalculateFierz(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
+  double fierz = utilities::CalculateFierz(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
 
   //std::cout << "fierz " << fierz << " a " << a << std::endl;
 
@@ -243,10 +245,13 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   double CAP = dm.configOptions.couplingConstants.CAP;
   double CT = dm.configOptions.couplingConstants.CT;
   double CTP = dm.configOptions.couplingConstants.CTP;
+  double a_conf = dm.configOptions.couplingConstants.a;
+  double b_conf = dm.configOptions.couplingConstants.b;
 
+  double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
+  double fierz = utilities::CalculateFierz(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
 
-  double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
-  double fierz = utilities::CalculateFierz(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
+  //std::cout <<" b = " << fierz <<"\t a = " << a << std::endl;
 
   std::vector<std::vector<double> >* dist;
   try {

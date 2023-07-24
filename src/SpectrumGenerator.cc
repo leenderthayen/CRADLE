@@ -23,7 +23,7 @@ std::vector<std::vector<double> >* DeltaSpectrumGenerator::GenerateSpectrum(Part
 std::vector<std::vector<double> >* SimpleBetaDecay::GenerateSpectrum(Particle* initState, Particle* finalState, double Q) {
   std::vector<std::vector<double> >* spectrum = utilities::GenerateBetaSpectrum(
   (finalState->GetCharge() - initState->GetCharge())*finalState->GetCharge(),
-  finalState->GetCharge()+finalState->GetNeutrons(), Q, true);
+  finalState->GetCharge()+finalState->GetNeutrons(), Q, false);
 
   return spectrum;
 }

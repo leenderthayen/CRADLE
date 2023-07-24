@@ -12,9 +12,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <future>
-
-#include <iostream>
-#include <iomanip>
+// 
+// #include <iostream>
+// #include <iomanip>
 
 template<typename A, typename B>
 std::pair<B,A> flip_pair(const std::pair<A,B> &p)
