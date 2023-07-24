@@ -111,17 +111,29 @@ namespace utilities {
     // std::cout<<"INITIAL :\t "<<"Jpi = "<<Jpi_init<<"  "<<"Energy = "<<parentExEn<<std::endl;
     // std::cout<<"FINAL :\t\t "<<"Jpi = "<<Jpi_final<<"  "<<"Energy = "<<daughterExEn<<std::endl;
 
-    if (Jpi_final == 0. && Jpi_init == 0.)
+    if (Jpi_final == 0. && Jpi_init == 0.)/// J check
     {
       Type = "Fermi";
+      return Type;
+    }
+
+    else if (abs(Jpi_final)-abs(Jpi_init) == 0. || abs(Jpi_final)-abs(Jpi_init) == 1.) /// J check
+    {
+      if (Jpi_final > 0. && Jpi_init > 0.) /// pi check
+      {
+        Type = "Gamow-Teller";
+        return Type;
+      }
+
     }
 
     else
     {
-      Type = "Gamow-Teller";
+      throw std::invalid_argument("Not pure Fermi or pure Gamow-Teller transition ! (don't use Auto mode or remove the transition)");
+      return NULL;
     }
 
-    return Type;
+
 
   }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,12 +196,24 @@ namespace utilities {
     return mf*mf*(cs*cs+cv*cv+csp*csp+cvp*cvp)+mgt*mgt*(ct*ct+ctp*ctp+ca*ca+cap*cap);
   }
 
-  inline double CalculateFierz(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt) {
+  inline double CalculateFierz(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt, double a, double b)
+  {
+    if (std::isnan(a) && std::isnan(b)){
     return 2.*(mf*mf*(cs*cv+csp*cvp)+mgt*mgt*(ct*ca+ctp*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
   }
+    else {
+      return b;
+    }
+  }
 
-  inline double CalculateBetaNeutrinoAsymmetry(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt) {
-    return 1.; //(mf*mf*(-cs*cs-csp*csp+cv*cv+cvp*cvp)+mgt*mgt/3.*(ct*ct+ctp*ctp-ca*ca-cap*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
+  inline double CalculateBetaNeutrinoAsymmetry(double cs, double csp, double ct, double ctp, double cv, double cvp, double ca, double cap, double mf, double mgt, double a, double b)
+  {
+    if (std::isnan(a) && std::isnan(b)){
+    return (mf*mf*(-cs*cs-csp*csp+cv*cv+cvp*cvp)+mgt*mgt/3.*(ct*ct+ctp*ctp-ca*ca-cap*cap))/CalculateXiBetaDecay(cs, csp, ct, ctp, cv, cvp, ca, cap, mf, mgt);
+  }
+    else {
+      return a;
+    }
   }
 
   inline vector<double> NormaliseVector(const vector<double>& v) {
@@ -245,8 +269,15 @@ namespace utilities {
     double specific = 0;
 
     /////////////////////// Completion du code SL 10/05/2023
-    double bNeg = 0;
-    double aNeg[1] = {0};
+    double bNeg[7][6] = { {0.115, -1.8123, 8.2498, -11.223, -14.854, 32.086},
+                          {-0.00062, 0.007165, 0.01841, -0.53736, 1.2691, -1.5467},
+                          {0.02482, -0.5975, 4.84199, -15.3374, 23.9774, -12.6534},
+                          {-0.14038, 3.64953, -38.8143, 172.1368, -346.708, 288.7873},
+                          {0.008152, -1.15664, 49.9663, -273.711, 657.8292, -603.7033},
+                          {1.2145, -23.9931, 149.9718, -471.2985, 662.1909, -305.6804},
+                          {-1.5632, 33.4192, -255.1333, 938.5297, -1641.2845, 1095.358} };
+    double aNeg[7] = {0,0,0,0,0,0,0};
+
 
     double bPos[7][6] = { {0.0701, -2.572, 27.5971, -128.658, 272.264, -214.925},
                           {-0.002308, 0.066463, -0.6407, 2.63606, -5.6317, 4.0011},
@@ -261,7 +292,10 @@ namespace utilities {
     {
       for (int x=1; x<=6; x++)
       {
-        aPos[n] += bPos[n][x-1]*std::pow(FINESTRUCTURE*Z, x);
+        if (betaType == 1)
+          aPos[n] += bPos[n][x-1]*std::pow(FINESTRUCTURE*Z, x);
+        else
+          aNeg[n] += bNeg[n][x-1]*std::pow(FINESTRUCTURE*Z, x);
       }
     }
 
@@ -275,7 +309,6 @@ namespace utilities {
 
     if (betaType == 1)
       specific = aPos[0] * r / W + 0.22 * (r - 0.0164) * std::pow(FINESTRUCTURE * Z, 4.5) + sum;
-
     else
       specific = aNeg[0] * r / W + 0.41 * (r - 0.0164) * std::pow(FINESTRUCTURE * Z, 4.5) + sum;
     ///////////////////////
@@ -395,6 +428,8 @@ namespace utilities {
     double CAP = dm.configOptions.couplingConstants.CAP;
     double CT = dm.configOptions.couplingConstants.CT;
     double CTP = dm.configOptions.couplingConstants.CTP;
+    double a_conf = dm.configOptions.couplingConstants.a;
+    double b_conf = dm.configOptions.couplingConstants.b;
 
     double mf = 0.;
     double mgt = 0.;
@@ -405,7 +440,7 @@ namespace utilities {
       mgt = 1.;
     }
 
-    double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt);
+    double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
 
     double M = A * (PMASSC2 + NMASSC2) / 2. / EMASSC2;
 
@@ -622,20 +657,22 @@ namespace utilities {
   inline double GetSpectrumHeight(int Z, int A, double Q, double E, bool advanced) {
     double W = E/EMASSC2+1.;
     double W0 = Q/EMASSC2+1.;
+    int decayType = FERMI;
     double R = std::sqrt(5./3.)*ApproximateRadius(A)/NATURALLENGTH;
     if (advanced) {
       int betaType = (int)((Z > 0) - (Z < 0));
       Z = std::abs(Z);
       double cShape, cNS;
 
+      DecayManager& dm = DecayManager::GetInstance();
       if (dm.configOptions.betaDecay.Default == "Fermi") {
-        int decayType = 0;
+        decayType = FERMI;
       }
-      if (dm.configOptions.betaDecay.Default == "Gamow-Teller")
-        int decayType = 1;
+      if (dm.configOptions.betaDecay.Default == "Gamow-Teller") {
+        decayType = GAMOW_TELLER;
       }
       else{
-        int decayType = 2;
+        decayType = FERMI;
       }
 
       std::tie(cShape, cNS) = CCorrectionComponents(W, W0, Z, A, R, betaType, decayType, 1.27, -229, 1, 4.*A, 1*A, 0);

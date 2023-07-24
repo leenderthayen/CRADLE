@@ -7,9 +7,6 @@
 #include <sstream>
 #include <random>
 
-#include <iostream>
-#include <iomanip>
-
 namespace CRADLE {
 
 class DecayChannel;
