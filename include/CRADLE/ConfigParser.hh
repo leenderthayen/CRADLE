@@ -17,7 +17,7 @@ struct NuclearOptions {
 struct General {
   int Verbosity = 1;
   int Loop = 0;
-  int Threads = 2;
+  int Threads = 1;
   std::string Output = "output.txt";
 };
 
@@ -25,13 +25,11 @@ struct CouplingConstants {
   double CS = 0.0;
   double CSP = 0.0;
   double CV = 1.0;
-  double CVP = 1.0;
+  double CVP = 0.0;
   double CT = 0.0;
   double CTP = 0.0;
   double CA = 1.2754;
   double CAP = 1.2754;
-  double a = 1.;
-  double b = 0.;
 };
 
 struct Cuts {

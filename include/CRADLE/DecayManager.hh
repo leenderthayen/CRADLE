@@ -32,7 +32,6 @@ class DecayManager {
     void RegisterDecayMode(const std::string, DecayMode&);
     void RegisterParticle(Particle*);
     void RegisterDistribution(const std::string, std::vector<std::vector<double> >*);
-    void RegisterBetaType(const std::string, const std::string); //////// ajout de SL 12/05/2023
     void RegisterSpectrumGenerator(const std::string, SpectrumGenerator&);
     void RegisterBasicSpectrumGenerators();
     void ListRegisteredParticles();
@@ -40,8 +39,6 @@ class DecayManager {
     Particle* GetNewParticle(const std::string, int Z=0, int A=0);
     DecayMode& GetDecayMode(const std::string);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
-
-    std::string GetBetaType(const std::string); /////// ajout de SL 12/05/2023
 
     ConfigOptions configOptions;
 
@@ -52,7 +49,6 @@ class DecayManager {
 
     std::map<const std::string, DecayMode&> registeredDecayModes;
     std::map<const std::string, std::vector<std::vector<double> >* > registeredDistributions;
-    std::map<const std::string, std::string> registeredBetaType;    /////// ajout de SL 12/05/2023
     //std::vector<Particle*> particleStack;
     std::map<const std::string, Particle*> registeredParticles;
     std::string outputName;

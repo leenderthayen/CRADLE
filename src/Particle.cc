@@ -35,7 +35,6 @@ double Particle::GetLifetime() const {
   double t = 1.e46;
   //double energyThreshold = GetOpt(double, "Cuts.Energy");
   double energyThreshold = 10;
-
   for(int i = 0; i < decayChannels.size(); ++i) {
     // Look for decay channels from current excitation state
     if (std::abs(decayChannels[i]->GetParentExcitationEnergy()-currentExcitationEnergy) < energyThreshold) {
@@ -48,7 +47,7 @@ double Particle::GetLifetime() const {
 
 double Particle::GetDecayTime() {
   double lifetime = GetLifetime();
-  //std::cout << name << " Lifetime " << lifetime << std::endl;
+  // std::cout << name << " Lifetime " << lifetime << std::endl;
   if (lifetime!= 1.e46) {
     std::exponential_distribution<double> distribution(1./lifetime);
     double decayTime = distribution(randomGen);

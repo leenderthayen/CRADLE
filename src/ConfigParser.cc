@@ -26,7 +26,7 @@ namespace CRADLE {
     cmd->add_option("-e,--energy", cmdOptions.Energy, "Excitation energy of initial state.");
 
     cmd->callback([&]() {
-      std::cout << "Parsing initial nucleus " << cmdOptions.Name << std::endl;
+      std::cout << "Parsing initial nucleus " << cmdOptions.Name << std::endl;	    
     });
 
   }
@@ -49,8 +49,6 @@ namespace CRADLE {
     coupling->add_option("--CTP", couplingConstants.CTP, "Tensor prime coupling constant.");
     coupling->add_option("--CSP", couplingConstants.CSP, "Scalar prime coupling constant.");
     coupling->add_option("--CAP", couplingConstants.CAP, "Axial prime coupling constant.");
-    coupling->add_option("--a", couplingConstants.a, "Angular correlation coefficient.");
-    coupling->add_option("--b", couplingConstants.b, "Fierz term.");
   }
 
   void SetCuts (CLI::App& app, Cuts& cuts) {
