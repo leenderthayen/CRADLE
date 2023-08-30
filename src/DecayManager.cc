@@ -12,9 +12,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <future>
-// 
-// #include <iostream>
-// #include <iomanip>
 
 template<typename A, typename B>
 std::pair<B,A> flip_pair(const std::pair<A,B> &p)
@@ -104,22 +101,6 @@ vector<vector<double> >* DecayManager::GetDistribution(const string name) {
   return registeredDistributions.at(name);
 }
 
- /////// ajout de SL 12/05/2023//////////////////////////////////////
-void DecayManager::RegisterBetaType(const string name,
-                                        const string nameType) {
-  registeredBetaType.insert(
-      pair<string, string>(name, nameType));
-  // cout << "Registered BetaType " << name << endl;
-}
-
-string DecayManager::GetBetaType(const string name) {
-  if (registeredBetaType.count(name) == 0) {
-    throw std::invalid_argument("Transition not registered.");
-  }
-  return registeredBetaType.at(name);
-}
-/////////////////////////////////////////////////////////////////////
-
 void DecayManager::RegisterBasicParticles() {
   RegisterParticle(new Particle("e-", utilities::EMASSC2, -1, 0, 0.5, 0.));
   RegisterParticle(new Particle("e+", utilities::EMASSC2, 1, 0, 0.5, 0.));
@@ -179,28 +160,24 @@ void DecayManager::ListRegisteredParticles() {
 bool DecayManager::GenerateNucleus(string name, int Z, int A) {
   std::ostringstream filename;
   filename << configOptions.envOptions.Radiationdata;
-  filename << "/z" << Z << ".a" << A;
+  filename << "z" << Z << ".a" << A;
   std::ifstream radDataFile((filename.str()).c_str());
 
-  //cout << "Generating nucleus " << name << endl;
+  cout << "Generating nucleus " << name << endl;
 
   string line;
   double excitationEnergy = 0.;
   double lifetime;
   double atomicMass = utilities::GetAMEMass(configOptions.envOptions.AMEdata, Z, A);
-
   if (atomicMass == 0) {
     atomicMass = utilities::GetApproximateMass(Z, A);
   }
-
   Particle* p = new Particle(name, atomicMass, Z,
                              (A - Z), 0., 0);
 
-  //cout << filename.str() << endl;
+  // cout << filename.str() << endl;
 
   while (getline(radDataFile, line)) {
-    //cout<<line<<endl;
-
     if (!line.compare(0, 1, "#")) {
       // Comment line
       continue;
@@ -209,12 +186,10 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
       std::istringstream iss(line);
       string p;
       string flag;
-
       iss >> p >> excitationEnergy >> flag >> lifetime;
       continue;
-
     }
-    //cout << "Lifetime: " << lifetime << endl;
+    // cout << "Lifetime: " << lifetime << endl;
     string mode;
     double daughterExcitationEnergy = 0;
     double intensity = 0;
@@ -224,14 +199,11 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
 
     std::istringstream iss(line);
     iss >> mode >> daughterExcitationEnergy >> flag >> intensity >> Q >> modifier;
-    // cout << "Mode : " << mode << endl;
-    // cout << "Daughter Energy :" << daughterExcitationEnergy << endl;
-    // cout << "Flag :" << flag <<endl;
-    // cout << "Intensity : " << intensity << endl;
-    // cout << "Q : " << Q << endl;
-    // cout << "Modifier : " << modifier << endl;
-    // cout << "\n" <<endl;
-
+    /*cout << "Mode: " << mode << endl;
+    cout << "Daughter Energy" << daughterExcitationEnergy << endl;
+    cout << "Intensity: " << intensity << endl;
+    cout << "Q: " << Q << endl;
+    cout << "Modifier: " << modifier << endl;*/
     if (Q > 0.) {
       /*cout << "Adding DecayChannel " << mode << " Excitation Energy " <<
       excitationEnergy << " to " << daughterExcitationEnergy << endl;*/
@@ -317,9 +289,8 @@ bool DecayManager::GenerateNucleus(string name, int Z, int A) {
           configOptions.envOptions.Radiationdata.c_str(),
           &infoRD);
       int j = stat(
-          configOptions.envOptions.Gammadata.c_str(),
+          configOptions.envOptions.Radiationdata.c_str(),
           &infoG);
-
       if (i == 0 && j == 0 && S_ISDIR(infoRD.st_mode) && S_ISDIR(infoG.st_mode)) {
         RegisterBasicParticles();
 	RegisterBasicDecayModes();
@@ -345,23 +316,21 @@ std::string DecayManager::GenerateEvent(int eventNr) {
   particleStack.push_back(ini);
   while (!particleStack.empty()) {
     Particle* p = particleStack.back();
-    //cout << "Decaying particle " << p->GetName() << endl;
+    // cout << "Decaying particle " << p->GetName() << endl;
     vector<Particle*> finalStates;
     double decayTime = p->GetDecayTime();
 
-
     if ((time + decayTime) <= configOptions.cuts.Lifetime) {
-
       try {
         finalStates = p->Decay();
         time += decayTime;
-        //cout << "Decay finished" << endl;
+        // cout << "Decay finished" << endl;
       } catch (const std::invalid_argument& e) {
-        cout << "Decay Mode for particle " << p->GetName() << " not found. Aborting." << endl;
+        // cout << "Decay Mode for particle " << p->GetName() << " not found. Aborting." << endl;
         return "";
       }
     } else {
-      //cout << "Particle " << p->GetName() << " is stable" << endl;
+      // cout << "Particle " << p->GetName() << " is stable" << endl;
       eventDataSS << eventNr << "\t" << time << "\t" << p->GetInfoForFile() << "\n";
     }
     delete particleStack.back();
@@ -373,80 +342,6 @@ std::string DecayManager::GenerateEvent(int eventNr) {
   }
   return eventDataSS.str();
 }
-
-// std::string DecayManager::GenerateEvent(int eventNr)
-// {
-//   double time = 0.;
-//   double checkTime = 0.;
-//   int subEventNr=0;
-//   int totSubEvents = 0;
-//   int totEvents = 0;
-//   std::ostringstream eventData;
-//   std::ostringstream subHeader;
-//   std::ostringstream subEventData;
-//   std::vector<Particle *> particleStack;
-//   Particle *ini = GetNewParticle(initStateName);
-//   ini->SetExcitationEnergy(initExcitationEn);
-//   particleStack.push_back(ini);
-//   cout<<particleStack.size()<<endl;
-//   while (!particleStack.empty())
-//   {
-//
-//     Particle *p = particleStack.back();
-//     vector<Particle *> finalStates;
-//     double decayTime = p->GetDecayTime();
-//     std::cout << eventNr << "\t" << subEventNr << std::endl;
-//     std::cout << "     Time =\t" << time      << "\n "
-//               << "CheckTime =\t" << checkTime << "\n "
-//               << "decayTime =\t" << decayTime << std::endl;
-//     std::cout <<  p->GetInfoForFile() << std::endl;
-//
-//     if (decayTime >= 0.)
-//     {
-//       try
-//       {
-//
-//         finalStates = p->Decay();
-//         time += decayTime;
-//         //cout << "Decay finished" << endl;
-//       }
-//       catch (const std::invalid_argument& e)
-//       {
-//         std::cout << "Decay Mode for particle " << p->GetName() << " not found. Aborting." << endl;
-//         return "";
-//       }
-//     }
-//     else
-//     {
-//       if (time != checkTime)
-//       {
-//         subHeader << eventNr << std::setw(8) << subEventNr << "\t\t" << totSubEvents << "\n" << subEventData.str();
-//         totSubEvents = 0;
-//         ++subEventNr;
-//         checkTime = time;
-//         subEventData.str(std::string());
-//       }
-//       ++totEvents;
-//       ++totSubEvents;
-//
-//       subEventData << eventNr << "\t\t" << std::fixed<<std::setprecision(4)<<roundf(time*100)/100. << "\t" << p->GetInfoForFile() << "\n";
-//     }
-//     delete particleStack.back();
-//     particleStack.pop_back();
-//     if (!finalStates.empty())
-//     {
-//       particleStack.insert(particleStack.end(), finalStates.begin(),
-//                            finalStates.end());
-//     }
-//   }
-//   // Write down the last event that occured!
-//   subHeader << eventNr << "\t\t" << subEventNr << "\t\t" << totSubEvents << "\n"
-//             << subEventData.str();
-//   eventData << eventNr << "\t\t" << totEvents << "\n"
-//             << subHeader.str();
-//
-//   return eventData.str();
-// }
 
 bool DecayManager::MainLoop() {
   int nrParticles = configOptions.general.Loop;
@@ -461,8 +356,8 @@ bool DecayManager::MainLoop() {
   std::ios::sync_with_stdio(false);
   boost::progress_display show_progress(nrParticles);
   boost::progress_timer t;
-  //fileStream << GenerateEvent(0);                        ///// and i started to 0 before
-  for (int i = 0; i < nrParticles; i+=NRTHREADS) {
+  fileStream << GenerateEvent(0);
+  for (int i = 1; i < nrParticles; i+=NRTHREADS) {
     // cout << "LOOP NR " << i+1 << endl;
     int threads = std::min(NRTHREADS, nrParticles-i);
     std::future<std::string> f[threads];
@@ -480,6 +375,4 @@ bool DecayManager::MainLoop() {
   fileStream.close();
   return true;
 }
-
-
 }//End of CRADLE namespace
