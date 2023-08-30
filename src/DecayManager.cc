@@ -99,7 +99,7 @@ void DecayManager::RegisterDistribution(const string name,
 
 vector<vector<double> >* DecayManager::GetDistribution(const string name) {
   if (registeredDistributions.count(name) == 0) {
-    throw std::invalid_argument("Transition not registered.");
+    throw std::invalid_argument("Distribution not registered.");
   }
   return registeredDistributions.at(name);
 }
