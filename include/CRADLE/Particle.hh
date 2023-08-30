@@ -57,6 +57,7 @@ class Particle {
       oss << name << "\t" << currentExcitationEnergy << "\t" << GetKinEnergy() << "\t" << fourMomentum(0) << "\t" << fourMomentum(1) << "\t" << fourMomentum(2) << "\t" << fourMomentum(3);
       return oss.str();
     };
+
     inline void SetMomentum(ublas::vector<double> v) { fourMomentum = v; };
     inline void SetExcitationEnergy(double e) { currentExcitationEnergy = e; fourMomentum(0)+=e; };
     double GetLifetime() const;
