@@ -110,7 +110,40 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   //Work in the COM frame
   ublas::vector<double> elFourMomentum (4);
 
-  DecayManager& dm = DecayManager::GetInstance();
+   double mf = 0.;
+  double mgt = 0.;
+    DecayManager& dm = DecayManager::GetInstance();
+
+
+  /////////ajout de SL 12/05/2023//////////////
+  std::string Type;
+  
+  if (dm.configOptions.betaDecay.Default == "Fermi") {
+    mf = 1.;
+    Type = "Fermi";
+  }
+  else if (dm.configOptions.betaDecay.Default == "Gamow-Teller") {
+    mgt = 1.;
+    Type = "Gomow-Teller";
+  }
+  else if (dm.configOptions.betaDecay.Default == "Auto") {
+    
+    try{
+      Type = DecayManager::GetInstance().GetBetaType(oss.str());
+    } catch (const std::invalid_argument& e) {
+      Type = utilities::FindBetaType(initState, recoil);
+      DecayManager::GetInstance().RegisterBetaType(oss.str(), Type);
+    }
+    
+    if (Type == "Fermi") {
+    mf = 1.;
+  }
+  else{
+    mgt = 1.;
+  }
+  }
+  ////////////////////////////////////////////////
+
   double CS = dm.configOptions.couplingConstants.CS;
   double CSP = dm.configOptions.couplingConstants.CSP;
   double CV = dm.configOptions.couplingConstants.CV;
@@ -122,44 +155,29 @@ std::vector<Particle*> BetaMinus::Decay(Particle* initState, double Q, double da
   double a_conf = dm.configOptions.couplingConstants.a;
   double b_conf = dm.configOptions.couplingConstants.b;
 
-  double mf = 0.;
-  double mgt = 0.;
-
-  if (dm.configOptions.betaDecay.Default == "Fermi") {
-    mf = 1.;
-  }
-  else {
-    mgt = 1.;
-  }
-
   double a = utilities::CalculateBetaNeutrinoAsymmetry(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
   double fierz = utilities::CalculateFierz(CS, CSP, CT, CTP, CV, CVP, CA, CAP, mf, mgt, a_conf, b_conf);
 
   //std::cout << "fierz " << fierz << " a " << a << std::endl;
 
   std::vector<std::vector<double> >* dist;
-  // std::cout << "Try getting distribution" << std::endl;
   try {
     dist = DecayManager::GetInstance().GetDistribution(oss.str());
   } catch (const std::invalid_argument& e) {
-    // bool advancedFermi = false;
-    // if (OptionContainer::GetInstance().GetOption<std::string>("BetaDecay.FermiFunction") == "Advanced") {
-    //   advancedFermi = true;
-    // }
-    // std::cout << "Distribution not found" << std::endl;
-    // std::cout << oss.str() << " " << spectrumGen << std::endl;
+    bool advancedFermi = false;
+    if (dm.configOptions.betaDecay.FermiFunction == "Advanced") { //// réécriture de la condition par SL 10/05/2023
+      advancedFermi = true;
+    }
+    dist = spectrumGen->GenerateSpectrum(initState, recoil, Q, Type); //// changement de Q en E0 par SL 10/05/2023
     double gamma = std::sqrt(1-std::pow(utilities::FINESTRUCTURE*recoil->GetCharge(), 2.));
-    dist = spectrumGen->GenerateSpectrum(initState, recoil, Q);
-    int i = 0;
-    for (auto & element : *dist) {
-      double E = element[0]+utilities::EMASSC2;
-      double SH = element[0];
+    int i=0;
+    for ( int i = 0; i<dist->size(); i++) {                                  ////// changement de boucle et element par ((*dist)[i]) par SL 10/05/2023
+      double E = ((*dist)[i])[0]+utilities::EMASSC2;
+      double SH = ((*dist)[i])[1];
       ((*dist)[i])[1] = SH*(1+gamma*fierz*utilities::EMASSC2/E);
     }
     DecayManager::GetInstance().RegisterDistribution(oss.str(), dist);
-  }
-
-  // std::cout << "Found distribution" << std::endl;
+    }
 
   std::vector<double> p;
 
@@ -217,23 +235,32 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
   double mgt = 0.;
 
   /////////ajout de SL 12/05/2023//////////////
-
+  
+  std::string Type;
+  
   if (dm.configOptions.betaDecay.Default == "Fermi") {
     mf = 1.;
+    Type = "Fermi";
   }
   else if (dm.configOptions.betaDecay.Default == "Gamow-Teller") {
     mgt = 1.;
+    Type = "Gomow-Teller";
   }
   else if (dm.configOptions.betaDecay.Default == "Auto") {
-    std::string Type;
+    
     try{
       Type = DecayManager::GetInstance().GetBetaType(oss.str());
     } catch (const std::invalid_argument& e) {
       Type = utilities::FindBetaType(initState, recoil);
       DecayManager::GetInstance().RegisterBetaType(oss.str(), Type);
     }
-    if (Type == "Fermi") mf = 1.;
-    else mgt = 1.;
+    
+    if (Type == "Fermi") {
+    mf = 1.;
+  }
+  else {
+    mgt = 1.;
+  }
   }
   ////////////////////////////////////////////////
 
@@ -261,7 +288,7 @@ std::vector<Particle*> BetaPlus::Decay(Particle* initState, double Q, double dau
     if (dm.configOptions.betaDecay.FermiFunction == "Advanced") { //// réécriture de la condition par SL 10/05/2023
       advancedFermi = true;
     }
-    dist = spectrumGen->GenerateSpectrum(initState, recoil, E0); //// changement de Q en E0 par SL 10/05/2023
+    dist = spectrumGen->GenerateSpectrum(initState, recoil, E0, Type); //// changement de Q en E0 par SL 10/05/2023
     double gamma = std::sqrt(1-std::pow(utilities::FINESTRUCTURE*recoil->GetCharge(), 2.));
     int i=0;
     for ( int i = 0; i<dist->size(); i++) {                                  ////// changement de boucle et element par ((*dist)[i]) par SL 10/05/2023

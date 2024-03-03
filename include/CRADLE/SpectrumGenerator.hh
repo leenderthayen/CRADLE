@@ -10,7 +10,7 @@ class Particle;
 
 class SpectrumGenerator {
   public:
-    virtual std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double) = 0;
+    virtual std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double, std::string) = 0;
     SpectrumGenerator();
     virtual ~SpectrumGenerator();
 };
@@ -21,7 +21,7 @@ class DeltaSpectrumGenerator: public SpectrumGenerator {
       static DeltaSpectrumGenerator instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double, std::string);
 
   protected:
     DeltaSpectrumGenerator();
@@ -35,7 +35,7 @@ class SimpleBetaDecay: public SpectrumGenerator {
       static SimpleBetaDecay instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double, std::string);
 
   protected:
     SimpleBetaDecay();
@@ -49,7 +49,7 @@ class AdvancedBetaDecay: public SpectrumGenerator {
       static AdvancedBetaDecay instance;
       return instance;
     }
-    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double);
+    std::vector<std::vector<double> >* GenerateSpectrum(Particle*, Particle*, double, std::string);
 
   protected:
     AdvancedBetaDecay();
