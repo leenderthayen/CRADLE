@@ -1,0 +1,1 @@
+./CRADLE++ nucleus --name 32Ar -Z 18 -A 32 -c ../config/config_SM.txt general -l 1000000 -o ../../../../../../../mnt/hgfs/shared/save_geo/Ar_SM_5.txt

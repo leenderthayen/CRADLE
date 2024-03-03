@@ -1,0 +1,25 @@
+[General]
+Verbosity=1
+Verbosity_file=0
+[Coupling]
+CS=0
+CSP=0
+CV=1
+CVP=1
+CT=0
+CTP=0
+CA=1.27
+CAP=1.27
+a=NaN
+b=NaN
+[Cuts]
+Distance=1.0
+Lifetime=1e9
+Energy=1.0
+[BetaDecay]
+Default=Auto
+FermiFunction=Advanced
+#Polarisation not yet implemented
+PolarisationX=0.
+PolarisationY=0.
+PolarisationZ=0.

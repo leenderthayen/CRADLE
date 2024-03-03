@@ -13,6 +13,17 @@ class Particle;
 class DecayMode;
 class SpectrumGenerator;
 
+struct ParticleData {
+    int event;
+    int code;
+    double time;
+    double excitation_energy;
+    double kinetic_energy;
+    double px;
+    double py;
+    double pz;
+};
+
 class DecayManager {
   public:
     static DecayManager& GetInstance() {
@@ -36,7 +47,8 @@ class DecayManager {
     void RegisterSpectrumGenerator(const std::string, SpectrumGenerator&);
     void RegisterBasicSpectrumGenerators();
     void ListRegisteredParticles();
-    std::string GenerateEvent(int);
+    std::vector<ParticleData> GenerateEvent_ROOT(int, int);
+    std::string GenerateEvent_TXT(int, int);
     Particle* GetNewParticle(const std::string, int Z=0, int A=0);
     DecayMode& GetDecayMode(const std::string);
     std::vector<std::vector<double> >* GetDistribution(const std::string);
@@ -44,6 +56,8 @@ class DecayManager {
     std::string GetBetaType(const std::string); /////// ajout de SL 12/05/2023
 
     ConfigOptions configOptions;
+
+     
 
   private:
     DecayManager() {};

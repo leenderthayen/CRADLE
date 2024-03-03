@@ -33,7 +33,8 @@ namespace CRADLE {
 
   void SetGeneralOptions (CLI::App& app, General& general) {
     CLI::App* comp = app.add_subcommand("General", "This is the general subcommand")->ignore_case();
-    comp->add_option("-v,--verbosity", general.Verbosity, "Verbosity settings");
+    comp->add_option("-v,--Verbosity", general.Verbosity, "Verbosity settings");
+    comp->add_option("-w,--Verbosity_file", general.Verbosity_file, "Verbosity File settings");
     comp->add_option("-l,--loop", general.Loop, "Number of events to generate.");
     comp->add_option("-t,--threads", general.Threads, "Number of threads (2 x #CPU).");
     comp->add_option("-o,--output", general.Output, "Name of the output file.");

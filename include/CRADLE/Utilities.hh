@@ -81,11 +81,10 @@ namespace utilities {
           getline(gammaDataFile, line);
           continue;
       }
-
+        
         if (initEnergy >= levelEn-1. && initEnergy <= levelEn+1.)
           {
             return angMom;
-            break;
           }
 
       }
@@ -108,8 +107,8 @@ namespace utilities {
     double Jpi_init = GetJpi(Z_init + initState->GetNeutrons(), Z_init, initState->GetExcitationEnergy());
     double Jpi_final = GetJpi(Z_final + finalState->GetNeutrons(), Z_final, finalState->GetExcitationEnergy());
 
-    // std::cout<<"INITIAL :\t "<<"Jpi = "<<Jpi_init<<"  "<<"Energy = "<<parentExEn<<std::endl;
-    // std::cout<<"FINAL :\t\t "<<"Jpi = "<<Jpi_final<<"  "<<"Energy = "<<daughterExEn<<std::endl;
+    // std::cout<<"INITIAL :\t "<<"Jpi = "<<Jpi_init<<"  "<<"Energy = "<< initState->GetExcitationEnergy()<<std::endl;
+    // std::cout<<"FINAL :\t\t "<<"Jpi = "<<Jpi_final<<"  "<<"Energy = "<< finalState->GetExcitationEnergy()<<std::endl;
 
     if (Jpi_final == 0. && Jpi_init == 0.)/// J check
     {
@@ -117,23 +116,11 @@ namespace utilities {
       return Type;
     }
 
-    else if (abs(Jpi_final)-abs(Jpi_init) == 0. || abs(Jpi_final)-abs(Jpi_init) == 1.) /// J check
-    {
-      if (Jpi_final > 0. && Jpi_init > 0.) /// pi check
-      {
-        Type = "Gamow-Teller";
-        return Type;
-      }
-
-    }
-
     else
     {
-      throw std::invalid_argument("Not pure Fermi or pure Gamow-Teller transition ! (don't use Auto mode or remove the transition)");
-      return NULL;
+      Type = "Gamow-Teller";
+      return Type;
     }
-
-
 
   }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -417,7 +404,7 @@ namespace utilities {
   }
 
   inline double QCorrection(double W, double W0, int Z, int A, ////////// Q Correction ---- Q (changement de la récupération de la valeur de a)
-                                      int betaType) {
+                                      int betaType, int decayType) {
 
     DecayManager& dm = DecayManager::GetInstance();
     double CS = dm.configOptions.couplingConstants.CS;
@@ -433,7 +420,7 @@ namespace utilities {
 
     double mf = 0.;
     double mgt = 0.;
-    if (dm.configOptions.betaDecay.Default == "Fermi") {
+    if (decayType == FERMI) {
       mf = 1.;
     }
     else {
@@ -654,10 +641,10 @@ namespace utilities {
     return (1.15+1.8*std::pow(A, -2./3.)-1.2*std::pow(A, -4./3.))*std::pow(A, 1./3.)*1.E-15;
   }
 
-  inline double GetSpectrumHeight(int Z, int A, double Q, double E, bool advanced) {
+  inline double GetSpectrumHeight(int Z, int A, double Q, double E, bool advanced, std::string DecayType) {
     double W = E/EMASSC2+1.;
     double W0 = Q/EMASSC2+1.;
-    int decayType = FERMI;
+    int decayType;
     double R = std::sqrt(5./3.)*ApproximateRadius(A)/NATURALLENGTH;
     if (advanced) {
       int betaType = (int)((Z > 0) - (Z < 0));
@@ -665,20 +652,17 @@ namespace utilities {
       double cShape, cNS;
 
       DecayManager& dm = DecayManager::GetInstance();
-      if (dm.configOptions.betaDecay.Default == "Fermi") {
+      if (DecayType == "Fermi") {
         decayType = FERMI;
-      }
-      if (dm.configOptions.betaDecay.Default == "Gamow-Teller") {
-        decayType = GAMOW_TELLER;
       }
       else{
-        decayType = FERMI;
+        decayType = GAMOW_TELLER;
       }
 
       std::tie(cShape, cNS) = CCorrectionComponents(W, W0, Z, A, R, betaType, decayType, 1.27, -229, 1, 4.*A, 1*A, 0);
       double CCorr = cShape + cNS;
       //My correction SL 10/05/2023
-      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*AtomicExchangeCorrection(W, Z)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7)*RecoilCorrection(W, W0, A, 0, 0)*AtomicMismatchCorrection(W, W0, Z, A, betaType)*QCorrection(W, W0, Z, A, betaType);
+      return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*AtomicExchangeCorrection(W, Z)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.706)*RecoilCorrection(W, W0, A, decayType, 0)*AtomicMismatchCorrection(W, W0, Z, A, betaType)*QCorrection(W, W0, Z, A, betaType, decayType);
 
       //Raw implementation
       //return PhaseSpace(W, W0)*FermiFunction(Z, W, R, betaType)*L0Correction(W, Z, R, betaType)*CCorr*UCorrection(W, Z, betaType)*AtomicScreeningCorrection(W, Z, betaType)*RadiativeCorrection(W, W0, Z, R, 1.27, 4.7);
@@ -691,13 +675,13 @@ namespace utilities {
     }
   }
 
-  inline std::vector<std::vector<double> >* GenerateBetaSpectrum(int Z, int A, double Q, bool advancedFermi) {
+  inline std::vector<std::vector<double> >* GenerateBetaSpectrum(int Z, int A, double Q, bool advancedFermi, std::string DecayType) {
     std::vector<std::vector<double> >* dist = new std::vector<std::vector<double> >();
     double stepSize = 1.0;
 
     double currentEnergy = stepSize;
     while(currentEnergy <= Q) {
-      double s = GetSpectrumHeight(Z, A, Q, currentEnergy, advancedFermi);
+      double s = GetSpectrumHeight(Z, A, Q, currentEnergy, advancedFermi, DecayType);
       std::vector<double> pair;
       pair.push_back(currentEnergy);
       pair.push_back(s);
@@ -764,12 +748,6 @@ namespace utilities {
     return dir;
   }
 
-  /*inline vector<double> GetParticleDirection(std::vector<vector<double> >& dirs, std::vector<std::vector<double> >& A) {
-    vector<double> dir (3);
-    //TODO
-    return dir;
-  }*/
-
   inline vector<double> LorentzBoost(vector<double>& velocity, vector<double>& v) {
     double speed = GetNorm(velocity);
     double beta = speed;
@@ -791,7 +769,7 @@ namespace utilities {
 
     return prod(boost, v);
   }
-
+  
   inline double GetApproximateMass(int Z, int A) {
     double b = 15.5*A-16.8*std::pow(A, 2.0/3.0)- 0.72*Z*(Z-1)*std::pow(A, -1.0/3.0) - 23.*std::pow(A-2*Z, 2.)/A;
     if (A%2 == 0) {

@@ -22,7 +22,7 @@ class Particle {
     double currentExcitationEnergy;
 
     std::string name;
-
+    
     ublas::vector<double> fourMomentum;
     std::vector<DecayChannel*> decayChannels;
 
@@ -54,7 +54,7 @@ class Particle {
     inline std::string GetInfoForFile() const {
       std::string n;
       std::ostringstream oss(n);
-      oss << name << "\t" << currentExcitationEnergy << "\t" << GetKinEnergy() << "\t" << fourMomentum(0) << "\t" << fourMomentum(1) << "\t" << fourMomentum(2) << "\t" << fourMomentum(3);
+      oss << name << "\t" << currentExcitationEnergy << "\t" << GetKinEnergy() << "\t" << fourMomentum(0) << "\t" << fourMomentum(1)/fourMomentum(0) << "\t" << fourMomentum(2)/fourMomentum(0) << "\t" << fourMomentum(3)/fourMomentum(0);
       return oss.str();
     };
 
