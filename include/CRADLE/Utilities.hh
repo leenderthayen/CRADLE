@@ -724,7 +724,7 @@ namespace utilities {
     dir2 = NormaliseVector(dir2);
 
     std::vector<std::vector<double> > dist;
-    int N = 180;
+    int N = 1800;
     double stepSize = 2./N;
     double currentCosAngle = -1;
 

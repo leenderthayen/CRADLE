@@ -2,14 +2,4 @@
 # Denotes metastable state; Flag; Excitation Energy; Lifetime
 P         5046.1         -         0.000e+00
 # Decay modes from this state; Name; Daughter Excitation; Flag; Intensity; Q
-                              Proton   0.0000e+00  - 34   3465.0
-# Denotes metastable state; Flag; Excitation Energy; Lifetime
-P         4081.6         -         0.000e+00
-# Decay modes from this state; Name; Daughter Excitation; Flag; Intensity; Q
-                              Proton   0.0000e+00  - 33   2500.5
-# Denotes metastable state; Flag; Excitation Energy; Lifetime
-P         3771.7         -         0.000e+00
-# Decay modes from this state; Name; Daughter Excitation; Flag; Intensity; Q
-                              Proton   0.0000e+00  - 33   2190.6
-
-
+                              Proton   0.0000e+00  - 1.0000e+02   3.465e+03

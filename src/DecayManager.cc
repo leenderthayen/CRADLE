@@ -471,6 +471,8 @@ namespace CRADLE
     ParticleData_ini.excitation_energy = 0;
     ParticleData_ini.kinetic_energy = 0;
     ParticleData_ini.px = 0;
+    ParticleData_ini.py = 0;
+    ParticleData_ini.pz = 0;
     double time = 0.;
     double checkTime = 0.;
     int totEvents = 0;
@@ -480,6 +482,16 @@ namespace CRADLE
     particleStack.push_back(ini);
     while (!particleStack.empty())
     {
+       ParticleData_ini.event = 0;
+        ParticleData_ini.time = 0;
+        ParticleData_ini.code = 0;
+        ParticleData_ini.excitation_energy = 0;
+        ParticleData_ini.kinetic_energy = 0;
+        ParticleData_ini.px = 0;
+        ParticleData_ini.py = 0;
+        ParticleData_ini.pz = 0;
+        double mom;
+
       Particle *p = particleStack.back();
       vector<Particle *> finalStates;
       double decayTime = p->GetDecayTime();
@@ -498,9 +510,10 @@ namespace CRADLE
           vec[totEvents].time = roundf(time * 10000) / 10000.;
           vec[totEvents].excitation_energy = p->GetExcitationEnergy();
           vec[totEvents].kinetic_energy = p->GetKinEnergy();
-          vec[totEvents].px = p->GetMomentum()(1) / p->GetMomentum()(0);
-          vec[totEvents].py = p->GetMomentum()(2) / p->GetMomentum()(0);
-          vec[totEvents].pz = p->GetMomentum()(3) / p->GetMomentum()(0);
+          mom = sqrt(p->GetMomentum()[1]*p->GetMomentum()[1] + p->GetMomentum()[2]*p->GetMomentum()[2] + p->GetMomentum()[3]*p->GetMomentum()[3]);
+          vec[totEvents].px = p->GetMomentum()[1] / (mom);
+          vec[totEvents].py = p->GetMomentum()[2] / (mom);
+          vec[totEvents].pz = p->GetMomentum()[3] / (mom);
           ++totEvents;
         }
       }
@@ -512,9 +525,10 @@ namespace CRADLE
         vec[totEvents].time = roundf(time * 10000) / 10000.;
         vec[totEvents].excitation_energy = p->GetExcitationEnergy();
         vec[totEvents].kinetic_energy = p->GetKinEnergy();
-        vec[totEvents].px = p->GetMomentum()(1) / p->GetMomentum()(0);
-        vec[totEvents].py = p->GetMomentum()(2) / p->GetMomentum()(0);
-        vec[totEvents].pz = p->GetMomentum()(3) / p->GetMomentum()(0);
+        mom = sqrt(p->GetMomentum()[1]*p->GetMomentum()[1] + p->GetMomentum()[2]*p->GetMomentum()[2] + p->GetMomentum()[3]*p->GetMomentum()[3]);
+        vec[totEvents].px = p->GetMomentum()[1] / (mom);
+        vec[totEvents].py = p->GetMomentum()[2] / (mom);
+        vec[totEvents].pz = p->GetMomentum()[3] / (mom);
         ++totEvents;
       }
 
@@ -706,17 +720,18 @@ namespace CRADLE
 
     if (outputName.find("root") != std::string::npos)
     {
-      TFile outputFile(outputName.c_str(), "RECREATE");
-      TTree tree("ParticleTree", "Tree for Particle Data");
+      TFile* outputFile = new TFile(outputName.c_str(), "RECREATE");
+      TTree* tree = new TTree("ParticleTree", "Tree for Particle Data");
+      
       ParticleData pData;
-      tree.Branch("event", &pData.event);
-      tree.Branch("time", &pData.time);
-      tree.Branch("code", &pData.code);
-      tree.Branch("energy", &pData.kinetic_energy);
-      tree.Branch("excitation_energy", &pData.excitation_energy);
-      tree.Branch("px", &pData.px);
-      tree.Branch("py", &pData.py);
-      tree.Branch("pz", &pData.pz);
+      tree->Branch("event", &pData.event);
+      tree->Branch("time", &pData.time);
+      tree->Branch("code", &pData.code);
+      tree->Branch("energy", &pData.kinetic_energy);
+      tree->Branch("excitation_energy", &pData.excitation_energy);
+      tree->Branch("px", &pData.px);
+      tree->Branch("py", &pData.py);
+      tree->Branch("pz", &pData.pz);
 
       for (int i = 0; i < nrParticles; i += NRTHREADS)
       {
@@ -733,13 +748,13 @@ namespace CRADLE
           for (const auto &particle : f[t].get())
           {
             pData = particle;
-            tree.Fill();
+            tree->Fill();
           }
           ++show_progress;
         }
       }
-      outputFile.Write();
-      outputFile.Close();
+      outputFile->Write();
+      outputFile->Close();
     }
 
     else if (outputName.find("txt") != std::string::npos)
