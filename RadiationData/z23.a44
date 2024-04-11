@@ -1,0 +1,5 @@
+# 44V ( 111 MS    )
+# Denotes metastable state; Flag; Excitation Energy; Lifetime
+P         100.         -         0.000e+00
+# Decay modes from this state; Name; Daughter Excitation; Flag; Intensity; Q
+                              Proton   0.0000e+00  - 1.0000e+02   3582.

@@ -1,5 +1,6 @@
 [General]
 Verbosity=1
+Verbosity_file=0
 [Coupling]
 CS=0.
 CSP=0.
@@ -9,12 +10,14 @@ CT=0.
 CTP=0.
 CA=1.27
 CAP=1.27
+b=0
+a=1
 [Cuts]
 Distance=1.0
 Lifetime=1e9
 Energy=1.0
 [BetaDecay]
-Default=Gamow-Teller
+Default=Fermi
 FermiFunction=Advanced
 #Polarisation not yet implemented
 PolarisationX=0.

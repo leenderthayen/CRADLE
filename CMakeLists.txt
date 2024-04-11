@@ -47,7 +47,7 @@ include(CMakeUninstallTarget)
 #---------------------------------------------------------------------------------------
 # compiler config
 #---------------------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -71,9 +71,11 @@ add_executable(CRADLE++ src/CRADLE++.cc)
 find_package(Boost REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Threads)
+find_package(ROOT REQUIRED)
 
 target_include_directories(Cradle PUBLIC ${Boost_INCLUDE_DIRS})
 target_include_directories(Cradle PUBLIC ${GSL_INCLUDE_DIRS})
+target_include_directories(Cradle PUBLIC ${ROOT_INCLUDE_DIRS})
 
 target_include_directories(
     Cradle
@@ -84,10 +86,10 @@ target_include_directories(
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 
-target_link_libraries(Cradle PUBLIC "-L/usr/local/Cellar/gsl/2.7/lib -lgsl -lgslcblas")
+target_link_libraries(Cradle PUBLIC "-L/usr/local/lib -lgsl -lgslcblas")
 target_link_libraries(Cradle PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(Cradle PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-
+target_link_libraries(Cradle PUBLIC ${ROOT_LIBRARIES})
 target_link_libraries(CRADLE++ PRIVATE Cradle)
 
 
